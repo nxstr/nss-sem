@@ -1,7 +1,7 @@
 package cz.cvut.fel.nss.chatgc.model.users;
 
-import cz.cvut.fel.nss.chatgc.model.messages.Response;
 import cz.cvut.fel.nss.chatgc.model.Role;
+import cz.cvut.fel.nss.chatgc.model.messages.Response;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

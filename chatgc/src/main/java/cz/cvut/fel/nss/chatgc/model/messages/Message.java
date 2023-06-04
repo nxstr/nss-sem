@@ -24,6 +24,7 @@ public abstract class Message extends AbstractEntity {
     @ManyToOne(optional = false)
     private Chat chat;
 
-    private MessageType messageType;
+
+    private MessageType type;
 
 }

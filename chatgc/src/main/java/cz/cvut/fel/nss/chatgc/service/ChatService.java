@@ -6,18 +6,15 @@ import cz.cvut.fel.nss.chatgc.events.ChatServerEvent;
 import cz.cvut.fel.nss.chatgc.model.Chat;
 import cz.cvut.fel.nss.chatgc.model.messages.MessageType;
 import cz.cvut.fel.nss.chatgc.model.messages.Request;
-import cz.cvut.fel.nss.chatgc.model.users.Player;
 import cz.cvut.fel.nss.chatgc.model.users.User;
 import cz.cvut.fel.nss.chatgc.repository.ChatRepository;
 import cz.cvut.fel.nss.chatgc.service.messages.RequestService;
 import cz.cvut.fel.nss.chatgc.service.users.EmployeeService;
 import cz.cvut.fel.nss.chatgc.service.users.PlayerService;
-import cz.cvut.fel.nss.chatgc.service.users.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,6 +40,12 @@ public class ChatService {
     @Transactional
     public Chat findById(Integer id){
         return chatRepository.findById(id).orElse(null);
+    }
+
+    public Chat findByPlayer(String player){
+        Chat chat = chatRepository.findByPlayerUsername(player);
+        System.out.println(chat);
+        return chat;
     }
 
 

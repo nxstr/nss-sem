@@ -2,8 +2,9 @@ package cz.cvut.fel.nss.chatgc.controller;
 
 import cz.cvut.fel.nss.chatgc.service.users.EmployeeService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
@@ -16,4 +17,7 @@ public class EmployeeController {
     public SseEmitter sseEmitter(@PathVariable String name) {
         return employeeService.registerClient(name);
     }
+
+
+
 }

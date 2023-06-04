@@ -1,7 +1,6 @@
 package cz.cvut.fel.nss.chatgc.events;
 
 import cz.cvut.fel.nss.chatgc.dto.Client;
-import cz.cvut.fel.nss.chatgc.model.users.User;
 import cz.cvut.fel.nss.chatgc.repository.users.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

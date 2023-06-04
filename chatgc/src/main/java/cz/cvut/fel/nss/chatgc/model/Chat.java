@@ -1,5 +1,6 @@
 package cz.cvut.fel.nss.chatgc.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import cz.cvut.fel.nss.chatgc.model.messages.Message;
 import cz.cvut.fel.nss.chatgc.model.users.Player;
 import lombok.AllArgsConstructor;
@@ -8,7 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Set;
 
 @Data
@@ -18,18 +19,23 @@ import java.util.Set;
 @Entity
 @Table(name = "chats")
 public class Chat extends AbstractEntity{
+    @JsonIgnore
     private boolean isOpen;
 
     @OneToOne(mappedBy = "chat", optional = false)
+    @JsonIgnore
     private Player player;
 
     @OneToMany(mappedBy = "chat")
-    private List<Message> messages;
+    @JsonIgnore
+    private ArrayList<Message> messages;
 
     @ManyToMany
+    @JsonIgnore
     private Set<Category> categories;
 
     @ManyToMany(mappedBy = "chats")
+    @JsonIgnore
     private Set<Folder> folders;
 
     private String playerUsername;

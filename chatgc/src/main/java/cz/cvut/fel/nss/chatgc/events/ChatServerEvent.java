@@ -1,7 +1,6 @@
 package cz.cvut.fel.nss.chatgc.events;
 
 import cz.cvut.fel.nss.chatgc.dto.Client;
-import cz.cvut.fel.nss.chatgc.model.users.User;
 
 import java.util.Set;
 
