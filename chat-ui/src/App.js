@@ -8,8 +8,10 @@ import chatAPI from './services/chatapi';
 import { randomColor } from './utils/common';
 import AllChats from "./components/AllChats";
 import Chat from "./components/Chat";
-import { BrowserRouter as Router, Switch,
-  Route, Redirect,} from "react-router-dom";
+import {
+  BrowserRouter as Router, Switch,
+  Route, Redirect, BrowserRouter, Routes, useNavigate,
+} from "react-router-dom";
 
 
 const SOCKET_URL = 'http://localhost:8080/ws-chat/';
@@ -19,6 +21,7 @@ const App = () => {
   const [chats, setChats] = useState([])
   const [user, setUser] = useState(null)
   const [activeChat, setActiveChat] = useState(null)
+
 
   let onConnected = () => {
     console.log("Connected!!")
@@ -77,7 +80,7 @@ const App = () => {
     setActiveChat({
       chatId: id
     })
-    chatAPI.getMessages(id).then(res =>{
+    chatAPI.getMessages(id, user.username).then(res =>{
       console.log(res.data)
       setMessages(messages.concat(res.data))
     }).catch(err => {

@@ -1,5 +1,6 @@
 package cz.cvut.fel.nss.chatgc.model.messages;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import cz.cvut.fel.nss.chatgc.model.users.Employee;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

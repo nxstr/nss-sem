@@ -48,6 +48,12 @@ public class ChatService {
         return chat;
     }
 
+    @Transactional
+    public Chat update(Chat chat){
+        Chat res = chatRepository.save(chat);
+        return res;
+    }
+
 
     public void broadcast(ChatRequestDto dto) {
         System.out.println(dto);

@@ -53,8 +53,8 @@ public class ChatController {
     }
 
 
-    @GetMapping(value="/api/chat/{id}")
-    public ArrayList<MessageDto> getAllMessagesForChat(@PathVariable Integer id){
+    @GetMapping(value="/api/{username}/chat/{id}")
+    public ArrayList<MessageDto> getAllMessagesForChat(@PathVariable String username, @PathVariable Integer id){
         ArrayList<MessageDto> messages = new ArrayList<>();
         for(Message m: chatService.findById(id).getMessages()){
             System.out.println(m + " ----------- mess");
@@ -64,6 +64,9 @@ public class ChatController {
             if(Objects.equals(m.getClass().getAnnotation(DiscriminatorValue.class).value(), "RESPONSE")){
                 Response r = (Response) m;
                 messageDto.setSender(r.getEmployee().getUsername());
+                if(username.equals(messageDto.getChat())){
+                    messageDto.setSender("Employee");
+                }
             }else{
                 messageDto.setSender(chatService.findById(id).getPlayerUsername());
             }
@@ -98,26 +101,6 @@ public class ChatController {
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
-    }
-
-
-    //    -------------- WebSocket API ----------------
-    @MessageMapping("/sendMessage")
-    @SendTo("{receiver}/topic/group")
-    public MessageDto broadcastGroupMessage(@Payload MessageDto message) {
-        System.out.println("boradcast +++++++++++++++++++++++++++++++++++++++");
-        return message;
-    }
-
-    @MessageMapping("/newUser")
-    @SendTo("{receiver}/topic/group")
-    public MessageDto addUser(@Payload MessageDto message,
-                           SimpMessageHeaderAccessor headerAccessor) {
-        // Add user in web socket session
-        headerAccessor.getSessionAttributes().put("username", message.getSender());
-
-        System.out.println("++++++++++++++++++++++++++++++++++" + headerAccessor.getSessionAttributes().get(message.getSender()));
-        return message;
     }
 
 }

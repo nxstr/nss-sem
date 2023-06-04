@@ -3,6 +3,8 @@ package cz.cvut.fel.nss.chatgc.consumer;
 
 import cz.cvut.fel.nss.chatgc.constants.KafkaConstants;
 import cz.cvut.fel.nss.chatgc.dto.MessageDto;
+import cz.cvut.fel.nss.chatgc.model.Chat;
+import cz.cvut.fel.nss.chatgc.model.messages.Message;
 import cz.cvut.fel.nss.chatgc.model.messages.MessageType;
 import cz.cvut.fel.nss.chatgc.model.messages.Request;
 import cz.cvut.fel.nss.chatgc.model.messages.Response;
@@ -55,11 +57,23 @@ public class MessageListener {
             r.setChat(chatService.findByPlayer(message.getChat()));
             r.setDataPath(message.getContent());
             responseService.persist(r);
+            Chat chat = chatService.findByPlayer(message.getChat());
+            ArrayList<Message> mess = chat.getMessages();
+            mess.add(r);
+            chat.setMessages(mess);
+            chatService.update(chat);
+            System.out.println("messages update "+chat.getMessages());
         }else{
             Request r = new Request(message.getContent(), LocalDateTime.now(), chatService.findByPlayer(message.getChat()), MessageType.TEXT, new HashSet<>());
 //            r.setChat(chatService.findByPlayer(message.getChat()));
 //            r.setDataPath(message.getContent());
             requestService.persist(r);
+            Chat chat = chatService.findByPlayer(message.getChat());
+            ArrayList<Message> mess = chat.getMessages();
+            mess.add(r);
+            chat.setMessages(mess);
+            chatService.update(chat);
+            System.out.println("messages update "+chat.getMessages());
         }
 
 
@@ -70,6 +84,7 @@ public class MessageListener {
         }
 
         if(!message.getSender().equals(message.getChat())){
+            System.out.println("here " + message.getSender());
             message.setSender("Employee");
         }
         System.out.println("send to player " + message.getChat());

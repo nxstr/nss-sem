@@ -5,9 +5,9 @@ const api = Axios.create({
 });
 
 const chatAPI = {
-    getMessages: (groupId) => {
+    getMessages: (groupId, username) => {
         console.log('Calling get messages from API');
-        return api.get(`chat/${groupId}`);
+        return api.get(`${username}/chat/${groupId}`);
     },
 
     getChats:(username) =>{

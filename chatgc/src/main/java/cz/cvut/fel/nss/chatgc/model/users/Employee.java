@@ -1,16 +1,15 @@
 package cz.cvut.fel.nss.chatgc.model.users;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import cz.cvut.fel.nss.chatgc.model.Role;
 import cz.cvut.fel.nss.chatgc.model.messages.Response;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Objects;
 
-@Data
+
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,13 +19,32 @@ import java.util.List;
 public class Employee extends User{
 
     @ManyToOne(optional = false)
+    @Getter
+    @Setter
     private Role role;
 
     @OneToMany(mappedBy = "employee")
+    @JsonIgnore
+    @Getter
+    @Setter
     private List<Response> responses;
 
     public Employee(String username, String email, String password, Role role) {
         super(username, email, password);
         this.role = role;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Employee employee = (Employee) o;
+        return role.equals(employee.role) && Objects.equals(responses, employee.responses);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), role);
     }
 }
