@@ -16,6 +16,7 @@ const chatAPI = {
 
     sendMessage: (username, text, chat) => {
         let msg = {
+            messageType: "message",
             sender: username,
             content: text
         }
@@ -29,6 +30,7 @@ const chatAPI = {
     loginMessage: (username) => {
         console.log("here ")
         let msg = {
+            messageType: "message",
             sender: username,
             content: "logged in",
             chat: ""

@@ -1,0 +1,138 @@
+package cz.cvut.fel.nss.chatgc.service;
+
+import cz.cvut.fel.nss.chatgc.model.Category;
+import cz.cvut.fel.nss.chatgc.model.Role;
+import cz.cvut.fel.nss.chatgc.repository.RoleRepository;
+import lombok.AllArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashSet;
+import java.util.Set;
+
+@Service
+@AllArgsConstructor
+public class RoleService {
+
+    private final RoleRepository roleRepository;
+    private final CategoryService categoryService;
+    private final ApplicationEventPublisher publisher;
+
+    @Transactional
+    public void persist(Role role){
+        if(role.getParentRole()!=null){
+            role.getParentRole().getChildrenRoles().add(role);
+            update(role.getParentRole());
+
+            role.getCategories().addAll(role.getParentRole().getCategories());
+        }
+        roleRepository.save(role);
+        //publisher
+    }
+
+    @Transactional
+    public void update(Role role){
+        roleRepository.save(role);
+    }
+
+    @Transactional
+    public void updateRoleName(Role role, String name){
+        if(role.getParentRole()!=null){
+            for(Role r: role.getParentRole().getChildrenRoles()){
+                if(r.equals(role)){
+                    r.setName(name);
+                }
+            }
+            update(role.getParentRole());
+        }
+        if(!role.getChildrenRoles().isEmpty()){
+            for(Role c: role.getChildrenRoles()){
+                c.getParentRole().setName(name);
+                update(c);
+            }
+        }
+        role.setName(name);
+        update(role);
+    }
+
+    @Transactional
+    public void removeRoleParent(Role role){
+        if(role.getParentRole()!=null) {
+            role.getParentRole().getChildrenRoles().remove(role);
+            update(role.getParentRole());
+
+//            role.getCategories().removeIf(c -> role.getParentRole().getCategories().contains(c));
+
+            removeParentRoleCategories(role, role.getParentRole().getCategories());
+
+            update(role);
+        }
+    }
+
+    @Transactional
+    public void addRoleParent(Role role, Role newParent){
+        if(role.getParentRole()==null){
+            role.setParentRole(newParent);
+
+            newParent.getChildrenRoles().add(role);
+            update(newParent);
+
+//            role.getCategories().addAll(newParent.getCategories());
+
+            addRoleCategories(role, newParent.getCategories());
+
+            update(role);
+        }
+    }
+
+    @Transactional
+    public void addRoleCategories(Role role, Set<Category> categories){
+        role.getCategories().addAll(categories);
+        if(role.getChildrenRoles().isEmpty()){
+            return;
+        }
+        for(Role c: role.getChildrenRoles()){
+            addRoleCategories(c, categories);
+        }
+        update(role);
+    }
+
+    @Transactional
+    public void removeParentRoleCategories(Role role, Set<Category> categories){
+        role.getCategories().removeAll(categories);
+        if(role.getChildrenRoles().isEmpty()){
+            return;
+        }
+        for(Role c: role.getChildrenRoles()){
+            removeParentRoleCategories(c, categories);
+        }
+        update(role);
+    }
+
+    @Transactional
+    public void removeRoleCategory(Role role, Category category){
+        if(!role.getParentRole().getCategories().contains(category)){
+            role.getCategories().remove(category);
+            update(role);
+
+            for(Role c: role.getChildrenRoles()){
+                Set<Category> cats = new HashSet<>();
+                cats.add(category);
+                removeParentRoleCategories(c, cats);
+            }
+        }
+    }
+
+    @Transactional
+    public void addChild(Role role, Role child){
+        if(child.getParentRole()==null) {
+            addRoleParent(child, role);
+        }
+    }
+
+    @Transactional
+    public void removeChild(Role child){
+        removeRoleParent(child);
+    }
+}

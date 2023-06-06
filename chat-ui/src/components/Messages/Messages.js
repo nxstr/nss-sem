@@ -1,6 +1,8 @@
 import React from 'react'
+import Button from "@material-ui/core/Button";
+import {yellow} from "@material-ui/core/colors";
 
-const Messages = ({ messages, currentUser }) => {
+const Messages = ({ messages, currentUser, chats, onSubmitChat }) => {
 
     let renderMessage = (message) => {
         const { sender, content, color } = message;
@@ -28,10 +30,53 @@ const Messages = ({ messages, currentUser }) => {
         );
     };
 
+    let handleSubmit = (event, id) => {
+        // window.location.replace('api/allChats');
+        console.log("here ", id)
+        onSubmitChat(id);
+        // setChat({
+        //     chatId: id
+        // })
+        // chatAPI.getMessages(id).then(res =>{
+        //     console.log(res.data)
+        //     setMessages(messages.concat(res.data))
+        // }).catch(err => {
+        //     console.log('Error Occured while getting messages to api');
+        // })
+    }
+
+    let renderChat = (chat) => {
+
+        const {id, playerUsername} = chat;
+        console.log(chat)
+        return (
+            <li className="Chats-list">
+                <span
+                    className="avatar"
+                    style={{ backgroundColor: yellow }}
+                />
+                <div className="Message-content">
+                    <div className="username">
+                        {playerUsername}
+                    </div>
+                    <div className="text">{id}</div>
+                </div>
+                <Button variant="contained" color="primary" onClick={event => handleSubmit(event, id)} >
+                    Open
+                </Button>
+            </li>
+        );
+    }
+
     return (
-        <ul className="messages-list">
-            {messages.map(msg => renderMessage(msg))}
-        </ul>
+        <div>
+            <ul className="chats-list">
+                {chats.map(m=>renderChat(m))}
+            </ul>
+            <ul className="messages-list">
+                {messages.map(msg => renderMessage(msg))}
+            </ul>
+        </div>
     )
 }
 

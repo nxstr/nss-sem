@@ -7,11 +7,15 @@ import Messages from './components/Messages/Messages';
 import chatAPI from './services/chatapi';
 import { randomColor } from './utils/common';
 import AllChats from "./components/AllChats";
-import Chat from "./components/Chat";
+import categoryAPI from "./services/categoryapi";
+import Button from "@material-ui/core/Button";
 import {
-  BrowserRouter as Router, Switch,
-  Route, Redirect, BrowserRouter, Routes, useNavigate,
-} from "react-router-dom";
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
+import Categories from "./components/Categories";
 
 
 const SOCKET_URL = 'http://localhost:8080/ws-chat/';
@@ -21,6 +25,10 @@ const App = () => {
   const [chats, setChats] = useState([])
   const [user, setUser] = useState(null)
   const [activeChat, setActiveChat] = useState(null)
+  const [isEmp, setEmp] = useState(false);
+  const [cats, setCats] = useState([]);
+  const [isShown, setIsShown] = useState(false);
+  const [path, setPath] = useState(null);
 
 
   let onConnected = () => {
@@ -37,16 +45,38 @@ const App = () => {
   let getChats = (user) =>{
     chatAPI.getChats(user.username).then(res=> {
       setChats(chats.concat(res.data));
+      console.log("all chats ",res.data)
     }).catch(err => {
       console.log('Error Occured while getting chats to api');
     })
 
   }
 
+  let getCats = () =>{
+    categoryAPI.getCats(user.username).then(res=> {
+      setCats(res.data);
+      console.log("all cats ",res.data)
+    }).catch(err => {
+      console.log('Error Occured while getting cats to api');
+    })
+
+  }
+
   let onMessageReceived = (msg) => {
     console.log('New Message Received!!', msg);
-    setMessages(messages.concat(msg));
-    console.log(messages, " messages")
+    if(msg.messageType==="message"){
+      setMessages(messages.concat(msg));
+      console.log(messages, " messages")
+    }else if(msg.messageType==="chatListUpdate"){
+      getChats(user);
+    }else if(msg.messageType==="login"){
+      user.type = msg.content;
+      console.log(user.type, "typeeeeeeeeeeeeee")
+      if(user.type==="employee"){
+        setEmp(true);
+      }
+    }
+
   }
 
   let onSendMessage = (msgText) => {
@@ -54,6 +84,15 @@ const App = () => {
       console.log('Sent', res);
     }).catch(err => {
       console.log('Error Occured while sending message to api');
+    })
+  }
+
+
+  let categoryCreate = () => {
+    categoryAPI.createCategory(user.username).then(res => {
+      console.log('Cat', res);
+    }).catch(err => {
+      console.log('Error Occured while creating category');
     })
   }
   
@@ -71,18 +110,38 @@ const App = () => {
 
     setUser({
       username: pieces[0],
-      color: randomColor()
+      color: randomColor(),
+      type: "player"
     })
 
   }
 
   let handleChatId = (id) =>{
+
     setActiveChat({
       chatId: id
     })
+    setIsShown(false);
+    // window.location.replace(`http://localhost:3000/allChats/${id}`)
     chatAPI.getMessages(id, user.username).then(res =>{
       console.log(res.data)
       setMessages(messages.concat(res.data))
+    }).catch(err => {
+      console.log('Error Occured while getting messages to api');
+    })
+  }
+
+
+  let handleChatIdFromMess = (id) =>{
+
+    setActiveChat({
+      chatId: id
+    })
+    setIsShown(false);
+    // window.location.replace(`http://localhost:3000/allChats/${id}`)
+    chatAPI.getMessages(id, user.username).then(res =>{
+      console.log(res.data)
+      setMessages(res.data)
     }).catch(err => {
       console.log('Error Occured while getting messages to api');
     })
@@ -95,10 +154,28 @@ const App = () => {
     } return ""
   }
 
+
+  let getCatsClick = () => {
+    categoryAPI.redirect().then(res =>{
+      console.log(res.data)
+
+    }).catch(err => {
+      console.log('Error Occured while getting messages to api');
+    })
+    console.log('user', user);
+  }
+
+  let loadCats = () =>{
+    getCats();
+    setIsShown(true);
+    setActiveChat(null);
+  }
+
   return (
     <div className="App">
       {!!user ?
         (
+
           <>
             <SockJsClient
               url={SOCKET_URL}
@@ -111,31 +188,58 @@ const App = () => {
               debug={false}
 
             />
-            {/*<Messages*/}
-            {/*  messages={messages}*/}
-            {/*  currentUser={user}*/}
-            {/*/>*/}
-            {/*<Input onSendMessage={onSendMessage} />*/}
             {!!activeChat?(
-                <>
-                    <Messages
-                  messages={messages}
-              currentUser={user}
-            />
-            <Input onSendMessage={onSendMessage} />
-                </>
+                <Router>
+                  <Routes>
+                    <Route exact path="/home" element={
+                      <>
+                        <Messages
+                        messages={messages}
+                        currentUser={user}
+                        chats={chats}
+                        onSubmitChat = {handleChatIdFromMess}
+                    />
+                      <Input onSendMessage={onSendMessage}
+                      categoryCreate={categoryCreate}/>
+                      </>} />
+                    <Route path="/home" element={<Navigate replace to={{
+                      pathname: `/home`
+                    }} />} />
+                  </Routes>
+                </Router>
             ) :
-                <AllChats
-                    chats = {chats}
-                    currentUser = {user}
-                    onSubmitChat = {handleChatId}
-                    // onSubmit = {openChat(id)}
-                />
+
+                <Router>
+                  <Routes>
+                    <Route path="/home" element={<AllChats chats = {chats}
+                                                           currentUser = {user}
+                                                           onSubmitChat = {handleChatId}/>} />
+                    <Route path="/" element={<Navigate replace to="/home" />} />
+                  </Routes>
+                </Router>
             }
 
-          {/* тут буде не інпут а якийсь getAllChatsForUser, який буде брати всі чати через гет запрос з контроллера,
-           після того юзер буде клікати на чат, і має відкритись юрл з чат айді, тут же getFllMessagesForChat який спрацьовує зразу після кліку,
-           після чого вже буде оцей Input component*/}
+          {/*  if user.type==employee
+          show category button*/}
+            {!!isEmp?(
+                <>
+                  <Button onClick={loadCats}>
+                    Categories
+                  </Button>
+
+                  {isShown && (
+                      <Router>
+                        <Routes>
+                          <Route path="/home/cats" element={<Categories cats = {cats}
+                                                                        user={user}/>} />
+                          <Route path="/home" element={<Navigate replace to="/home/cats" />} />
+                        </Routes>
+                      </Router>
+                  )}
+                </>
+            ):
+                <></>
+            }
           </>
         ) :
         <LoginForm onSubmit={handleLoginSubmit} />

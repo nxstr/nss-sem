@@ -1,6 +1,7 @@
 package cz.cvut.fel.nss.chatgc.dto;
 
 public class MessageDto {
+    String messageType;
     String sender;
     String content;
     String chat;
@@ -8,7 +9,8 @@ public class MessageDto {
     public MessageDto() {
     }
 
-    public MessageDto(String sender) {
+    public MessageDto(String messType, String sender) {
+        this.messageType = messType;
         this.sender = sender;
     }
 
@@ -36,9 +38,18 @@ public class MessageDto {
         this.chat = chat;
     }
 
+    public String getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(String messageType) {
+        this.messageType = messageType;
+    }
+
     @Override
     public String toString() {
         return "Message{" +
+                "messageType='" + messageType + '\'' +
                 "sender='" + sender + '\'' +
                 ", content='" + content + '\'' +
                 ", timestamp='" + chat + '\'' +

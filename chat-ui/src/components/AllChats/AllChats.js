@@ -8,6 +8,7 @@ import Messages from "../Messages";
 import chatAPI from "../../services/chatapi";
 
 const AllChats = ({chats, currentUser, onSubmitChat})=>{
+    console.log("allchats", currentUser)
     const [messages, setMessages] = useState([])
     const [chat ,setChat] = useState(null)
 
@@ -69,11 +70,11 @@ const AllChats = ({chats, currentUser, onSubmitChat})=>{
             {!!chat ?
                 (
                     <>
-                    <Messages
-                        messages={messages}
-                        currentUser={currentUser}
-                    />
-                <Input onSendMessage={onSendMessage} />
+                {/*    <Messages*/}
+                {/*        messages={messages}*/}
+                {/*        currentUser={currentUser}*/}
+                {/*    />*/}
+                {/*<Input onSendMessage={onSendMessage} />*/}
                         </>
                 ) :
                 <ul className="messages-list">

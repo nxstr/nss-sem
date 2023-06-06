@@ -11,10 +11,6 @@ import cz.cvut.fel.nss.chatgc.service.users.EmployeeService;
 import cz.cvut.fel.nss.chatgc.service.users.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.DiscriminatorValue;
@@ -59,6 +55,7 @@ public class ChatController {
         for(Message m: chatService.findById(id).getMessages()){
             System.out.println(m + " ----------- mess");
             MessageDto messageDto = new MessageDto();
+            messageDto.setMessageType("message");
             messageDto.setChat(chatService.findById(id).getPlayerUsername());
             messageDto.setContent(m.getDataPath());
             if(Objects.equals(m.getClass().getAnnotation(DiscriminatorValue.class).value(), "RESPONSE")){
@@ -90,7 +87,7 @@ public class ChatController {
     @PostMapping(value = "/api/log", consumes = "application/json", produces = "application/json")
     public void loginMessage(@RequestBody MessageDto m) {
 //        message.setTimestamp(LocalDateTime.now().toString());
-        System.out.println("login mess ---------------------------------------");
+        System.out.println("login mess ---------------------------------------" + m.getMessageType());
         try {
             //Sending the message to kafka topic queue
             m.setContent("logged-in-action/" + m.getContent());

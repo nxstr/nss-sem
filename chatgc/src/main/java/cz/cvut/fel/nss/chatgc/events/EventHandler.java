@@ -5,6 +5,7 @@ import cz.cvut.fel.nss.chatgc.repository.users.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.event.EventListener;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +48,9 @@ public class EventHandler {
 
         sendMessage(event.client(), event);
     }
+
+
+
 
 
     public void sendMessage(Client client, CommunicationEvent event) {

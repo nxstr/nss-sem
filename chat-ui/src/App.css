@@ -15,12 +15,23 @@
 }
 
 .messages-list {
+  display: inline-block;
+  vertical-align: top;
   padding: 20px 0;
-  max-width: 900px;
-  width: 100%;
-  margin: 0 auto;
+  width: 65%;
   list-style: none;
-  padding-left: 0;
+  flex-grow: 1;
+  overflow: auto;
+  margin-right: 5%;
+}
+
+.chats-list {
+  display: inline-block;
+  vertical-align: top;
+  padding: 20px 0;
+  width: 30%;
+  margin: 0;
+  list-style: none;
   flex-grow: 1;
   overflow: auto;
 }
@@ -29,6 +40,11 @@
   display: flex;
   margin-top: 10px;
 }
+
+/*.Chats-list {*/
+/*  display: flex;*/
+/*  margin-top: 10px;*/
+/*}*/
 
 .Messages-message.currentUser {
   /*justify-content: flex-end;*/
@@ -75,10 +91,10 @@
 
 .message-input {
   display: flex;
-  width: 100%;
+  margin-left: 30%;
+  width: 70%;
   justify-content: space-between;
   max-width: 900px;
-  margin: 0 auto 40px;
   margin-bottom: 38px;
 }
 
