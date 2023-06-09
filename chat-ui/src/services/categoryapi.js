@@ -13,6 +13,16 @@ const categoryAPI = {
     },
     getCats: (username) => {
         return api.get(`${username}/categories`);
+    },
+    deleteCategory:(username, id) => {
+        return api.delete(`${username}/categories/delete/${id}`);
+    },
+    updateCategory:(username, id, name) => {
+        let msg = {
+            id: id,
+            name: name
+        }
+        return api.put(`${username}/categories/update/${id}`, msg);
     }
 
 }

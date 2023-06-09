@@ -13,7 +13,7 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate,
+  Navigate, useLocation,
 } from 'react-router-dom';
 import Categories from "./components/Categories";
 
@@ -28,7 +28,7 @@ const App = () => {
   const [isEmp, setEmp] = useState(false);
   const [cats, setCats] = useState([]);
   const [isShown, setIsShown] = useState(false);
-  const [path, setPath] = useState(null);
+  let path = "/home"
 
 
   let onConnected = () => {
@@ -50,6 +50,21 @@ const App = () => {
       console.log('Error Occured while getting chats to api');
     })
 
+  }
+
+  let onSendMessageCat = () => {
+    // categoryAPI.createCategory(user.username, msgText).then(res => {
+    //   console.log('Sent', res);
+    //   if(res.status===201){
+
+        categoryAPI.getCats(user.username).then(res => {
+          setCats(res.data);
+          return (<Categories cats={cats}
+                              user={user}
+                              onSendMessageCat={onSendMessageCat}/>);
+        }).catch(err => {
+      console.log('Error Occured while sending message to api');
+    })
   }
 
   let getCats = () =>{
@@ -169,6 +184,7 @@ const App = () => {
     getCats();
     setIsShown(true);
     setActiveChat(null);
+    path = "/home/cats";
   }
 
   return (
@@ -221,7 +237,7 @@ const App = () => {
 
           {/*  if user.type==employee
           show category button*/}
-            {!!isEmp?(
+            {!!isEmp &&(
                 <>
                   <Button onClick={loadCats}>
                     Categories
@@ -231,14 +247,14 @@ const App = () => {
                       <Router>
                         <Routes>
                           <Route path="/home/cats" element={<Categories cats = {cats}
-                                                                        user={user}/>} />
+                                                                        user={user}
+                          onSendMessageCat={onSendMessageCat}/>} />
                           <Route path="/home" element={<Navigate replace to="/home/cats" />} />
                         </Routes>
                       </Router>
                   )}
                 </>
-            ):
-                <></>
+            )
             }
           </>
         ) :

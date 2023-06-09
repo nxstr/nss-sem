@@ -40,6 +40,31 @@ public class CategoryController {
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
+    @DeleteMapping(value = "/api/{username}/categories/delete/{id}")
+    public ResponseEntity deleteCategory(@PathVariable String username, @PathVariable Integer id){
+        System.out.println(id + "==================");
+        if(checkIfAdmin(username)) {
+            if (categoryService.findById(id)!=null) {
+                categoryService.delete(categoryService.findById(id));
+                return new ResponseEntity<>(HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
+
+    @PutMapping(value = "/api/{username}/categories/update/{id}", consumes = "application/json", produces = "application/json")
+    public ResponseEntity updateCategory(@PathVariable Integer id, @PathVariable String username, @RequestBody CategoryDto categoryDto){
+        if(checkIfAdmin(username)) {
+            if (categoryService.findById(id)!=null) {
+                Category category = categoryService.findById(id);
+                category.setName(categoryDto.getName());
+                categoryService.update(categoryService.findById(id));
+                return new ResponseEntity<>(HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
+
     @GetMapping(value ="/api/{username}/categories")
     public List<CategoryDto> getCategoryList(@PathVariable String username){
         List<CategoryDto> cats = new ArrayList<>();
