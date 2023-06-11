@@ -10,6 +10,7 @@ import cz.cvut.fel.nss.chatgc.model.messages.MessageType;
 import cz.cvut.fel.nss.chatgc.model.messages.Request;
 import cz.cvut.fel.nss.chatgc.model.messages.Response;
 import cz.cvut.fel.nss.chatgc.model.users.Employee;
+import cz.cvut.fel.nss.chatgc.security.SecurityUtils;
 import cz.cvut.fel.nss.chatgc.service.ChatService;
 import cz.cvut.fel.nss.chatgc.service.messages.RequestService;
 import cz.cvut.fel.nss.chatgc.service.messages.ResponseService;
@@ -59,39 +60,45 @@ public class MessageListener {
             r.setDate(LocalDateTime.now());
             r.setType(MessageType.TEXT);
             responseService.persist(r);
-            Chat chat = chatService.findByPlayer(message.getChat());
-            ArrayList<Message> mess = chat.getMessages();
-            mess.add(r);
-            chat.setMessages(mess);
-            chatService.update(chat);
-            System.out.println("messages update "+chat.getMessages());
+//            Chat chat = chatService.findByPlayer(message.getChat());
+//            ArrayList<Message> mess = chat.getMessages();
+//            mess.add(r);
+//            chat.setMessages(mess);
+//            chatService.update(chat);
+            updateChat(message.getChat(), r);
+//            System.out.println("messages update "+chat.getMessages());
         }else{
             Request r = new Request(message.getContent(), LocalDateTime.now(), chatService.findByPlayer(message.getChat()), MessageType.TEXT, new HashSet<>());
-//            r.setChat(chatService.findByPlayer(message.getChat()));
-//            r.setDataPath(message.getContent());
-            requestService.persist(r);
-            Chat chat = chatService.findByPlayer(message.getChat());
-            ArrayList<Message> mess = chat.getMessages();
-            mess.add(r);
-            chat.setMessages(mess);
-            chatService.update(chat);
-            System.out.println("messages update "+chat.getMessages());
+//            requestService.persist(r);
+//            Chat chat = chatService.findByPlayer(message.getChat());
+//            ArrayList<Message> mess = chat.getMessages();
+//            mess.add(r);
+//            chat.setMessages(mess);
+//            chatService.update(chat);
+            updateChat(message.getChat(), r);
+//            System.out.println("messages update "+chat.getMessages());
         }
 
-
-
         for(String i: onlineEmps){
-            System.out.println("send to employee " + i);
+            System.out.println(i + "*********************************");
             template.convertAndSend("/topic/group/"+i, message);
         }
 
         if(!message.getSender().equals(message.getChat())){
-            System.out.println("here " + message.getSender());
             message.setSender("Employee");
         }
-        System.out.println("send to player " + message.getChat());
+        System.out.println(message.getChat() + "*********************************");
         template.convertAndSend("/topic/group/"+message.getChat(), message);
 
+    }
+
+
+    public void updateChat(String chatName, Message r){
+        Chat chat = chatService.findByPlayer(chatName);
+        ArrayList<Message> mess = chat.getMessages();
+        mess.add(r);
+        chat.setMessages(mess);
+        chatService.update(chat);
     }
 
 
@@ -113,6 +120,26 @@ public class MessageListener {
         }
         template.convertAndSend("/topic/group/"+message.getSender(), message);
         System.out.println("-------------------------------- username key " + message.getSender());
+    }
+
+    @KafkaListener(
+            topics = "logout-topic",
+            groupId = KafkaConstants.GROUP_ID
+    )
+    public void listenLogout(MessageDto message){
+        if(employeeService.findByUsername(message.getSender())!=null && Objects.equals(employeeService.findByUsername(message.getSender()).getClass().getAnnotation(DiscriminatorValue.class).value(), "EMPLOYEE")) {
+            if (onlineEmps.contains(message.getSender())){
+                onlineEmps.remove(message.getSender());
+            }
+            message.setContent("employee");
+        }else{
+            message.setContent("player");
+        }
+        for(String e: onlineEmps){
+            System.out.println(e + "-----------------------");
+        }
+//        template.convertAndSend("/topic/group/"+message.getSender(), message);
+        System.out.println("logged out and need to remade logout on react to setUser(null) on message type logout received through websocket session " + message.getSender());
     }
 
 

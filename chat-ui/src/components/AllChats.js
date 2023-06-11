@@ -1,14 +1,9 @@
 import React, { useState } from 'react'
 import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import {Link, Route, Routes} from "react-router-dom";
-import Input from "../Input";
-import messages from "../Messages";
-import Messages from "../Messages";
-import chatAPI from "../../services/chatapi";
+import chatAPI from "../services/chatapi";
 
 const AllChats = ({chats, currentUser, onSubmitChat})=>{
-    console.log("allchats", currentUser)
+    console.log("allchats", chats)
     const [messages, setMessages] = useState([])
     const [chat ,setChat] = useState(null)
 
@@ -27,10 +22,10 @@ const AllChats = ({chats, currentUser, onSubmitChat})=>{
         })
     }
 
-    let handleSubmit = (event, id) => {
+    let handleSubmit = (event, id, name) => {
         // window.location.replace('api/allChats');
         console.log("here ", id)
-        onSubmitChat(id);
+        onSubmitChat(id, name);
         // setChat({
         //     chatId: id
         // })
@@ -58,7 +53,7 @@ const AllChats = ({chats, currentUser, onSubmitChat})=>{
                     </div>
                     <div className="text">{id}</div>
                 </div>
-                <Button variant="contained" color="primary" onClick={event => handleSubmit(event, id)} >
+                <Button variant="contained" color="primary" onClick={event => handleSubmit(event, id, playerUsername)} >
                     Open
                 </Button>
             </li>

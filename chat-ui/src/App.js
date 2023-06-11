@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import SockJsClient from 'react-stomp';
 import './App.css';
-import Input from './components/Input/Input';
-import LoginForm from './components/LoginForm';
-import Messages from './components/Messages/Messages';
+
 import chatAPI from './services/chatapi';
 import { randomColor } from './utils/common';
-import AllChats from "./components/AllChats";
+
 import categoryAPI from "./services/categoryapi";
 import Button from "@material-ui/core/Button";
 import {
@@ -15,12 +13,19 @@ import {
   Route,
   Navigate, useLocation,
 } from 'react-router-dom';
+import RegForm from "./components/RegForm";
+import LoginForm from "./components/LoginForm";
+import AllChats from "./components/AllChats";
+import Input from "./components/Input";
+import Messages from "./components/Messages";
 import Categories from "./components/Categories";
+
 
 
 const SOCKET_URL = 'http://localhost:8080/ws-chat/';
 
 const App = () => {
+
   const [messages, setMessages] = useState([])
   const [chats, setChats] = useState([])
   const [user, setUser] = useState(null)
@@ -28,6 +33,8 @@ const App = () => {
   const [isEmp, setEmp] = useState(false);
   const [cats, setCats] = useState([]);
   const [isShown, setIsShown] = useState(false);
+  const [hasChat, setHasChat] = useState(false);
+  const [isReg, setIsReg] = useState(false);
   let path = "/home"
 
 
@@ -40,17 +47,36 @@ const App = () => {
       console.log('Error Occured while sending message to api', err);
     })
     getChats(user);
+    // loadChats();
   }
 
   let getChats = (user) =>{
     chatAPI.getChats(user.username).then(res=> {
-      setChats(chats.concat(res.data));
-      console.log("all chats ",res.data)
+        setChats(res.data)
+      // setChats(chats => res.data)
+      let hasChatObj = false;
+      for(let i=0; i<res.data.length; i++){
+        if(res.data[i]!==null){
+          hasChatObj = true;
+          break;
+        }
+      }
+      if(!hasChatObj){
+        console.log("len is 0", res.data.length, res.data)
+        setHasChat(false);
+      }else{
+        console.log("len is not 0 " , res.data.length, res.data)
+        setHasChat(true);
+      }
+      console.log("all chats ",chats)
     }).catch(err => {
       console.log('Error Occured while getting chats to api');
     })
 
   }
+  // let loadChats = () => {
+  //   console.log("all chats ",chats)
+  // }
 
   let onSendMessageCat = () => {
     // categoryAPI.createCategory(user.username, msgText).then(res => {
@@ -80,8 +106,11 @@ const App = () => {
   let onMessageReceived = (msg) => {
     console.log('New Message Received!!', msg);
     if(msg.messageType==="message"){
-      setMessages(messages.concat(msg));
-      console.log(messages, " messages")
+      console.log(msg.chat.id, " active chatttttt")
+      if(activeChat!=null && msg.chat===activeChat.chatName){
+        setMessages(messages.concat(msg));
+        console.log(messages, " messages")
+      }
     }else if(msg.messageType==="chatListUpdate"){
       getChats(user);
     }else if(msg.messageType==="login"){
@@ -119,22 +148,87 @@ const App = () => {
     })
   }
 
-  let handleLoginSubmit = (users) => {
-    var pieces = users.split(" ");
-    console.log(pieces[0], " Logged in..");
+  const login = async (username, password) => {
 
-    setUser({
-      username: pieces[0],
-      color: randomColor(),
-      type: "player"
+    // const response = await axios.post("http://localhost:8080/login", {
+    //   username: username,
+    //   password: password
+    // })
+
+    const LOGIN_URL = "http://localhost:8080/api/login";
+    const params = new URLSearchParams()
+    params.append('username', username)
+    params.append('password',password)
+
+
+    let msg = {
+      username: username,
+      password: password
+    }
+    //
+    // const response = await fetch("https://api.request.com/api_resource", {
+    //   method: "GET",
+    //   mode: "cors",
+    //   headers: {
+    //     Authorization: `Bearer: ${token}`,
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify(data),
+    // });
+
+    categoryAPI.login(username, password).then(res =>{
+      console.log(res, "=================================")
+      if(res.status===200){
+        setUser({
+          username: username,
+          color: randomColor(),
+          type: "player"
+        })
+        getChats(user)
+      }else{
+        console.log("FORBIDDEN")
+      }
+    }).catch(err => {
+      console.log('Error Occured while getting messages to api');
     })
+
+    //
+    //
+    // return await axios.post(`http://localhost:8080/api/login`, params.header("Access-Control-Allow-Origin", "*"));
+
+  };
+
+  let handleLoginSubmit = (username, password) => {
+    // var pieces = users.split(" ");
+    // console.log(pieces[0], " Logged in..");
+
+    // setUser({
+    //   username: pieces[0],
+    //   color: randomColor(),
+    //   type: "player"
+    // })
+    login(username, password).then(res => {
+      console.log('Sent loginnnnnnnnnnnnnnnnnnnnn', res, " ", hasChat);
+
+    }).catch(err => {
+      console.log('Error Occured while sending message to api', err);
+    });
+
+    // console.log("user======================== ", user)
 
   }
 
-  let handleChatId = (id) =>{
+  let handleReg = () => {
+    setIsReg(true);
+  }
+
+
+
+  let handleChatId = (id, name) =>{
 
     setActiveChat({
-      chatId: id
+      chatId: id,
+      chatName: name
     })
     setIsShown(false);
     // window.location.replace(`http://localhost:3000/allChats/${id}`)
@@ -147,10 +241,11 @@ const App = () => {
   }
 
 
-  let handleChatIdFromMess = (id) =>{
+  let handleChatIdFromMess = (id, name) =>{
 
     setActiveChat({
-      chatId: id
+      chatId: id,
+      chatName: name
     })
     setIsShown(false);
     // window.location.replace(`http://localhost:3000/allChats/${id}`)
@@ -187,6 +282,34 @@ const App = () => {
     path = "/home/cats";
   }
 
+  let createChat = () => {
+    chatAPI.createChat().then(res => {
+      if(res.status===200){
+        getChats(user);
+      }
+    }).catch(err => {
+      console.log('Error Occured while getting messages to api');
+    })
+  }
+
+  let handleRegSubmit = (username, password, email) => {
+    chatAPI.registerPlayer(username, password, email).then(res => {
+      setIsReg(false);
+      setHasChat(false);
+    }).catch(err => {
+      console.log('Error Occured while getting messages to api');
+    })
+  }
+
+  let logout = () => {
+    chatAPI.logout().then(res => {
+      setUser(null);
+      console.log("logout")
+    }).catch(err => {
+      console.log('Error Occured while getting messages to api');
+    })
+  }
+
   return (
     <div className="App">
       {!!user ?
@@ -204,36 +327,48 @@ const App = () => {
               debug={false}
 
             />
-            {!!activeChat?(
-                <Router>
-                  <Routes>
-                    <Route exact path="/home" element={
-                      <>
-                        <Messages
-                        messages={messages}
-                        currentUser={user}
-                        chats={chats}
-                        onSubmitChat = {handleChatIdFromMess}
-                    />
-                      <Input onSendMessage={onSendMessage}
-                      categoryCreate={categoryCreate}/>
-                      </>} />
-                    <Route path="/home" element={<Navigate replace to={{
-                      pathname: `/home`
-                    }} />} />
-                  </Routes>
-                </Router>
-            ) :
+            <Button onClick={logout}>
+              Logout
+            </Button>
+            {!!hasChat?(
+                <>
+                  {!!activeChat?(
+                          <Router>
+                            <Routes>
+                              <Route exact path="/" element={
+                                <>
+                                  <Messages
+                                      messages={messages}
+                                      currentUser={user}
+                                      chats={chats}
+                                      onSubmitChat = {handleChatIdFromMess}
+                                  />
+                                  <Input onSendMessage={onSendMessage}
+                                         categoryCreate={categoryCreate}/>
+                                </>} />
+                              <Route path="/" element={<Navigate replace to={{
+                                pathname: `/`
+                              }} />} />
+                            </Routes>
+                          </Router>
+                      ) :
 
-                <Router>
-                  <Routes>
-                    <Route path="/home" element={<AllChats chats = {chats}
-                                                           currentUser = {user}
-                                                           onSubmitChat = {handleChatId}/>} />
-                    <Route path="/" element={<Navigate replace to="/home" />} />
-                  </Routes>
-                </Router>
+                      <Router>
+                        <Routes>
+                          <Route path="/" element={<AllChats chats = {chats}
+                                                             currentUser = {user}
+                                                             onSubmitChat = {handleChatId}/>} />
+                          <Route path="/" element={<Navigate replace to="/" />} />
+                        </Routes>
+                      </Router>
+                  }
+                </>
+            ) :
+                <Button onClick={createChat}>
+                  Create Chat
+                </Button>
             }
+
 
           {/*  if user.type==employee
           show category button*/}
@@ -246,10 +381,10 @@ const App = () => {
                   {isShown && (
                       <Router>
                         <Routes>
-                          <Route path="/home/cats" element={<Categories cats = {cats}
+                          <Route path="/cats" element={<Categories cats = {cats}
                                                                         user={user}
                           onSendMessageCat={onSendMessageCat}/>} />
-                          <Route path="/home" element={<Navigate replace to="/home/cats" />} />
+                          <Route path="/" element={<Navigate replace to="/cats" />} />
                         </Routes>
                       </Router>
                   )}
@@ -258,7 +393,15 @@ const App = () => {
             }
           </>
         ) :
-        <LoginForm onSubmit={handleLoginSubmit} />
+          <>
+            {!!isReg?(
+                    <RegForm onSubmit = {handleRegSubmit} />
+                ):
+                <LoginForm onSubmit={handleLoginSubmit} onSubmitReg={handleReg} />
+            }
+          </>
+
+
       }
     </div>
   )

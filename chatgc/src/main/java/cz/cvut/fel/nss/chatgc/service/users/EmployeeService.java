@@ -10,6 +10,7 @@ import cz.cvut.fel.nss.chatgc.repository.RoleRepository;
 import cz.cvut.fel.nss.chatgc.repository.users.EmployeeRepository;
 import cz.cvut.fel.nss.chatgc.repository.users.UserRepository;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -24,37 +25,19 @@ public class EmployeeService extends UserService<Employee> {
     private final EmployeeRepository employeeDao;
     private final RoleRepository roleDao;
     private final ChatRepository chatRepository;
+    private final PasswordEncoder encoder;
 
-    public EmployeeService(UserRepository<Employee, Integer> userDao, ApplicationEventPublisher publisher, EmployeeRepository employeeDao, RoleRepository roleDao, ChatRepository chatRepository) {
-        super(userDao, publisher);
+    public EmployeeService(UserRepository<Employee, Integer> userDao, ApplicationEventPublisher publisher, EmployeeRepository employeeDao, RoleRepository roleDao, ChatRepository chatRepository, PasswordEncoder encoder, PasswordEncoder encoder1) {
+        super(userDao, publisher, encoder);
         this.employeeDao = employeeDao;
         this.roleDao = roleDao;
         this.chatRepository = chatRepository;
+        this.encoder = encoder1;
     }
 
     @Transactional
     public Employee findById(Integer id){
         return (Employee) employeeDao.findById(id).orElse(null);
-    }
-
-    public SseEmitter registerClient(String name) {
-        var emitter = new SseEmitter(DEFAULT_TIMEOUT);
-        var client = new Client(emitter, name);
-
-        if(roleDao.findByName("admin")==null) {
-            roleDao.save(new Role("admin", new HashSet<>(), null, new HashSet<>()));
-        }
-        if(employeeDao.findByUsername(name)==null){
-            persist(new Employee(name, "employeeEmail", "employeePass", roleDao.findByName("admin")));
-        }
-
-        //move to event handler maybe
-
-        addOnlineUsers(client);
-        sendWelcomeToClient(client);
-
-        System.out.println("New client registeres");
-        return emitter;
     }
 
     public Set<Chat> findAllChats(Employee employee){

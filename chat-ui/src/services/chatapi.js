@@ -21,9 +21,6 @@ const chatAPI = {
             content: text
         }
         console.log(chat.chatId)
-        // if(username==="bbb" || username==="ccc"){
-        //     return api.post(`send/employee/aaa`, msg);
-        // }
         return api.post(`send/${chat.chatId}`, msg);
     },
     
@@ -36,6 +33,20 @@ const chatAPI = {
             chat: ""
         }
         return api.post(`log`, msg);
+    },
+    createChat: () => {
+        return api.post(`chats/new`);
+    },
+    registerPlayer: (username, password, email) => {
+        let msg = {
+            username: username,
+            password: password,
+            email: email
+        }
+        return api.post(`register/player`, msg);
+    },
+    logout: () => {
+        return api.get(`logout`);
     }
 }
 

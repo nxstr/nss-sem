@@ -36,6 +36,10 @@ public class RoleService {
         roleRepository.save(role);
     }
 
+    public Role findByName(String name){
+        return roleRepository.findByName(name);
+    }
+
     @Transactional
     public void updateRoleName(Role role, String name){
         if(role.getParentRole()!=null){

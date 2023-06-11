@@ -7,6 +7,7 @@ import cz.cvut.fel.nss.chatgc.model.users.User;
 import cz.cvut.fel.nss.chatgc.repository.users.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,11 +21,20 @@ public abstract class UserService<T extends User> {
     private final UserRepository<T, Integer> userDao;
     private final Set<Client> registeredClients = new HashSet<>();
     private final ApplicationEventPublisher publisher;
+    private final PasswordEncoder encoder;
 
     @Transactional
     public void persist(T user){
+        user.encodePassword(encoder);
         userDao.save(user);
         System.out.println("saved");
+    }
+
+    @Transactional
+    public void update(T user){
+        user.encodePassword(encoder);
+        userDao.save(user);
+        System.out.println("updates");
     }
 
     @Transactional

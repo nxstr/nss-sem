@@ -1,4 +1,4 @@
-package cz.cvut.fel.nss.chatgc;
+package cz.cvut.fel.nss.chatgc.configuration;
 
 
 import org.springframework.beans.factory.ObjectProvider;

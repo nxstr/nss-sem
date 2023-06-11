@@ -28,4 +28,8 @@ public abstract class User extends AbstractEntity {
     public void encodePassword(PasswordEncoder passwordEncoder) {
         password = passwordEncoder.encode(password);
     }
+    public void erasePassword() {
+        this.password = null;
+    }
+
 }

@@ -6,14 +6,21 @@ import cz.cvut.fel.nss.chatgc.model.Chat;
 import cz.cvut.fel.nss.chatgc.model.messages.Message;
 import cz.cvut.fel.nss.chatgc.model.messages.Response;
 import cz.cvut.fel.nss.chatgc.model.users.Employee;
+import cz.cvut.fel.nss.chatgc.model.users.Player;
+import cz.cvut.fel.nss.chatgc.security.SecurityUtils;
+import cz.cvut.fel.nss.chatgc.security.model.AuthenticationToken;
 import cz.cvut.fel.nss.chatgc.service.ChatService;
 import cz.cvut.fel.nss.chatgc.service.users.EmployeeService;
 import cz.cvut.fel.nss.chatgc.service.users.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.DiscriminatorValue;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
@@ -39,10 +46,8 @@ public class ChatController {
     public Set<Chat> getAllChatsForUser(@PathVariable String username){
         Set<Chat> chats = new HashSet<>();
         if(Objects.equals(employeeService.findByUsername(username).getClass().getAnnotation(DiscriminatorValue.class).value(), "EMPLOYEE")){
-            System.out.println("emp here " + username);
             chats.addAll(employeeService.findAllChats((Employee) employeeService.findByUsername(username)));
         }else{
-            System.out.println("here player " + username);
             chats.add(chatService.findByPlayer(username));
         }
         return chats;
@@ -53,7 +58,6 @@ public class ChatController {
     public ArrayList<MessageDto> getAllMessagesForChat(@PathVariable String username, @PathVariable Integer id){
         ArrayList<MessageDto> messages = new ArrayList<>();
         for(Message m: chatService.findById(id).getMessages()){
-            System.out.println(m + " ----------- mess");
             MessageDto messageDto = new MessageDto();
             messageDto.setMessageType("message");
             messageDto.setChat(chatService.findById(id).getPlayerUsername());
@@ -75,8 +79,6 @@ public class ChatController {
     @PostMapping(value = "/api/send/{chatId}", consumes = "application/json", produces = "application/json")
     public void sendMessage(@RequestBody MessageDto message, @PathVariable Integer chatId) {
         try {
-            //Sending the message to kafka topic queue
-            System.out.println("send mess ---------------------------------------");
             message.setChat(chatService.findById(chatId).getPlayerUsername());
             kafkaTemplate.send(KafkaConstants.KAFKA_TOPIC, message).get();
         } catch (InterruptedException | ExecutionException e) {
@@ -84,20 +86,15 @@ public class ChatController {
         }
     }
 
-    @PostMapping(value = "/api/log", consumes = "application/json", produces = "application/json")
-    public void loginMessage(@RequestBody MessageDto m) {
-//        message.setTimestamp(LocalDateTime.now().toString());
-        System.out.println("login mess ---------------------------------------" + m.getMessageType());
-        try {
-            //Sending the message to kafka topic queue
-            m.setContent("logged-in-action/" + m.getContent());
-
-            kafkaTemplate.send("login-topic", m).get();
-
-
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
+    @PostMapping(value = "api/chats/new")
+    @PreAuthorize("hasAuthority('PLAYER')")
+    public ResponseEntity createChat(Principal principal){
+        final AuthenticationToken auth = (AuthenticationToken) principal;
+        Integer id = auth.getPrincipal().getAccount().getId();
+        Player player = playerService.findById(id);
+        Chat chat = new Chat(true, player, new ArrayList<>(), new HashSet<>(), new HashSet<>(), player.getUsername());
+        chatService.persist(chat);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

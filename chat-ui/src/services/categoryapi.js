@@ -23,6 +23,13 @@ const categoryAPI = {
             name: name
         }
         return api.put(`${username}/categories/update/${id}`, msg);
+    },
+    login:(username, password) => {
+        let msg = {
+            username: username,
+            password:password
+        }
+        return api.post(`login`, msg);
     }
 
 }

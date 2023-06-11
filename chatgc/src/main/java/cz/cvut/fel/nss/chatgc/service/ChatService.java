@@ -16,10 +16,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -53,57 +49,4 @@ public class ChatService {
         Chat res = chatRepository.save(chat);
         return res;
     }
-
-
-    public void broadcast(ChatRequestDto dto) {
-        System.out.println(dto);
-        Set<Client> users1 = new HashSet<>();
-
-        for(Client c: employeeService.getUsers()){
-            User user = employeeService.findByUsername(c.getName());
-            if(employeeService.findById(user.getId()).getRole().getName().equals("admin")){
-                users1.add(c);
-            }
-        }
-
-        for(Client c: playerService.getUsers()){
-            if(c.getName().equals(dto.chatName())){
-                users1.add(c);
-            }
-        }
-//
-//        Set<User> users = new HashSet<>();
-//        for(Client c:users1){
-//            users.add(userService.findByUsername(c.getName()));
-//        }
-
-        User user = playerService.findByUsername(dto.chatName());
-
-        Chat chat = chatRepository.findByPlayerUsername(dto.chatName());
-
-        if(chat==null){
-            chatRepository.save(new Chat(true, playerService.findById(user.getId()), new ArrayList<>(), new HashSet<>(), new HashSet<>(), dto.chatName()));
-            chat = chatRepository.findByPlayerUsername(dto.chatName());
-        }
-        requestService.persist(new Request(dto.message(), LocalDateTime.now(), chat, MessageType.TEXT, new HashSet<>()));
-//        System.out.println(chat.getPlayerUsername());
-
-
-        ChatServerEvent chatEvent = new ChatServerEvent(dto.message(), dto.chatName(), users1);
-        publisher.publishEvent(chatEvent);
-    }
-
-//    public SseEmitter registerClient(String name) {
-//        var emitter = new SseEmitter(DEFAULT_TIMEOUT);
-////        var client = new Client(emitter, name);
-//
-//        emitter.onCompletion(() -> registeredClients.remove(client));
-//        emitter.onError((err) -> removeAndLogError(client));
-//        emitter.onTimeout(() -> removeAndLogError(client));
-//        registeredClients.add(client);
-//        sendWelcomeToClient(client);
-//
-//        System.out.println("New client registeres");
-//        return emitter;
-//    }
 }
