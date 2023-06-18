@@ -1,5 +1,6 @@
 package cz.cvut.fel.nss.chatgc.model.messages;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import cz.cvut.fel.nss.chatgc.model.AbstractEntity;
 import cz.cvut.fel.nss.chatgc.model.Chat;
 import lombok.AllArgsConstructor;

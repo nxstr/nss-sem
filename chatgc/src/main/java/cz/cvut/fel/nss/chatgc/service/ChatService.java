@@ -16,6 +16,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 
 @Service
 @AllArgsConstructor
@@ -31,6 +33,10 @@ public class ChatService {
     @Transactional
     public void persist(Chat chat){
         chatRepository.save(chat);
+    }
+
+    public List<Chat> findAll(){
+        return chatRepository.findAll();
     }
 
     @Transactional

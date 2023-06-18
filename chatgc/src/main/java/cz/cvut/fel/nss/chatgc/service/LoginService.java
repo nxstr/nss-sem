@@ -1,11 +1,12 @@
 package cz.cvut.fel.nss.chatgc.service;
 
+import cz.cvut.fel.nss.chatgc.model.messages.Response;
+import cz.cvut.fel.nss.chatgc.model.users.Employee;
+import cz.cvut.fel.nss.chatgc.model.users.User;
 import cz.cvut.fel.nss.chatgc.security.DefaultAuthenticationProvider;
-import cz.cvut.fel.nss.chatgc.security.SecurityUtils;
-import cz.cvut.fel.nss.chatgc.security.model.AccountDetails;
 import cz.cvut.fel.nss.chatgc.security.service.AccountDetailsService;
+import cz.cvut.fel.nss.chatgc.service.users.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;

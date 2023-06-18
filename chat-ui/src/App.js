@@ -47,12 +47,12 @@ const App = () => {
       console.log('Error Occured while sending message to api', err);
     })
     getChats(user);
-    // loadChats();
   }
 
   let getChats = (user) =>{
     chatAPI.getChats(user.username).then(res=> {
         setChats(res.data)
+      console.log(res.data)
       // setChats(chats => res.data)
       let hasChatObj = false;
       for(let i=0; i<res.data.length; i++){
@@ -69,26 +69,19 @@ const App = () => {
         setHasChat(true);
       }
       console.log("all chats ",chats)
-    }).catch(err => {
-      console.log('Error Occured while getting chats to api');
+    }).catch(() => {
+      console.log('Error Occurred while getting chats to api');
     })
 
   }
-  // let loadChats = () => {
-  //   console.log("all chats ",chats)
-  // }
 
   let onSendMessageCat = () => {
-    // categoryAPI.createCategory(user.username, msgText).then(res => {
-    //   console.log('Sent', res);
-    //   if(res.status===201){
-
         categoryAPI.getCats(user.username).then(res => {
           setCats(res.data);
           return (<Categories cats={cats}
                               user={user}
                               onSendMessageCat={onSendMessageCat}/>);
-        }).catch(err => {
+        }).catch(() => {
       console.log('Error Occured while sending message to api');
     })
   }
@@ -97,7 +90,7 @@ const App = () => {
     categoryAPI.getCats(user.username).then(res=> {
       setCats(res.data);
       console.log("all cats ",res.data)
-    }).catch(err => {
+    }).catch(() => {
       console.log('Error Occured while getting cats to api');
     })
 
@@ -109,6 +102,15 @@ const App = () => {
       console.log(msg.chat.id, " active chatttttt")
       if(activeChat!=null && msg.chat===activeChat.chatName){
         setMessages(messages.concat(msg));
+        // let chatsCopy = chats;
+        for(let i=0; i<chats.length; i++){
+          console.log("chatsssss: ", chats)
+          if(chats[i].playerUsername===activeChat.chatName){
+            chats[i].lastMessage = msg;
+            console.log(chats[i])
+          }
+        }
+        setChats([].concat(chats))
         console.log(messages, " messages")
       }
     }else if(msg.messageType==="chatListUpdate"){
@@ -126,7 +128,7 @@ const App = () => {
   let onSendMessage = (msgText) => {
     chatAPI.sendMessage(user.username, msgText, activeChat).then(res => {
       console.log('Sent', res);
-    }).catch(err => {
+    }).catch(() => {
       console.log('Error Occured while sending message to api');
     })
   }
@@ -135,47 +137,12 @@ const App = () => {
   let categoryCreate = () => {
     categoryAPI.createCategory(user.username).then(res => {
       console.log('Cat', res);
-    }).catch(err => {
+    }).catch(() => {
       console.log('Error Occured while creating category');
-    })
-  }
-  
-    let onLoginMessage = (username) => {
-    chatAPI.loginMessage(user.username).then(res => {
-      console.log('Sent login', res);
-    }).catch(err => {
-      console.log('Error Occured while sending message to api');
     })
   }
 
   const login = async (username, password) => {
-
-    // const response = await axios.post("http://localhost:8080/login", {
-    //   username: username,
-    //   password: password
-    // })
-
-    const LOGIN_URL = "http://localhost:8080/api/login";
-    const params = new URLSearchParams()
-    params.append('username', username)
-    params.append('password',password)
-
-
-    let msg = {
-      username: username,
-      password: password
-    }
-    //
-    // const response = await fetch("https://api.request.com/api_resource", {
-    //   method: "GET",
-    //   mode: "cors",
-    //   headers: {
-    //     Authorization: `Bearer: ${token}`,
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify(data),
-    // });
-
     categoryAPI.login(username, password).then(res =>{
       console.log(res, "=================================")
       if(res.status===200){
@@ -188,34 +155,19 @@ const App = () => {
       }else{
         console.log("FORBIDDEN")
       }
-    }).catch(err => {
+    }).catch(() => {
       console.log('Error Occured while getting messages to api');
     })
-
-    //
-    //
-    // return await axios.post(`http://localhost:8080/api/login`, params.header("Access-Control-Allow-Origin", "*"));
 
   };
 
   let handleLoginSubmit = (username, password) => {
-    // var pieces = users.split(" ");
-    // console.log(pieces[0], " Logged in..");
-
-    // setUser({
-    //   username: pieces[0],
-    //   color: randomColor(),
-    //   type: "player"
-    // })
     login(username, password).then(res => {
       console.log('Sent loginnnnnnnnnnnnnnnnnnnnn', res, " ", hasChat);
 
     }).catch(err => {
       console.log('Error Occured while sending message to api', err);
     });
-
-    // console.log("user======================== ", user)
-
   }
 
   let handleReg = () => {
@@ -234,8 +186,8 @@ const App = () => {
     // window.location.replace(`http://localhost:3000/allChats/${id}`)
     chatAPI.getMessages(id, user.username).then(res =>{
       console.log(res.data)
-      setMessages(messages.concat(res.data))
-    }).catch(err => {
+      setMessages([].concat(res.data))
+    }).catch(() => {
       console.log('Error Occured while getting messages to api');
     })
   }
@@ -248,11 +200,10 @@ const App = () => {
       chatName: name
     })
     setIsShown(false);
-    // window.location.replace(`http://localhost:3000/allChats/${id}`)
     chatAPI.getMessages(id, user.username).then(res =>{
       console.log(res.data)
-      setMessages(res.data)
-    }).catch(err => {
+      setMessages([].concat(res.data))
+    }).catch(() => {
       console.log('Error Occured while getting messages to api');
     })
   }
@@ -262,17 +213,6 @@ const App = () => {
       console.log(" user is " + user.username)
       return user.username
     } return ""
-  }
-
-
-  let getCatsClick = () => {
-    categoryAPI.redirect().then(res =>{
-      console.log(res.data)
-
-    }).catch(err => {
-      console.log('Error Occured while getting messages to api');
-    })
-    console.log('user', user);
   }
 
   let loadCats = () =>{
@@ -287,25 +227,29 @@ const App = () => {
       if(res.status===200){
         getChats(user);
       }
-    }).catch(err => {
+    }).catch(() => {
       console.log('Error Occured while getting messages to api');
     })
   }
 
   let handleRegSubmit = (username, password, email) => {
-    chatAPI.registerPlayer(username, password, email).then(res => {
+    chatAPI.registerPlayer(username, password, email).then(() => {
       setIsReg(false);
       setHasChat(false);
-    }).catch(err => {
+    }).catch(() => {
       console.log('Error Occured while getting messages to api');
     })
   }
 
   let logout = () => {
-    chatAPI.logout().then(res => {
+    chatAPI.logout().then(() => {
       setUser(null);
+      setActiveChat(null);
+      setChats([]);
+      setHasChat(false);
+      setMessages([])
       console.log("logout")
-    }).catch(err => {
+    }).catch(() => {
       console.log('Error Occured while getting messages to api');
     })
   }
@@ -330,13 +274,30 @@ const App = () => {
             <Button onClick={logout}>
               Logout
             </Button>
+            {!!isEmp &&(
+                <>
+                  <Button onClick={loadCats} className="CatsButton">
+                    Categories
+                  </Button>
+                  </>
+                )}
+        <div className="main">
             {!!hasChat?(
                 <>
-                  {!!activeChat?(
+                  <Router>
+                    <Routes>
+                      <Route path="/" element={<AllChats chats = {chats}
+                                                         currentUser = {user}
+                                                         onSubmitChat = {handleChatId}/>} />
+                      <Route path="/" element={<Navigate replace to="/" />} />
+                    </Routes>
+                  </Router>
+                  {!!activeChat &&(
                           <Router>
                             <Routes>
                               <Route exact path="/" element={
-                                <>
+                                <div className="chat">
+
                                   <Messages
                                       messages={messages}
                                       currentUser={user}
@@ -345,53 +306,40 @@ const App = () => {
                                   />
                                   <Input onSendMessage={onSendMessage}
                                          categoryCreate={categoryCreate}/>
-                                </>} />
+                                </div>} />
                               <Route path="/" element={<Navigate replace to={{
                                 pathname: `/`
                               }} />} />
                             </Routes>
                           </Router>
-                      ) :
-
-                      <Router>
-                        <Routes>
-                          <Route path="/" element={<AllChats chats = {chats}
-                                                             currentUser = {user}
-                                                             onSubmitChat = {handleChatId}/>} />
-                          <Route path="/" element={<Navigate replace to="/" />} />
-                        </Routes>
-                      </Router>
-                  }
+                      )}
                 </>
             ) :
                 <Button onClick={createChat}>
                   Create Chat
                 </Button>
             }
-
-
-          {/*  if user.type==employee
-          show category button*/}
-            {!!isEmp &&(
-                <>
-                  <Button onClick={loadCats}>
-                    Categories
-                  </Button>
+            {/*{!!isEmp &&(*/}
+            {/*    <>*/}
+            {/*      <Button onClick={loadCats} className="CatsButton">*/}
+            {/*        Categories*/}
+            {/*      </Button>*/}
 
                   {isShown && (
                       <Router>
                         <Routes>
-                          <Route path="/cats" element={<Categories cats = {cats}
+                          <Route path="/" element={<Categories cats = {cats}
                                                                         user={user}
                           onSendMessageCat={onSendMessageCat}/>} />
-                          <Route path="/" element={<Navigate replace to="/cats" />} />
+                          <Route path="/" element={<Navigate replace to="/" />} />
                         </Routes>
                       </Router>
                   )}
-                </>
-            )
-            }
-          </>
+            {/*    </>*/}
+            {/*)*/}
+            {/*}*/}
+          </div>
+            </>
         ) :
           <>
             {!!isReg?(

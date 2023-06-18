@@ -37,13 +37,15 @@ public class DefaultAuthenticationProvider implements AuthenticationProvider {
 
         final AccountDetails userDetails = (AccountDetails) userDetailsService.loadUserByUsername(username);
         final String password = (String) authentication.getCredentials();
+        System.out.println("passssssssssssssssssssss " + password + " " + userDetails.getAccount());
+
+        System.out.println("encoded>>>>>>>>>>>>>>>>>>> " +passwordEncoder.encode(userDetails.getPassword()) + " " + passwordEncoder.encode(password));
 
         if (!passwordEncoder.matches(password, userDetails.getPassword())) {
             throw new BadCredentialsException("Provided credentials don't match.");
         }
-        AuthenticationToken token = SecurityUtils.setCurrentUser(userDetails);
-        System.out.println(token.getPrincipal().getUsername() + "loggeddddddddddddddddddddddddddd");
-        return token;
+        return SecurityUtils.setCurrentUser(userDetails);
+
     }
 
     @Override

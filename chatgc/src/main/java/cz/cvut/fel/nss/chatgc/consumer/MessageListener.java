@@ -99,6 +99,7 @@ public class MessageListener {
         mess.add(r);
         chat.setMessages(mess);
         chatService.update(chat);
+        System.out.println("chat updated: " + chat);
     }
 
 

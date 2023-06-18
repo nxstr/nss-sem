@@ -3,6 +3,7 @@ package cz.cvut.fel.nss.chatgc.service.users;
 
 import cz.cvut.fel.nss.chatgc.dto.Client;
 import cz.cvut.fel.nss.chatgc.events.WelcomeServerEvent;
+import cz.cvut.fel.nss.chatgc.exceptions.ExistsException;
 import cz.cvut.fel.nss.chatgc.model.users.User;
 import cz.cvut.fel.nss.chatgc.repository.users.UserRepository;
 import lombok.AllArgsConstructor;
@@ -23,6 +24,8 @@ public abstract class UserService<T extends User> {
     private final ApplicationEventPublisher publisher;
     private final PasswordEncoder encoder;
 
+
+
     @Transactional
     public void persist(T user){
         user.encodePassword(encoder);
@@ -32,7 +35,6 @@ public abstract class UserService<T extends User> {
 
     @Transactional
     public void update(T user){
-        user.encodePassword(encoder);
         userDao.save(user);
         System.out.println("updates");
     }
@@ -47,17 +49,24 @@ public abstract class UserService<T extends User> {
         return userDao.findByUsername(name);
     }
 
-    public void addOnlineUsers(Client client){
-        registeredClients.add(client);
+    @Transactional
+    public User findByEmail(String email){
+        return userDao.findByEmail(email);
     }
 
-    public Set<Client> getUsers(){
-        return registeredClients;
+    @Transactional
+    public void changePassword(User user, String password){
+        user.setPassword(password);
+        user.encodePassword(encoder);
+        userDao.save(user);
     }
 
-    public void sendWelcomeToClient(Client client) {
-        User user = userDao.findByUsername(client.getName());
-        WelcomeServerEvent welcomeServerEvent = new WelcomeServerEvent(client);
-        publisher.publishEvent(welcomeServerEvent);
+    @Transactional
+    public void changeEmail(User user, String email){
+        if(findByEmail(email)!=null){
+            throw new ExistsException("email already exists");
+        }
+        user.setEmail(email);
+        userDao.save(user);
     }
 }

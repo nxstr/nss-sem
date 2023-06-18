@@ -1,5 +1,6 @@
 package cz.cvut.fel.nss.chatgc.controller.users;
 
+import cz.cvut.fel.nss.chatgc.model.messages.Response;
 import cz.cvut.fel.nss.chatgc.model.users.Employee;
 import cz.cvut.fel.nss.chatgc.service.RoleService;
 import cz.cvut.fel.nss.chatgc.service.users.EmployeeService;
@@ -21,6 +22,12 @@ public class EmployeeController {
 
     @PostMapping("/api/reg")
     public void createEmployee(){
+
+            Employee e = (Employee) employeeService.findByUsername("testEmp");
+            for(Response r: e.getResponses()){
+                r.setEmployee(null);
+            }
+
         Employee employee = new Employee();
         employee.setUsername("testEmp");
         employee.setPassword("test");

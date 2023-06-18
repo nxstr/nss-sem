@@ -5,6 +5,13 @@
   height: 100vh;
   text-align: center;
 }
+.main{
+  display: flex;
+  flex-direction: row;
+  height: 80%;
+  width: 94%;
+  margin: 2%;
+}
 
 .App-header {
   background-color: #262626;
@@ -13,22 +20,89 @@
   text-align: center;
   color: white;
 }
+.messagecomp{
+  height: 75%;
+  display: inline-block;
+}
+
+.chat{
+  display: inline-flex;
+  flex-direction: column;
+  width: 100%;
+}
+.chats{
+  width: 30%;
+  display: inline-block;
+}
+.cats{
+  width: 70%;
+  display: inline-block;
+}
+
+.chat-box{
+  background-color: lightblue;
+  float:left;
+  text-align: left;
+  padding: 2%;
+  margin: 1%;
+  display: flex;
+  flex-direction: row;
+
+}
+
+.box-content{
+  width: 80%;
+  margin: 1%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-username{
+  font-weight: bold;
+}
+
+.chat-box-button{
+  height: 5%;
+  width: 10px;
+}
+
+.chat-text{
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/*.CatsButton{*/
+/*  width: 50%;*/
+/*}*/
+
+.chat-list {
+  width: 100%;
+  margin: 0;
+  list-style: none;
+  flex-grow: 1;
+  overflow: auto;
+  display: inline-flex;
+  flex-direction: column;
+  float:left;
+}
 
 .messages-list {
   display: inline-block;
   vertical-align: top;
   padding: 20px 0;
-  width: 65%;
+  width: 100%;
   list-style: none;
   flex-grow: 1;
   overflow: auto;
   margin-right: 5%;
+  height: 90%;
+  margin-bottom: 5%;
 }
 
 .chats-list {
   display: inline-block;
   vertical-align: top;
-  padding: 20px 0;
   width: 30%;
   margin: 0;
   list-style: none;
@@ -91,11 +165,11 @@
 
 .message-input {
   display: flex;
-  margin-left: 30%;
-  width: 70%;
+  margin-left: 5%;
+  width: 90%;
   justify-content: space-between;
   max-width: 900px;
-  margin-bottom: 38px;
+  /*margin-bottom: 38px;*/
 }
 
 .inputField {

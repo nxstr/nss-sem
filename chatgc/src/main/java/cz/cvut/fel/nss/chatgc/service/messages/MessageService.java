@@ -18,6 +18,11 @@ public abstract class MessageService<T extends Message> {
     }
 
     @Transactional
+    public void update(Message message){
+        messageDao.save(message);
+    }
+
+    @Transactional
     public Message findById(Integer id){
         return messageDao.findById(id).orElse(null);
     }

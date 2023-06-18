@@ -39,21 +39,24 @@ const AllChats = ({chats, currentUser, onSubmitChat})=>{
 
     let renderChat = (chat) => {
 
-        const {id, playerUsername} = chat;
+        const {id, playerUsername, lastMessage} = chat;
         console.log(chat)
         return (
-            <li className="Messages-list">
+            <li className="chat-box">
                 <span
                     className="avatar"
                     style={{ backgroundColor: "yellow" }}
                 />
-                <div className="Message-content">
-                    <div className="username">
+                <div className="box-content">
+                    <div className="chat-username">
                         {playerUsername}
                     </div>
-                    <div className="text">{id}</div>
+                    <div className="chat-last-sender">
+                        {lastMessage.sender} :
+                    </div>
+                    <div className="chat-text">{lastMessage.content}</div>
                 </div>
-                <Button variant="contained" color="primary" onClick={event => handleSubmit(event, id, playerUsername)} >
+                <Button onClick={event => handleSubmit(event, id, playerUsername)} className="chat-box-button">
                     Open
                 </Button>
             </li>
@@ -61,21 +64,10 @@ const AllChats = ({chats, currentUser, onSubmitChat})=>{
     }
 
     return (
-        <div className="App">
-            {!!chat ?
-                (
-                    <>
-                {/*    <Messages*/}
-                {/*        messages={messages}*/}
-                {/*        currentUser={currentUser}*/}
-                {/*    />*/}
-                {/*<Input onSendMessage={onSendMessage} />*/}
-                        </>
-                ) :
-                <ul className="messages-list">
+        <div className="chats">
+                <ul className="chat-list">
                     {chats.map(chat => renderChat(chat))}
                 </ul>
-            }
         </div>
     )
 

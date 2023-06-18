@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -20,7 +21,7 @@ public class RoleService {
     private final ApplicationEventPublisher publisher;
 
     @Transactional
-    public void persist(Role role){
+    public Role persist(Role role){
         if(role.getParentRole()!=null){
             role.getParentRole().getChildrenRoles().add(role);
             update(role.getParentRole());
@@ -28,16 +29,22 @@ public class RoleService {
             role.getCategories().addAll(role.getParentRole().getCategories());
         }
         roleRepository.save(role);
+        return role;
         //publisher
     }
 
     @Transactional
-    public void update(Role role){
+    public Role update(Role role){
         roleRepository.save(role);
+        return role;
     }
 
     public Role findByName(String name){
         return roleRepository.findByName(name);
+    }
+
+    public Optional<Role> findById(Integer id){
+        return roleRepository.findById(id);
     }
 
     @Transactional
@@ -63,13 +70,13 @@ public class RoleService {
     @Transactional
     public void removeRoleParent(Role role){
         if(role.getParentRole()!=null) {
-            role.getParentRole().getChildrenRoles().remove(role);
-            update(role.getParentRole());
+            Set<Role> roles = new HashSet<>(role.getParentRole().getChildrenRoles());
+            roles.remove(role);
+            role.getParentRole().setChildrenRoles(roles);
+            Role parent = update(role.getParentRole());
 
-//            role.getCategories().removeIf(c -> role.getParentRole().getCategories().contains(c));
-
-            removeParentRoleCategories(role, role.getParentRole().getCategories());
-
+            removeParentRoleCategories(role, parent.getCategories());
+            role.setParentRole(null);
             update(role);
         }
     }
@@ -82,12 +89,16 @@ public class RoleService {
             newParent.getChildrenRoles().add(role);
             update(newParent);
 
-//            role.getCategories().addAll(newParent.getCategories());
-
             addRoleCategories(role, newParent.getCategories());
 
             update(role);
         }
+    }
+
+    @Transactional
+    public void changeRoleParent(Role role, Role newParent){
+        removeRoleParent(role);
+        addRoleParent(role, newParent);
     }
 
     @Transactional
@@ -116,9 +127,9 @@ public class RoleService {
 
     @Transactional
     public void removeRoleCategory(Role role, Category category){
-        if(!role.getParentRole().getCategories().contains(category)){
+        if(role.getParentRole()==null || !role.getParentRole().getCategories().contains(category)){
             role.getCategories().remove(category);
-            update(role);
+            role = update(role);
 
             for(Role c: role.getChildrenRoles()){
                 Set<Category> cats = new HashSet<>();

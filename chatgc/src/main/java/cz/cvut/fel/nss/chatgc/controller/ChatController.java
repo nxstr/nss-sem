@@ -1,6 +1,7 @@
 package cz.cvut.fel.nss.chatgc.controller;
 
 import cz.cvut.fel.nss.chatgc.constants.KafkaConstants;
+import cz.cvut.fel.nss.chatgc.dto.ChatDTO;
 import cz.cvut.fel.nss.chatgc.dto.MessageDto;
 import cz.cvut.fel.nss.chatgc.model.Chat;
 import cz.cvut.fel.nss.chatgc.model.messages.Message;
@@ -21,10 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.DiscriminatorValue;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -43,12 +41,73 @@ public class ChatController {
     }
 
     @GetMapping(value="/api/allChats/{username}")
-    public Set<Chat> getAllChatsForUser(@PathVariable String username){
-        Set<Chat> chats = new HashSet<>();
+    public Set<ChatDTO> getAllChatsForUser(@PathVariable String username){
+        Set<ChatDTO> chats = new HashSet<>();
+        System.out.println("find chat: " + chatService.findByPlayer("e"));
         if(Objects.equals(employeeService.findByUsername(username).getClass().getAnnotation(DiscriminatorValue.class).value(), "EMPLOYEE")){
-            chats.addAll(employeeService.findAllChats((Employee) employeeService.findByUsername(username)));
+            for(Chat chat:employeeService.findAllChats((Employee) employeeService.findByUsername(username)).stream().filter(d -> d.getPlayer()!=null).toList()){
+                Message m = null;
+                MessageDto dto = new MessageDto();
+                if(!chat.getMessages().isEmpty()){
+                    chat.getMessages().sort(new Comparator<Message>() {
+                        public int compare(Message o1, Message o2) {
+                            return o1.getDate().compareTo(o2.getDate());
+                        }
+                    });
+                    m = chat.getMessages().get(chat.getMessages().size()-1);
+                    dto.setContent(m.getDataPath());
+                    dto.setChat(chat.getPlayerUsername());
+                    dto.setMessageType("message");
+                    if(Objects.equals(m.getClass().getAnnotation(DiscriminatorValue.class).value(), "RESPONSE")){
+                        Response r = (Response) m;
+                        if(r.getEmployee()!=null) {
+                            dto.setSender(r.getEmployee().getUsername());
+                        }else{
+                            dto.setSender("deleted");
+                        }
+                        if(username.equals(dto.getChat())){
+                            dto.setSender("Employee");
+                        }
+                    }else{
+                        dto.setSender(chat.getPlayerUsername());
+                    }
+                }
+
+
+               chats.add(new ChatDTO(chat.isOpen(), chat.getPlayerUsername(), chat.getId(), chat.getCategories(), chat.getFolders(), dto));
+            }
+
         }else{
-            chats.add(chatService.findByPlayer(username));
+            Message m = null;
+            MessageDto dto = new MessageDto();
+            if(chatService.findByPlayer(username)!=null) {
+                if (!chatService.findByPlayer(username).getMessages().isEmpty()) {
+                    chatService.findByPlayer(username).getMessages().sort(new Comparator<Message>() {
+                        public int compare(Message o1, Message o2) {
+                            return o1.getDate().compareTo(o2.getDate());
+                        }
+                    });
+                    m = chatService.findByPlayer(username).getMessages().get(chatService.findByPlayer(username).getMessages().size() - 1);
+                    dto.setContent(m.getDataPath());
+                    dto.setChat(chatService.findByPlayer(username).getPlayerUsername());
+                    dto.setMessageType("message");
+                    if (Objects.equals(m.getClass().getAnnotation(DiscriminatorValue.class).value(), "RESPONSE")) {
+                        Response r = (Response) m;
+                        if (r.getEmployee() != null) {
+                            dto.setSender(r.getEmployee().getUsername());
+                        } else {
+                            dto.setSender("deleted");
+                        }
+                        if (username.equals(dto.getChat())) {
+                            dto.setSender("Employee");
+                        }
+                    } else {
+                        dto.setSender(chatService.findByPlayer(username).getPlayerUsername());
+                    }
+                }
+                chats.add(new ChatDTO(chatService.findByPlayer(username).isOpen(), chatService.findByPlayer(username).getPlayerUsername(), chatService.findByPlayer(username).getId(), chatService.findByPlayer(username).getCategories(), chatService.findByPlayer(username).getFolders(), dto));
+
+            }
         }
         return chats;
     }
@@ -57,14 +116,24 @@ public class ChatController {
     @GetMapping(value="/api/{username}/chat/{id}")
     public ArrayList<MessageDto> getAllMessagesForChat(@PathVariable String username, @PathVariable Integer id){
         ArrayList<MessageDto> messages = new ArrayList<>();
-        for(Message m: chatService.findById(id).getMessages()){
+        ArrayList<Message> msgs = chatService.findById(id).getMessages();
+        msgs.sort(new Comparator<Message>() {
+            public int compare(Message o1, Message o2) {
+                return o1.getDate().compareTo(o2.getDate());
+            }
+        });
+        for(Message m: msgs){
             MessageDto messageDto = new MessageDto();
             messageDto.setMessageType("message");
             messageDto.setChat(chatService.findById(id).getPlayerUsername());
             messageDto.setContent(m.getDataPath());
             if(Objects.equals(m.getClass().getAnnotation(DiscriminatorValue.class).value(), "RESPONSE")){
                 Response r = (Response) m;
-                messageDto.setSender(r.getEmployee().getUsername());
+                if(r.getEmployee()!=null) {
+                    messageDto.setSender(r.getEmployee().getUsername());
+                }else{
+                    messageDto.setSender("deleted");
+                }
                 if(username.equals(messageDto.getChat())){
                     messageDto.setSender("Employee");
                 }
@@ -94,6 +163,8 @@ public class ChatController {
         Player player = playerService.findById(id);
         Chat chat = new Chat(true, player, new ArrayList<>(), new HashSet<>(), new HashSet<>(), player.getUsername());
         chatService.persist(chat);
+        player.setChat(chat);
+        playerService.update(player);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

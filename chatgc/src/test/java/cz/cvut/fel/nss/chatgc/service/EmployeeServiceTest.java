@@ -1,0 +1,140 @@
+package cz.cvut.fel.nss.chatgc.service;
+
+import cz.cvut.fel.nss.chatgc.DataGenerator;
+import cz.cvut.fel.nss.chatgc.configuration.AppConfig;
+import cz.cvut.fel.nss.chatgc.exceptions.ExistsException;
+import cz.cvut.fel.nss.chatgc.exceptions.RoleException;
+import cz.cvut.fel.nss.chatgc.model.Category;
+import cz.cvut.fel.nss.chatgc.model.Chat;
+import cz.cvut.fel.nss.chatgc.model.Role;
+import cz.cvut.fel.nss.chatgc.model.messages.MessageType;
+import cz.cvut.fel.nss.chatgc.model.messages.Response;
+import cz.cvut.fel.nss.chatgc.model.users.Employee;
+import cz.cvut.fel.nss.chatgc.repository.CategoryRepository;
+import cz.cvut.fel.nss.chatgc.repository.ChatRepository;
+import cz.cvut.fel.nss.chatgc.repository.RoleRepository;
+import cz.cvut.fel.nss.chatgc.repository.messages.ResponseRepository;
+import cz.cvut.fel.nss.chatgc.repository.users.EmployeeRepository;
+import cz.cvut.fel.nss.chatgc.service.messages.ResponseService;
+import cz.cvut.fel.nss.chatgc.service.users.EmployeeService;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.time.LocalDateTime;
+import java.util.*;
+
+@ExtendWith(MockitoExtension.class)
+public class EmployeeServiceTest {
+    @Mock
+    private CategoryRepository categoryDao;
+
+    @Mock
+    private RoleRepository roleDao;
+
+    @Mock
+    private EmployeeRepository employeeDao;
+
+    @Mock
+    private ResponseService responseService;
+
+    @Mock
+    private ChatService chatService;
+
+    @Mock
+    PasswordEncoder encoder;
+
+    @Captor
+    private ArgumentCaptor<Employee> userArgumentCaptor;
+
+    @InjectMocks
+    private EmployeeService employeeService;
+
+    @Test
+    public void createTestReturnsException(){
+        Employee e1 = setUpEmployee();
+        e1.setRole(null);
+        assertThrows(RoleException.class, ()->employeeService.create(e1));
+    }
+
+    @Test
+    public void createTest(){
+        Employee e = setUpEmployee();
+        employeeService.create(e);
+        Mockito.verify(employeeDao, Mockito.times(1)).save(userArgumentCaptor.capture());
+        Employee employee = userArgumentCaptor.getValue();
+        assertEquals(e.getUsername(), employee.getUsername());
+        assertEquals(e.getEmail(), employee.getEmail());
+        assertEquals(e.getRole(), employee.getRole());
+    }
+
+    @Test
+    public void updateEmployee(){
+        Employee e = setUpEmployee();
+        employeeService.persist(e);
+        e.setResponses(setUpResponses(e));
+        employeeService.update(e);
+        Mockito.verify(employeeDao, Mockito.times(2)).save(userArgumentCaptor.capture());
+        Employee employee = userArgumentCaptor.getValue();
+        assertEquals(4, employee.getResponses().size());
+        assertEquals(e.getResponses(), employee.getResponses());
+    }
+
+    @Test
+    public void updateUsername(){
+        Employee e = setUpEmployee();
+        employeeService.persist(e);
+        e.setResponses(setUpResponses(e));
+        employeeService.update(e);
+
+        employeeService.changeUsername(e, "testUsername");
+
+        for(Response r: e.getResponses()){
+            assertEquals("testUsername", r.getEmployee().getUsername());
+        }
+        assertEquals("testUsername", e.getUsername());
+    }
+
+    private List<Response> setUpResponses(Employee e){
+        List<Response> responses = new ArrayList<>();
+        Chat chat = new Chat(true, null, new ArrayList<>(), new HashSet<>(), new HashSet<>(), "test");
+        chatService.persist(chat);
+        for(int i=0; i<4; i++){
+            Response r = new Response(e);
+            r.setDataPath("test"+new Random().nextInt(10));
+            r.setType(MessageType.TEXT);
+            r.setDate(LocalDateTime.now());
+            r.setChat(chat);
+            responseService.persist(r);
+            chat.getMessages().add(r);
+            responses.add(r);
+        }
+        chatService.update(chat);
+        return responses;
+    }
+
+    private Employee setUpEmployee(){
+        Employee employee = DataGenerator.generateEmployee();
+        employee.setRole(setUpRole(new Random().nextInt(5)));
+        employee.setResponses(new ArrayList<>());
+        return employee;
+    }
+
+    private Role setUpRole(int countCats){
+        Set<Category> cats = new HashSet<>();
+        for(int i=0; i<countCats; i++){
+            Category cat1 = DataGenerator.generateCategory();
+            categoryDao.save(cat1);
+            cats.add(cat1);
+        }
+        Role role = DataGenerator.generateEmptyRole();
+        role.setCategories(cats);
+        roleDao.save(role);
+        return role;
+    }
+}
