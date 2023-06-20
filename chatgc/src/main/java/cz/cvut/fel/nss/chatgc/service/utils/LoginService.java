@@ -1,4 +1,4 @@
-package cz.cvut.fel.nss.chatgc.service;
+package cz.cvut.fel.nss.chatgc.service.utils;
 
 import cz.cvut.fel.nss.chatgc.model.messages.Response;
 import cz.cvut.fel.nss.chatgc.model.users.Employee;

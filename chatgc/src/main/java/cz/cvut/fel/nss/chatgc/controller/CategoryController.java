@@ -30,6 +30,7 @@ public class CategoryController {
     }
 
     @PostMapping(value = "/api/{username}/categories/new", consumes = "application/json", produces = "application/json")
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity createCategory(@RequestBody CategoryDto categoryDto, @PathVariable String username){
         if(checkIfAdmin(username)) {
             Category category = new Category(categoryDto.getName());
@@ -42,6 +43,7 @@ public class CategoryController {
     }
 
     @DeleteMapping(value = "/api/{username}/categories/delete/{id}")
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity deleteCategory(@PathVariable String username, @PathVariable Integer id){
         System.out.println(id + "==================");
         if(checkIfAdmin(username)) {
@@ -54,12 +56,11 @@ public class CategoryController {
     }
 
     @PutMapping(value = "/api/{username}/categories/update/{id}", consumes = "application/json", produces = "application/json")
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity updateCategory(@PathVariable Integer id, @PathVariable String username, @RequestBody CategoryDto categoryDto){
         if(checkIfAdmin(username)) {
             if (categoryService.findById(id)!=null) {
-                Category category = categoryService.findById(id);
-                category.setName(categoryDto.getName());
-                categoryService.update(categoryService.findById(id));
+                categoryService.updateCategoryFromDto(categoryDto, id);
                 return new ResponseEntity<>(HttpStatus.OK);
             }
         }

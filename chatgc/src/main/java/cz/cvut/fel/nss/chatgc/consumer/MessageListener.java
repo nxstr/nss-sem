@@ -4,14 +4,17 @@ package cz.cvut.fel.nss.chatgc.consumer;
 import cz.cvut.fel.nss.chatgc.constants.KafkaConstants;
 import cz.cvut.fel.nss.chatgc.dto.MessageDto;
 import cz.cvut.fel.nss.chatgc.events.CategoryEvent;
+import cz.cvut.fel.nss.chatgc.events.EmployeeEvent;
 import cz.cvut.fel.nss.chatgc.model.Chat;
+import cz.cvut.fel.nss.chatgc.model.Role;
 import cz.cvut.fel.nss.chatgc.model.messages.Message;
 import cz.cvut.fel.nss.chatgc.model.messages.MessageType;
 import cz.cvut.fel.nss.chatgc.model.messages.Request;
 import cz.cvut.fel.nss.chatgc.model.messages.Response;
 import cz.cvut.fel.nss.chatgc.model.users.Employee;
-import cz.cvut.fel.nss.chatgc.security.SecurityUtils;
 import cz.cvut.fel.nss.chatgc.service.ChatService;
+import cz.cvut.fel.nss.chatgc.service.RoleService;
+import cz.cvut.fel.nss.chatgc.service.utils.DefaultEmailService;
 import cz.cvut.fel.nss.chatgc.service.messages.RequestService;
 import cz.cvut.fel.nss.chatgc.service.messages.ResponseService;
 import cz.cvut.fel.nss.chatgc.service.users.EmployeeService;
@@ -30,20 +33,22 @@ import java.util.*;
 public class MessageListener {
     @Autowired
     SimpMessagingTemplate template;
-//    ChatController controller;
     private final EmployeeService employeeService;
     private final RequestService requestService;
     private final ResponseService responseService;
     private final ChatService chatService;
-    private HashMap<String, ArrayList<String>> chats = new HashMap<>(); //на які чати підписані які юзери, ключ - нікнейм, значення - список чат айді
+    private final DefaultEmailService emailService;
+    private final RoleService roleService;
 
     private ArrayList<String> onlineEmps = new ArrayList<>();
 
-    public MessageListener(EmployeeService employeeService, RequestService requestService, ResponseService responseService, ChatService chatService) {
+    public MessageListener(EmployeeService employeeService, RequestService requestService, ResponseService responseService, ChatService chatService, DefaultEmailService emailService, RoleService roleService) {
         this.employeeService = employeeService;
         this.requestService = requestService;
         this.responseService = responseService;
         this.chatService = chatService;
+        this.emailService = emailService;
+        this.roleService = roleService;
     }
 
     @KafkaListener(
@@ -60,34 +65,19 @@ public class MessageListener {
             r.setDate(LocalDateTime.now());
             r.setType(MessageType.TEXT);
             responseService.persist(r);
-//            Chat chat = chatService.findByPlayer(message.getChat());
-//            ArrayList<Message> mess = chat.getMessages();
-//            mess.add(r);
-//            chat.setMessages(mess);
-//            chatService.update(chat);
             updateChat(message.getChat(), r);
-//            System.out.println("messages update "+chat.getMessages());
         }else{
             Request r = new Request(message.getContent(), LocalDateTime.now(), chatService.findByPlayer(message.getChat()), MessageType.TEXT, new HashSet<>());
-//            requestService.persist(r);
-//            Chat chat = chatService.findByPlayer(message.getChat());
-//            ArrayList<Message> mess = chat.getMessages();
-//            mess.add(r);
-//            chat.setMessages(mess);
-//            chatService.update(chat);
             updateChat(message.getChat(), r);
-//            System.out.println("messages update "+chat.getMessages());
         }
 
         for(String i: onlineEmps){
-            System.out.println(i + "*********************************");
             template.convertAndSend("/topic/group/"+i, message);
         }
 
         if(!message.getSender().equals(message.getChat())){
             message.setSender("Employee");
         }
-        System.out.println(message.getChat() + "*********************************");
         template.convertAndSend("/topic/group/"+message.getChat(), message);
 
     }
@@ -120,7 +110,6 @@ public class MessageListener {
             message.setContent("player");
         }
         template.convertAndSend("/topic/group/"+message.getSender(), message);
-        System.out.println("-------------------------------- username key " + message.getSender());
     }
 
     @KafkaListener(
@@ -148,19 +137,89 @@ public class MessageListener {
 
     //if emp's role has category, that has been updated
     //fun will send notification to user's topic
+    //NOT TESTED WEBSOCKET CONNECT!!!
     @EventListener
     @Transactional
     public void handleCategory(CategoryEvent event){
         System.out.println("category event");
-        if(event.message().equals("update") || event.message().equals("delete")){
+        if(event.message().equals("delete")){
+            List<Role> roles = roleService.deleteCategoryInAllRoles(event.category());
             for(String i: onlineEmps){
                 Employee e = (Employee) employeeService.findByUsername(i);
-                if(e.getRole().getCategories().contains(event.category())) {
+                if(roles.contains(e.getRole())){
                     MessageDto messageDto = new MessageDto();
                     messageDto.setMessageType("chatListUpdate");
                     template.convertAndSend("/topic/group/" + i, messageDto);
                 }
             }
+        }
+        else if(event.message().equals("changeCatIntoRole")){
+            List<Role> roles = roleService.changeCategoryInAllRoles(event.category());
+            for(String i: onlineEmps){
+                Employee e = (Employee) employeeService.findByUsername(i);
+                if(roles.contains(e.getRole())){
+                    MessageDto messageDto = new MessageDto();
+                    messageDto.setMessageType("chatListUpdate");
+                    template.convertAndSend("/topic/group/" + i, messageDto);
+                }
+            }
+        }
+    }
+
+
+    //NOT TESTED WEBSOCKET CONNECT!!!
+    //(email works OK)
+    @EventListener
+    @Transactional
+    public void handleEmployeeEvent(EmployeeEvent event){
+        switch (event.message()) {
+            case "create":
+                emailService.sendSimpleEmail(event.employee().getEmail(), "Your account data", "You have a new account in the GC web-chat app, here are your data:\n" +
+                        "username: " + event.employee().getUsername() + ",\n" +
+                        "password: " + event.employee().getPassword() + "\n");
+                break;
+            case "changeData":
+                emailService.sendSimpleEmail(event.employee().getEmail(), "Your account data", "Your account has been changed in the GC web-chat app, here are your data:\n" +
+                        "username: " + event.employee().getUsername() + "\n");
+                for (String i : onlineEmps) {
+                    MessageDto messageDto = new MessageDto();
+                    messageDto.setMessageType("chatListUpdate");
+                    template.convertAndSend("/topic/group/" + i, messageDto);
+                }
+                break;
+            case "changePass":
+                emailService.sendSimpleEmail(event.employee().getEmail(), "Your account data", "Your password has been changed in the GC web-chat app, here are your new data:\n" +
+                        "password: " + event.employee().getPassword() + ",\n");
+                break;
+            case "change":
+                //update role or smth that see only updated employee
+                if (onlineEmps.contains(event.employee().getUsername())) {
+                    MessageDto messageDto = new MessageDto();
+                    messageDto.setMessageType("chatListUpdate");
+                    template.convertAndSend("/topic/group/" + event.employee().getUsername(), messageDto);
+                }
+                break;
+            case "delete":
+                for (String i : onlineEmps) {
+                    MessageDto messageDto = new MessageDto();
+                    if (i.equals(event.employee().getUsername())) {
+                        messageDto.setMessageType("forceLogout");
+                    }else{
+                        messageDto.setMessageType("chatListUpdate");
+                    }
+                    template.convertAndSend("/topic/group/" + i, messageDto);
+                }
+                break;
+            case "changeUsername":
+                for (String i : onlineEmps) {
+                    MessageDto messageDto = new MessageDto();
+                    if (i.equals(event.employee().getUsername())) {
+                        messageDto.setMessageType("forceLogout");
+                        template.convertAndSend("/topic/group/" + i, messageDto);
+                        break;
+                    }
+                }
+                break;
         }
     }
 

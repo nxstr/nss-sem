@@ -1,9 +1,8 @@
 package cz.cvut.fel.nss.chatgc.controller.users;
 
 import cz.cvut.fel.nss.chatgc.dto.MessageDto;
-import cz.cvut.fel.nss.chatgc.security.SecurityUtils;
 import cz.cvut.fel.nss.chatgc.security.model.AuthenticationToken;
-import cz.cvut.fel.nss.chatgc.service.LoginService;
+import cz.cvut.fel.nss.chatgc.service.utils.LoginService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

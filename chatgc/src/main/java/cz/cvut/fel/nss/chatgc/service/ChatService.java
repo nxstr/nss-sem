@@ -1,12 +1,7 @@
 package cz.cvut.fel.nss.chatgc.service;
 
-import cz.cvut.fel.nss.chatgc.dto.ChatRequestDto;
-import cz.cvut.fel.nss.chatgc.dto.Client;
-import cz.cvut.fel.nss.chatgc.events.ChatServerEvent;
+import cz.cvut.fel.nss.chatgc.model.Category;
 import cz.cvut.fel.nss.chatgc.model.Chat;
-import cz.cvut.fel.nss.chatgc.model.messages.MessageType;
-import cz.cvut.fel.nss.chatgc.model.messages.Request;
-import cz.cvut.fel.nss.chatgc.model.users.User;
 import cz.cvut.fel.nss.chatgc.repository.ChatRepository;
 import cz.cvut.fel.nss.chatgc.service.messages.RequestService;
 import cz.cvut.fel.nss.chatgc.service.users.EmployeeService;
@@ -16,6 +11,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -37,6 +33,16 @@ public class ChatService {
 
     public List<Chat> findAll(){
         return chatRepository.findAll();
+    }
+
+    public List<Chat> findAllByCategoryId(Integer id){
+        List<Chat> chats = new ArrayList<>();
+        for(Chat c: findAll()){
+            if(c.getCategories().stream().map(Category::getId).toList().contains(id)){
+                chats.add(c);
+            }
+        }
+        return chats;
     }
 
     @Transactional

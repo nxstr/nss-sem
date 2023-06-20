@@ -1,5 +1,7 @@
 package cz.cvut.fel.nss.chatgc.service.users;
 
+import cz.cvut.fel.nss.chatgc.dto.EmployeeDTO;
+import cz.cvut.fel.nss.chatgc.events.EmployeeEvent;
 import cz.cvut.fel.nss.chatgc.exceptions.ExistsException;
 import cz.cvut.fel.nss.chatgc.exceptions.RoleException;
 import cz.cvut.fel.nss.chatgc.model.Category;
@@ -12,6 +14,7 @@ import cz.cvut.fel.nss.chatgc.repository.ChatRepository;
 import cz.cvut.fel.nss.chatgc.repository.RoleRepository;
 import cz.cvut.fel.nss.chatgc.repository.users.EmployeeRepository;
 import cz.cvut.fel.nss.chatgc.repository.users.UserRepository;
+import cz.cvut.fel.nss.chatgc.service.RoleService;
 import cz.cvut.fel.nss.chatgc.service.messages.ResponseService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,18 +29,18 @@ public class EmployeeService extends UserService<Employee> {
 
     public static final long DEFAULT_TIMEOUT = Long.MAX_VALUE;
     private final EmployeeRepository employeeDao;
-    private final RoleRepository roleDao;
     private final ChatRepository chatRepository;
     private final PasswordEncoder encoder;
     private final ResponseService responseService;
+    private final ApplicationEventPublisher publisher;
 
-    public EmployeeService(UserRepository<Employee, Integer> userDao, ApplicationEventPublisher publisher, EmployeeRepository employeeDao, RoleRepository roleDao, ChatRepository chatRepository, PasswordEncoder encoder, PasswordEncoder encoder1, ResponseService responseService) {
+    public EmployeeService(UserRepository<Employee, Integer> userDao, ApplicationEventPublisher publisher, EmployeeRepository employeeDao, ChatRepository chatRepository, PasswordEncoder encoder, PasswordEncoder encoder1, ResponseService responseService, ApplicationEventPublisher publisher1) {
         super(userDao, publisher, encoder);
         this.employeeDao = employeeDao;
-        this.roleDao = roleDao;
         this.chatRepository = chatRepository;
         this.encoder = encoder1;
         this.responseService = responseService;
+        this.publisher = publisher1;
     }
 
     @Transactional
@@ -52,6 +55,7 @@ public class EmployeeService extends UserService<Employee> {
         if(employee.getRole()==null){
             throw new RoleException("employee dont have role");
         }
+        publisher.publishEvent(new EmployeeEvent("create", new EmployeeDTO(employee.getUsername(), employee.getPassword(), employee.getEmail(), employee.getRole().getId())));
         this.persist(employee);
     }
 
@@ -67,28 +71,33 @@ public class EmployeeService extends UserService<Employee> {
         return emps;
     }
 
-    public List<Employee> findAllByRole(Role role){
-        List<Employee> res = new ArrayList<>();
-        List<Employee> all = findAllEmployees();
-        for(Employee e: all){
-            if(e.getRole().equals(role)){
-                res.add(e);
-            }
-        }
-        return res;
-    }
+
 
     @Transactional
     public void changeUsername(Employee employee, String newName){
         if(findByUsername(newName)!=null){
             throw new ExistsException("username already exists");
         }
+        publisher.publishEvent(new EmployeeEvent("changeUsername", new EmployeeDTO(employee.getUsername(), employee.getPassword(), employee.getEmail(), employee.getRole().getId())));
         employee.setUsername(newName);
         for(Response r: employee.getResponses()){
             r.setEmployee(employee);
             responseService.update(r);
         }
         update(employee);
+        publisher.publishEvent(new EmployeeEvent("changeData", new EmployeeDTO(employee.getUsername(), employee.getPassword(), employee.getEmail(), employee.getRole().getId())));
+    }
+
+//    @Transactional
+//    public void changeEmail(Employee employee, String email){
+//        super.changeEmail(employee, email);
+//        publisher.publishEvent(new EmployeeEvent("changeData", new EmployeeDTO(employee.getUsername(), employee.getPassword(), employee.getEmail(), employee.getRole().getId())));
+//    }
+
+    @Transactional
+    public void changeEmployeePassword(Employee employee, String password){
+        publisher.publishEvent(new EmployeeEvent("changePass", new EmployeeDTO(employee.getUsername(), password, employee.getEmail(), employee.getRole().getId())));
+        changePassword(employee, password);
     }
 
     @Transactional
@@ -97,6 +106,7 @@ public class EmployeeService extends UserService<Employee> {
             r.setEmployee(null);
         }
         employeeDao.delete(employee);
+        publisher.publishEvent(new EmployeeEvent("delete", new EmployeeDTO(employee.getUsername(), employee.getPassword(), employee.getEmail(), employee.getRole().getId())));
     }
 
     @Transactional
@@ -105,6 +115,8 @@ public class EmployeeService extends UserService<Employee> {
             throw new RoleException("employee does not have any role");
         }
         employee.setRole(role);
+        update(employee);
+        publisher.publishEvent(new EmployeeEvent("change", new EmployeeDTO(employee.getUsername(), employee.getPassword(), employee.getEmail(), employee.getRole().getId())));
     }
 
 
@@ -129,5 +141,20 @@ public class EmployeeService extends UserService<Employee> {
             }
         }
         return chats;
+    }
+
+
+    @Transactional
+    public void updateEmployeeFromDto(EmployeeDTO dto, Integer id){
+        Employee employee = findById(id);
+        if(!employee.getUsername().equals(dto.getUsername())){
+            changeUsername(employee, dto.getUsername());
+        }
+        if(!employee.getEmail().equals(dto.getEmail())){
+            changeEmail(employee, dto.getEmail());
+        }
+        if(!encoder.matches(dto.getPassword(), employee.getPassword())){
+            changeEmployeePassword(employee, dto.getPassword());
+        }
     }
 }

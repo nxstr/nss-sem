@@ -1,8 +1,5 @@
 package cz.cvut.fel.nss.chatgc.service.users;
 
-
-import cz.cvut.fel.nss.chatgc.dto.Client;
-import cz.cvut.fel.nss.chatgc.events.WelcomeServerEvent;
 import cz.cvut.fel.nss.chatgc.exceptions.ExistsException;
 import cz.cvut.fel.nss.chatgc.model.users.User;
 import cz.cvut.fel.nss.chatgc.repository.users.UserRepository;
@@ -12,15 +9,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.Set;
 
 @Service
 @AllArgsConstructor
 public abstract class UserService<T extends User> {
 
     private final UserRepository<T, Integer> userDao;
-    private final Set<Client> registeredClients = new HashSet<>();
     private final ApplicationEventPublisher publisher;
     private final PasswordEncoder encoder;
 

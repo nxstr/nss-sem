@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -48,6 +49,9 @@ public class EmployeeServiceTest {
 
     @Mock
     PasswordEncoder encoder;
+
+    @Mock
+    private ApplicationEventPublisher publisher;
 
     @Captor
     private ArgumentCaptor<Employee> userArgumentCaptor;
@@ -98,6 +102,35 @@ public class EmployeeServiceTest {
             assertEquals("testUsername", r.getEmployee().getUsername());
         }
         assertEquals("testUsername", e.getUsername());
+    }
+
+    @Test
+    public void changeRoleTest(){
+        Employee e = setUpEmployee();
+        employeeService.persist(e);
+        Role r = setUpRole(3);
+        employeeService.changeRole(e, r);
+
+        Mockito.verify(employeeDao, Mockito.times(2)).save(userArgumentCaptor.capture());
+        Employee employee = userArgumentCaptor.getValue();
+        assertEquals(r, employee.getRole());
+
+    }
+
+    @Test
+    public void deleteTest(){
+        Employee e = setUpEmployee();
+        employeeService.persist(e);
+        List<Response> responses = setUpResponses(e);
+        e.setResponses(responses);
+        employeeService.update(e);
+
+        employeeService.delete(e);
+
+        for(Response r: responses){
+            assertNull(r.getEmployee());
+        }
+        Mockito.verify(employeeDao, Mockito.times(1)).delete(e);
     }
 
     private List<Response> setUpResponses(Employee e){
