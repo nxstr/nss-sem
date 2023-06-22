@@ -55,7 +55,7 @@ public class EmployeeService extends UserService<Employee> {
         if(employee.getRole()==null){
             throw new RoleException("employee dont have role");
         }
-        publisher.publishEvent(new EmployeeEvent("create", new EmployeeDTO(employee.getUsername(), employee.getPassword(), employee.getEmail(), employee.getRole().getId())));
+        publisher.publishEvent(new EmployeeEvent("create", new EmployeeDTO(employee.getUsername(), employee.getPassword(), employee.getEmail(), employee.getRole().getId(), employee.getRole().getName())));
         this.persist(employee);
     }
 
@@ -78,14 +78,14 @@ public class EmployeeService extends UserService<Employee> {
         if(findByUsername(newName)!=null){
             throw new ExistsException("username already exists");
         }
-        publisher.publishEvent(new EmployeeEvent("changeUsername", new EmployeeDTO(employee.getUsername(), employee.getPassword(), employee.getEmail(), employee.getRole().getId())));
+        publisher.publishEvent(new EmployeeEvent("changeUsername", new EmployeeDTO(employee.getUsername(), employee.getPassword(), employee.getEmail(), employee.getRole().getId(), employee.getRole().getName())));
         employee.setUsername(newName);
         for(Response r: employee.getResponses()){
             r.setEmployee(employee);
             responseService.update(r);
         }
         update(employee);
-        publisher.publishEvent(new EmployeeEvent("changeData", new EmployeeDTO(employee.getUsername(), employee.getPassword(), employee.getEmail(), employee.getRole().getId())));
+        publisher.publishEvent(new EmployeeEvent("changeData", new EmployeeDTO(employee.getUsername(), employee.getPassword(), employee.getEmail(), employee.getRole().getId(), employee.getRole().getName())));
     }
 
 //    @Transactional
@@ -96,7 +96,7 @@ public class EmployeeService extends UserService<Employee> {
 
     @Transactional
     public void changeEmployeePassword(Employee employee, String password){
-        publisher.publishEvent(new EmployeeEvent("changePass", new EmployeeDTO(employee.getUsername(), password, employee.getEmail(), employee.getRole().getId())));
+        publisher.publishEvent(new EmployeeEvent("changePass", new EmployeeDTO(employee.getUsername(), password, employee.getEmail(), employee.getRole().getId(), employee.getRole().getName())));
         changePassword(employee, password);
     }
 
@@ -106,7 +106,7 @@ public class EmployeeService extends UserService<Employee> {
             r.setEmployee(null);
         }
         employeeDao.delete(employee);
-        publisher.publishEvent(new EmployeeEvent("delete", new EmployeeDTO(employee.getUsername(), employee.getPassword(), employee.getEmail(), employee.getRole().getId())));
+        publisher.publishEvent(new EmployeeEvent("delete", new EmployeeDTO(employee.getUsername(), employee.getPassword(), employee.getEmail(), employee.getRole().getId(), employee.getRole().getName())));
     }
 
     @Transactional
@@ -116,7 +116,7 @@ public class EmployeeService extends UserService<Employee> {
         }
         employee.setRole(role);
         update(employee);
-        publisher.publishEvent(new EmployeeEvent("change", new EmployeeDTO(employee.getUsername(), employee.getPassword(), employee.getEmail(), employee.getRole().getId())));
+        publisher.publishEvent(new EmployeeEvent("change", new EmployeeDTO(employee.getUsername(), employee.getPassword(), employee.getEmail(), employee.getRole().getId(), employee.getRole().getName())));
     }
 
 
@@ -131,7 +131,19 @@ public class EmployeeService extends UserService<Employee> {
         if(!employee.getRole().getName().equals("admin")) {
             Set<Category> cats = employee.getRole().getCategories();
             for (Category c : cats) {
-                chats.addAll(chatRepository.findChatsByCategories(c));
+//                chats.addAll(chatRepository.findChatsByCategories(c));
+                List<Chat> chatsWithCat = chatRepository.findChatsByCategories(c);
+                for(Chat chat: chatsWithCat){
+                    boolean hasAccess = true;
+                    for(Category cat: chat.getCategories()){
+                        if(!employee.getRole().getCategories().contains(cat)){
+                            hasAccess = false;
+                        }
+                    }
+                    if(hasAccess){
+                        chats.add(chat);
+                    }
+                }
             }
         }else{
             System.out.println("here " + employee.getUsername() + " " + employee.getRole());
@@ -148,12 +160,15 @@ public class EmployeeService extends UserService<Employee> {
     public void updateEmployeeFromDto(EmployeeDTO dto, Integer id){
         Employee employee = findById(id);
         if(!employee.getUsername().equals(dto.getUsername())){
+            System.out.println("name");
             changeUsername(employee, dto.getUsername());
         }
         if(!employee.getEmail().equals(dto.getEmail())){
+            System.out.println("email");
             changeEmail(employee, dto.getEmail());
         }
-        if(!encoder.matches(dto.getPassword(), employee.getPassword())){
+        if(!dto.getPassword().equals("") && !encoder.matches(dto.getPassword(), employee.getPassword())){
+            System.out.println("pass");
             changeEmployeePassword(employee, dto.getPassword());
         }
     }

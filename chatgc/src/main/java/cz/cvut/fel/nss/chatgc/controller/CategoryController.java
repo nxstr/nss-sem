@@ -21,72 +21,53 @@ public class CategoryController {
 
     @Autowired
     private final CategoryService categoryService;
-    private final EmployeeService employeeService;
 
 
-    public CategoryController(CategoryService categoryService, EmployeeService employeeService) {
+    public CategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
-        this.employeeService = employeeService;
     }
 
-    @PostMapping(value = "/api/{username}/categories/new", consumes = "application/json", produces = "application/json")
+    @PostMapping(value = "/api/categories/new", consumes = "application/json", produces = "application/json")
     @PreAuthorize("hasAuthority('admin')")
-    public ResponseEntity createCategory(@RequestBody CategoryDto categoryDto, @PathVariable String username){
-        if(checkIfAdmin(username)) {
+    public ResponseEntity createCategory(@RequestBody CategoryDto categoryDto){
             Category category = new Category(categoryDto.getName());
             if (categoryService.notExists(categoryDto.getName())) {
                 categoryService.persist(category);
                 return new ResponseEntity<>(HttpStatus.CREATED);
             }
-        }
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    @DeleteMapping(value = "/api/{username}/categories/delete/{id}")
+    @DeleteMapping(value = "/api/categories/delete/{id}")
     @PreAuthorize("hasAuthority('admin')")
-    public ResponseEntity deleteCategory(@PathVariable String username, @PathVariable Integer id){
-        System.out.println(id + "==================");
-        if(checkIfAdmin(username)) {
+    public ResponseEntity deleteCategory(@PathVariable Integer id){
             if (categoryService.findById(id)!=null) {
                 categoryService.delete(categoryService.findById(id));
                 return new ResponseEntity<>(HttpStatus.OK);
             }
-        }
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    @PutMapping(value = "/api/{username}/categories/update/{id}", consumes = "application/json", produces = "application/json")
+    @PutMapping(value = "/api/categories/update/{id}", consumes = "application/json", produces = "application/json")
     @PreAuthorize("hasAuthority('admin')")
-    public ResponseEntity updateCategory(@PathVariable Integer id, @PathVariable String username, @RequestBody CategoryDto categoryDto){
-        if(checkIfAdmin(username)) {
+    public ResponseEntity updateCategory(@PathVariable Integer id, @RequestBody CategoryDto categoryDto){
             if (categoryService.findById(id)!=null) {
                 categoryService.updateCategoryFromDto(categoryDto, id);
                 return new ResponseEntity<>(HttpStatus.OK);
             }
-        }
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    @GetMapping(value ="/api/{username}/categories")
+    @GetMapping(value ="/api/categories")
     @PreAuthorize("hasAuthority('admin')")
-    public List<CategoryDto> getCategoryList(@PathVariable String username){
+    public List<CategoryDto> getCategoryList(){
         List<CategoryDto> cats = new ArrayList<>();
-        if(checkIfAdmin(username)) {
             for(Category c: categoryService.findAll()){
                 CategoryDto dto = new CategoryDto();
                 dto.setName(c.getName());
                 dto.setId(c.getId());
                 cats.add(dto);
             }
-        }
         return cats;
-    }
-
-    public Boolean checkIfAdmin(String username){
-        if(Objects.equals(employeeService.findByUsername(username).getClass().getAnnotation(DiscriminatorValue.class).value(), "EMPLOYEE")){
-            Employee emp = (Employee) employeeService.findByUsername(username);
-            return emp.getRole().getName().equals("admin");
-        }
-        return false;
     }
 }

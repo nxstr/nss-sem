@@ -1,10 +1,14 @@
 package cz.cvut.fel.nss.chatgc.dto;
 
+import java.util.List;
+
 public class MessageDto {
     String messageType;
     String sender;
     String content;
     String chat;
+    //List<CategoryDto> categories (прямо як в RoleDto)
+    List<CategoryDto> categories;
 
     public MessageDto() {
     }
@@ -44,6 +48,14 @@ public class MessageDto {
 
     public void setMessageType(String messageType) {
         this.messageType = messageType;
+    }
+
+    public List<CategoryDto> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<CategoryDto> categories) {
+        this.categories = categories;
     }
 
     @Override

@@ -1,10 +1,13 @@
 package cz.cvut.fel.nss.chatgc.controller;
 
 import cz.cvut.fel.nss.chatgc.constants.KafkaConstants;
+import cz.cvut.fel.nss.chatgc.dto.CategoryDto;
 import cz.cvut.fel.nss.chatgc.dto.ChatDTO;
 import cz.cvut.fel.nss.chatgc.dto.MessageDto;
+import cz.cvut.fel.nss.chatgc.model.Category;
 import cz.cvut.fel.nss.chatgc.model.Chat;
 import cz.cvut.fel.nss.chatgc.model.messages.Message;
+import cz.cvut.fel.nss.chatgc.model.messages.Request;
 import cz.cvut.fel.nss.chatgc.model.messages.Response;
 import cz.cvut.fel.nss.chatgc.model.users.Employee;
 import cz.cvut.fel.nss.chatgc.model.users.Player;
@@ -48,68 +51,53 @@ public class ChatController {
             for(Chat chat:employeeService.findAllChats((Employee) employeeService.findByUsername(username)).stream().filter(d -> d.getPlayer()!=null).toList()){
                 Message m = null;
                 MessageDto dto = new MessageDto();
-                if(!chat.getMessages().isEmpty()){
-                    chat.getMessages().sort(new Comparator<Message>() {
-                        public int compare(Message o1, Message o2) {
-                            return o1.getDate().compareTo(o2.getDate());
-                        }
-                    });
-                    m = chat.getMessages().get(chat.getMessages().size()-1);
-                    dto.setContent(m.getDataPath());
-                    dto.setChat(chat.getPlayerUsername());
-                    dto.setMessageType("message");
-                    if(Objects.equals(m.getClass().getAnnotation(DiscriminatorValue.class).value(), "RESPONSE")){
-                        Response r = (Response) m;
-                        if(r.getEmployee()!=null) {
-                            dto.setSender(r.getEmployee().getUsername());
-                        }else{
-                            dto.setSender("deleted");
-                        }
-                        if(username.equals(dto.getChat())){
-                            dto.setSender("Employee");
-                        }
-                    }else{
-                        dto.setSender(chat.getPlayerUsername());
-                    }
-                }
-
-
-               chats.add(new ChatDTO(chat.isOpen(), chat.getPlayerUsername(), chat.getId(), chat.getCategories(), chat.getFolders(), dto));
+                chats.add(setUpDto(chat, m, dto, username));
             }
 
         }else{
             Message m = null;
             MessageDto dto = new MessageDto();
             if(chatService.findByPlayer(username)!=null) {
-                if (!chatService.findByPlayer(username).getMessages().isEmpty()) {
-                    chatService.findByPlayer(username).getMessages().sort(new Comparator<Message>() {
-                        public int compare(Message o1, Message o2) {
-                            return o1.getDate().compareTo(o2.getDate());
-                        }
-                    });
-                    m = chatService.findByPlayer(username).getMessages().get(chatService.findByPlayer(username).getMessages().size() - 1);
-                    dto.setContent(m.getDataPath());
-                    dto.setChat(chatService.findByPlayer(username).getPlayerUsername());
-                    dto.setMessageType("message");
-                    if (Objects.equals(m.getClass().getAnnotation(DiscriminatorValue.class).value(), "RESPONSE")) {
-                        Response r = (Response) m;
-                        if (r.getEmployee() != null) {
-                            dto.setSender(r.getEmployee().getUsername());
-                        } else {
-                            dto.setSender("deleted");
-                        }
-                        if (username.equals(dto.getChat())) {
-                            dto.setSender("Employee");
-                        }
-                    } else {
-                        dto.setSender(chatService.findByPlayer(username).getPlayerUsername());
-                    }
-                }
-                chats.add(new ChatDTO(chatService.findByPlayer(username).isOpen(), chatService.findByPlayer(username).getPlayerUsername(), chatService.findByPlayer(username).getId(), chatService.findByPlayer(username).getCategories(), chatService.findByPlayer(username).getFolders(), dto));
+                Chat chat = chatService.findByPlayer(username);
+                chats.add(setUpDto(chat, m, dto, username));
 
             }
         }
         return chats;
+    }
+
+    private ChatDTO setUpDto(Chat chat, Message m, MessageDto dto, String username){
+        if (!chat.getMessages().isEmpty()) {
+            chat.getMessages().sort(new Comparator<Message>() {
+                public int compare(Message o1, Message o2) {
+                    return o1.getDate().compareTo(o2.getDate());
+                }
+            });
+            m = chat.getMessages().get(chat.getMessages().size() - 1);
+            dto.setContent(m.getDataPath());
+            dto.setChat(chat.getPlayerUsername());
+            dto.setMessageType("message");
+            if (Objects.equals(m.getClass().getAnnotation(DiscriminatorValue.class).value(), "RESPONSE")) {
+                Response r = (Response) m;
+                if (r.getEmployee() != null) {
+                    dto.setSender(r.getEmployee().getUsername());
+                } else {
+                    dto.setSender("deleted");
+                }
+                if (username.equals(dto.getChat())) {
+                    dto.setSender("Employee");
+                }
+            } else {
+                dto.setSender(chat.getPlayerUsername());
+                dto.setCategories(new ArrayList<>());
+                Request r = (Request) m;
+                for(Category c: r.getCategories()){
+                    CategoryDto d = new CategoryDto(c.getId(), c.getName());
+                    dto.getCategories().add(d);
+                }
+            }
+        }
+        return new ChatDTO(chat.isOpen(), chat.getPlayerUsername(), chat.getId(), chat.getCategories(), chat.getFolders(), dto);
     }
 
 
@@ -139,6 +127,12 @@ public class ChatController {
                 }
             }else{
                 messageDto.setSender(chatService.findById(id).getPlayerUsername());
+                messageDto.setCategories(new ArrayList<>());
+                Request r = (Request) m;
+                for(Category c: r.getCategories()){
+                    CategoryDto d = new CategoryDto(c.getId(), c.getName());
+                    messageDto.getCategories().add(d);
+                }
             }
             messages.add(messageDto);
         }

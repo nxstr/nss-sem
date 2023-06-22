@@ -10,4 +10,5 @@ public class EmployeeDTO {
     String password;
     String email;
     Integer roleId;
+    String roleName;
 }

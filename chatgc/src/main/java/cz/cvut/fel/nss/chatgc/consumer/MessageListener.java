@@ -2,9 +2,11 @@ package cz.cvut.fel.nss.chatgc.consumer;
 
 
 import cz.cvut.fel.nss.chatgc.constants.KafkaConstants;
+import cz.cvut.fel.nss.chatgc.dto.CategoryDto;
 import cz.cvut.fel.nss.chatgc.dto.MessageDto;
 import cz.cvut.fel.nss.chatgc.events.CategoryEvent;
 import cz.cvut.fel.nss.chatgc.events.EmployeeEvent;
+import cz.cvut.fel.nss.chatgc.model.Category;
 import cz.cvut.fel.nss.chatgc.model.Chat;
 import cz.cvut.fel.nss.chatgc.model.Role;
 import cz.cvut.fel.nss.chatgc.model.messages.Message;
@@ -12,6 +14,7 @@ import cz.cvut.fel.nss.chatgc.model.messages.MessageType;
 import cz.cvut.fel.nss.chatgc.model.messages.Request;
 import cz.cvut.fel.nss.chatgc.model.messages.Response;
 import cz.cvut.fel.nss.chatgc.model.users.Employee;
+import cz.cvut.fel.nss.chatgc.service.CategoryService;
 import cz.cvut.fel.nss.chatgc.service.ChatService;
 import cz.cvut.fel.nss.chatgc.service.RoleService;
 import cz.cvut.fel.nss.chatgc.service.utils.DefaultEmailService;
@@ -39,16 +42,18 @@ public class MessageListener {
     private final ChatService chatService;
     private final DefaultEmailService emailService;
     private final RoleService roleService;
+    private final CategoryService categoryService;
 
     private ArrayList<String> onlineEmps = new ArrayList<>();
 
-    public MessageListener(EmployeeService employeeService, RequestService requestService, ResponseService responseService, ChatService chatService, DefaultEmailService emailService, RoleService roleService) {
+    public MessageListener(EmployeeService employeeService, RequestService requestService, ResponseService responseService, ChatService chatService, DefaultEmailService emailService, RoleService roleService, CategoryService categoryService) {
         this.employeeService = employeeService;
         this.requestService = requestService;
         this.responseService = responseService;
         this.chatService = chatService;
         this.emailService = emailService;
         this.roleService = roleService;
+        this.categoryService = categoryService;
     }
 
     @KafkaListener(
@@ -65,10 +70,26 @@ public class MessageListener {
             r.setDate(LocalDateTime.now());
             r.setType(MessageType.TEXT);
             responseService.persist(r);
-            updateChat(message.getChat(), r);
+            Chat chat = updateChat(message.getChat(), r);
+            chatService.update(chat);
         }else{
-            Request r = new Request(message.getContent(), LocalDateTime.now(), chatService.findByPlayer(message.getChat()), MessageType.TEXT, new HashSet<>());
-            updateChat(message.getChat(), r);
+            Set<Category> cats = new HashSet<>();
+            for(CategoryDto c: message.getCategories()){
+                Category category = categoryService.findById(c.getId());
+                if(category!=null){
+                    cats.add(category);
+                    System.out.println(category.getName());
+                }
+            }
+            Request r = new Request(message.getContent(), LocalDateTime.now(), chatService.findByPlayer(message.getChat()), MessageType.TEXT, cats);
+
+            Chat chat = updateChat(message.getChat(), r);
+            if(chat.getCategories()==null){
+                chat.setCategories(new HashSet<>());
+            }else{
+                chat.getCategories().addAll(cats);
+            }
+            chatService.update(chat);
         }
 
         for(String i: onlineEmps){
@@ -83,13 +104,13 @@ public class MessageListener {
     }
 
 
-    public void updateChat(String chatName, Message r){
+    public Chat updateChat(String chatName, Message r){
         Chat chat = chatService.findByPlayer(chatName);
         ArrayList<Message> mess = chat.getMessages();
         mess.add(r);
         chat.setMessages(mess);
-        chatService.update(chat);
         System.out.println("chat updated: " + chat);
+        return chat;
     }
 
 
