@@ -74,11 +74,13 @@ public class MessageListener {
             chatService.update(chat);
         }else{
             Set<Category> cats = new HashSet<>();
-            for(CategoryDto c: message.getCategories()){
-                Category category = categoryService.findById(c.getId());
-                if(category!=null){
-                    cats.add(category);
-                    System.out.println(category.getName());
+            if(message.getCategories()!=null && !message.getCategories().isEmpty()) {
+                for (CategoryDto c : message.getCategories()) {
+                    Category category = categoryService.findById(c.getId());
+                    if (category != null) {
+                        cats.add(category);
+                        System.out.println(category.getName());
+                    }
                 }
             }
             Request r = new Request(message.getContent(), LocalDateTime.now(), chatService.findByPlayer(message.getChat()), MessageType.TEXT, cats);
@@ -126,7 +128,8 @@ public class MessageListener {
             if (!onlineEmps.contains(message.getSender())){
                 onlineEmps.add(message.getSender());
             }
-            message.setContent("employee");
+            Employee e = (Employee) employeeService.findByUsername(message.getSender());
+            message.setContent(e.getRole().getName());
         }else{
             message.setContent("player");
         }

@@ -105,11 +105,10 @@ const Categories = ({cats, user, onSendMessageCat}) => {
 
     return (
         <div className="cats">
-
+            <Input onSendMessage={onSendMess}/>
                 <ul className="chat-list">
                     {cats.map(cat => renderCategory(cat))}
                 </ul>
-            <Input onSendMessage={onSendMess}/>
         </div>
     )
 

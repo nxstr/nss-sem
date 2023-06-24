@@ -39,9 +39,13 @@ public class RoleController {
     @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity updateRole(@RequestBody RoleDto dto){
         try{
+            if(dto.getName().equals("admin")){
+                throw new RoleException("admin role is not allowed to modify");
+            }
             roleService.changeRoleFromDto(dto);
             return new ResponseEntity<>(HttpStatus.OK);
         }catch (RoleException e){
+            System.out.println(e.getMessage());
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }
@@ -51,6 +55,9 @@ public class RoleController {
     public ResponseEntity deleteRole(@PathVariable Integer id){
         Role role = roleService.findById(id).orElse(null);
         if(role!=null) {
+            if(role.getName().equals("admin")){
+                throw new RoleException("admin role is not allowed to modify");
+            }
             try {
                 roleService.delete(role);
                 return new ResponseEntity<>(HttpStatus.OK);

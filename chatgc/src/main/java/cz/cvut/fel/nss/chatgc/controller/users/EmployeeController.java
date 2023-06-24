@@ -38,6 +38,7 @@ public class EmployeeController {
             employeeService.create(e);
             return new ResponseEntity<>(HttpStatus.OK);
         }catch (RoleException | ExistsException e){
+            System.out.println(e.getMessage());
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -53,6 +54,7 @@ public class EmployeeController {
             dto.setEmail(employee.getEmail());
             dto.setRoleId(employee.getRole().getId());
             dto.setRoleName(employee.getRole().getName());
+            dto.setId(employee.getId());
         }
         return dto;
     }
@@ -68,6 +70,7 @@ public class EmployeeController {
             dto.setEmail(e.getEmail());
             dto.setRoleId(e.getRole().getId());
             dto.setRoleName(e.getRole().getName());
+            dto.setId(e.getId());
             emps.add(dto);
         }
         return emps;
@@ -107,8 +110,21 @@ public class EmployeeController {
         final AuthenticationToken auth = (AuthenticationToken) principal;
         Integer id = auth.getPrincipal().getAccount().getId();
         Employee acc = employeeService.findById(id);
-        EmployeeDTO dto = new EmployeeDTO(acc.getUsername(), "", acc.getEmail(), acc.getRole().getId(), acc.getRole().getName());
+        EmployeeDTO dto = new EmployeeDTO(acc.getUsername(), "", acc.getEmail(), acc.getRole().getId(), acc.getRole().getName(), acc.getId());
         return dto;
+    }
+
+    @PutMapping(value = "api/employee/current/edit")
+    @PreAuthorize("hasAuthority('EMPLOYEE')")
+    public ResponseEntity editCurrent(Principal principal, @RequestBody EmployeeDTO dto){
+        try {
+            final AuthenticationToken auth = (AuthenticationToken) principal;
+            Integer id = auth.getPrincipal().getAccount().getId();
+            employeeService.updateEmployeeFromDto(dto, id);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch (RoleException | ExistsException e){
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
 

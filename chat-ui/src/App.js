@@ -19,6 +19,8 @@ import AllChats from "./components/AllChats";
 import Input from "./components/Input";
 import Messages from "./components/Messages";
 import Categories from "./components/Categories";
+import AdminPanel from "./components/AdminPanel";
+import Account from "./components/Account";
 
 
 
@@ -35,6 +37,9 @@ const App = () => {
   const [isShown, setIsShown] = useState(false);
   const [hasChat, setHasChat] = useState(false);
   const [isReg, setIsReg] = useState(false);
+  const [showAcc, setShowAcc] = useState(false);
+  const [currentAcc, setCurrentAcc] = useState([]);
+  const [isPlayer, setPlayer] = useState(true);
   let path = "/home"
 
 
@@ -75,26 +80,26 @@ const App = () => {
 
   }
 
-  let onSendMessageCat = () => {
-        categoryAPI.getCats(user.username).then(res => {
-          setCats(res.data);
-          return (<Categories cats={cats}
-                              user={user}
-                              onSendMessageCat={onSendMessageCat}/>);
-        }).catch(() => {
-      console.log('Error Occured while sending message to api');
-    })
-  }
+  // let onSendMessageCat = () => {
+  //       categoryAPI.getCats(user.username).then(res => {
+  //         setCats(res.data);
+  //         return (<Categories cats={cats}
+  //                             user={user}
+  //                             onSendMessageCat={onSendMessageCat}/>);
+  //       }).catch(() => {
+  //     console.log('Error Occured while sending message to api');
+  //   })
+  // }
 
-  let getCats = () =>{
-    categoryAPI.getCats(user.username).then(res=> {
-      setCats(res.data);
-      console.log("all cats ",res.data)
-    }).catch(() => {
-      console.log('Error Occured while getting cats to api');
-    })
-
-  }
+  // let getCats = () =>{
+  //   categoryAPI.getCats(user.username).then(res=> {
+  //     setCats(res.data);
+  //     console.log("all cats ",res.data)
+  //   }).catch(() => {
+  //     console.log('Error Occured while getting cats to api');
+  //   })
+  //
+  // }
 
   let onMessageReceived = (msg) => {
     console.log('New Message Received!!', msg);
@@ -117,8 +122,13 @@ const App = () => {
       getChats(user);
     }else if(msg.messageType==="login"){
       user.type = msg.content;
+      if(user.type!=="player"){
+        setPlayer(false);
+      }else{
+        setPlayer(true);
+      }
       console.log(user.type, "typeeeeeeeeeeeeee")
-      if(user.type==="employee"){
+      if(user.type==="admin"){
         setEmp(true);
       }
     }
@@ -182,6 +192,7 @@ const App = () => {
       chatId: id,
       chatName: name
     })
+    setShowAcc(false);
     setIsShown(false);
     // window.location.replace(`http://localhost:3000/allChats/${id}`)
     chatAPI.getMessages(id, user.username).then(res =>{
@@ -200,6 +211,7 @@ const App = () => {
       chatName: name
     })
     setIsShown(false);
+    setShowAcc(false);
     chatAPI.getMessages(id, user.username).then(res =>{
       console.log(res.data)
       setMessages([].concat(res.data))
@@ -216,8 +228,9 @@ const App = () => {
   }
 
   let loadCats = () =>{
-    getCats();
+    // getCats();
     setIsShown(true);
+    setShowAcc(false);
     setActiveChat(null);
     path = "/home/cats";
   }
@@ -236,6 +249,7 @@ const App = () => {
     chatAPI.registerPlayer(username, password, email).then(() => {
       setIsReg(false);
       setHasChat(false);
+      setShowAcc(false);
     }).catch(() => {
       console.log('Error Occured while getting messages to api');
     })
@@ -248,10 +262,25 @@ const App = () => {
       setChats([]);
       setHasChat(false);
       setMessages([])
+      setEmp(false);
+      setShowAcc(false);
       console.log("logout")
     }).catch(() => {
       console.log('Error Occured while getting messages to api');
     })
+  }
+
+  let loadCurrent = () => {
+    setShowAcc(true);
+    setIsShown(false);
+    if(user.type!=="player"){
+      chatAPI.getCurrentEmployee().then(res => {
+        setCurrentAcc(res.data);
+        console.log(res.data.username);
+      }).catch(() => {
+        console.log('Error Occured while getting messages to api');
+      })
+    }
   }
 
   return (
@@ -271,16 +300,27 @@ const App = () => {
               debug={false}
 
             />
-            <Button onClick={logout}>
-              Logout
-            </Button>
-            {!!isEmp &&(
-                <>
-                  <Button onClick={loadCats} className="CatsButton">
-                    Categories
-                  </Button>
-                  </>
-                )}
+            <ul className="mainButton">
+              <li>
+                <Button onClick={logout} >
+                  Logout
+                </Button>
+              </li>
+              {!!isEmp &&(
+                  <li>
+                    <Button onClick={loadCats}>
+                      Admin Panel
+                    </Button>
+                  </li>
+              )}
+              <li>
+                <Button onClick={loadCurrent}>
+                  Account
+                </Button>
+              </li>
+            </ul>
+
+
         <div className="main">
             {!!hasChat?(
                 <>
@@ -315,29 +355,27 @@ const App = () => {
                       )}
                 </>
             ) :
-                <Button onClick={createChat}>
-                  Create Chat
-                </Button>
-            }
-            {/*{!!isEmp &&(*/}
-            {/*    <>*/}
-            {/*      <Button onClick={loadCats} className="CatsButton">*/}
-            {/*        Categories*/}
-            {/*      </Button>*/}
+                <>
+                  {isPlayer && (
+                      <Button onClick={createChat}>
+                        Create Chat
+                      </Button>
+                  )}
+                </>
 
+
+            }
                   {isShown && (
                       <Router>
                         <Routes>
-                          <Route path="/" element={<Categories cats = {cats}
-                                                                        user={user}
-                          onSendMessageCat={onSendMessageCat}/>} />
+                          <Route path="/" element={<AdminPanel user = {user}/>} />
                           <Route path="/" element={<Navigate replace to="/" />} />
                         </Routes>
                       </Router>
                   )}
-            {/*    </>*/}
-            {/*)*/}
-            {/*}*/}
+          {showAcc && (
+              <Account currentAcc={currentAcc} type = {user.type}/>
+          )}
           </div>
             </>
         ) :
@@ -348,8 +386,6 @@ const App = () => {
                 <LoginForm onSubmit={handleLoginSubmit} onSubmitReg={handleReg} />
             }
           </>
-
-
       }
     </div>
   )

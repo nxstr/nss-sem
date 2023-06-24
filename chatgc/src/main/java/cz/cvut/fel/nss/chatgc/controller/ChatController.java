@@ -91,9 +91,11 @@ public class ChatController {
                 dto.setSender(chat.getPlayerUsername());
                 dto.setCategories(new ArrayList<>());
                 Request r = (Request) m;
-                for(Category c: r.getCategories()){
-                    CategoryDto d = new CategoryDto(c.getId(), c.getName());
-                    dto.getCategories().add(d);
+                if(r.getCategories()!=null && !r.getCategories().isEmpty()) {
+                    for (Category c : r.getCategories()) {
+                        CategoryDto d = new CategoryDto(c.getId(), c.getName());
+                        dto.getCategories().add(d);
+                    }
                 }
             }
         }

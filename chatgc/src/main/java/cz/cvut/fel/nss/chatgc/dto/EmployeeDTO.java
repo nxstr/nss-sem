@@ -11,4 +11,5 @@ public class EmployeeDTO {
     String email;
     Integer roleId;
     String roleName;
+    Integer id;
 }

@@ -205,8 +205,12 @@ public class RoleService {
 
     @Transactional
     public void changeRoleParent(Role role, Role newParent){
-        removeRoleParent(role);
-        addRoleParent(role, newParent);
+        if(role.getParentRole()!=null) {
+            removeRoleParent(role);
+        }
+        if(role.getParentRole()==null && newParent!=null) {
+            addRoleParent(role, newParent);
+        }
     }
 
     @Transactional
@@ -278,6 +282,9 @@ public class RoleService {
                 changeRoleParent(roleNotUpdated, parent);
             }
         }
+        if(roleNotUpdated.getParentRole()==null && parent!=null){
+            changeRoleParent(roleNotUpdated, parent);
+        }
 
         if(!cats.equals(roleNotUpdated.getCategories())){
             Set<Category> forRemove = new HashSet<>();
@@ -308,6 +315,7 @@ public class RoleService {
     }
 
     public List<Role> findAll(){
+//        List<Role> roles = new ArrayList<>(roleRepository.findAll().stream().filter(d -> !d.getName().equals("admin")).toList());
         return roleRepository.findAll();
     }
 }

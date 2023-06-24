@@ -47,6 +47,18 @@ const chatAPI = {
     },
     logout: () => {
         return api.get(`logout`);
+    },
+    getCurrentEmployee:() => {
+        return api.get(`employee/current`);
+    },
+    updateCurrent:(username, email, password, id) => {
+        let dto = {
+            "username": username,
+            "password": password,
+            "email": email,
+            "id": id
+        }
+        return api.put(`employee/current/edit`, dto);
     }
 }
 
