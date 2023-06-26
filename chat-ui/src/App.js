@@ -21,6 +21,7 @@ import Messages from "./components/Messages";
 import Categories from "./components/Categories";
 import AdminPanel from "./components/AdminPanel";
 import Account from "./components/Account";
+import CategorySelect from "./components/CategorySelect";
 
 
 
@@ -40,6 +41,7 @@ const App = () => {
   const [showAcc, setShowAcc] = useState(false);
   const [currentAcc, setCurrentAcc] = useState([]);
   const [isPlayer, setPlayer] = useState(true);
+  const [selectedOptions, setSelectedOptions] = useState([]);
   let path = "/home"
 
 
@@ -136,7 +138,17 @@ const App = () => {
   }
 
   let onSendMessage = (msgText) => {
-    chatAPI.sendMessage(user.username, msgText, activeChat).then(res => {
+    let arr = [];
+    console.log(selectedOptions, "aaaaaaaaaaaaa");
+    for(let i=0; i<selectedOptions.length; i++){
+      for(let j=0; j<cats.length; j++){
+        if(selectedOptions[i].toString()===cats[j].id.toString()){
+          arr.push(cats[i]);
+        }
+      }
+    }
+    console.log(arr);
+    chatAPI.sendMessage(user.username, msgText, activeChat, arr).then(res => {
       console.log('Sent', res);
     }).catch(() => {
       console.log('Error Occured while sending message to api');
@@ -184,6 +196,13 @@ const App = () => {
     setIsReg(true);
   }
 
+  let getCats = () => {
+    categoryAPI.getCats(user.username).then(res => {
+      setCats(res.data);
+    }).catch(err=>{
+      console.log('Error Occured while sending message to api', err);
+    });
+  }
 
 
   let handleChatId = (id, name) =>{
@@ -192,6 +211,9 @@ const App = () => {
       chatId: id,
       chatName: name
     })
+    if(user.type==="player"){
+      getCats();
+    }
     setShowAcc(false);
     setIsShown(false);
     // window.location.replace(`http://localhost:3000/allChats/${id}`)
@@ -210,6 +232,9 @@ const App = () => {
       chatId: id,
       chatName: name
     })
+    if(user.type==="player"){
+      getCats();
+    }
     setIsShown(false);
     setShowAcc(false);
     chatAPI.getMessages(id, user.username).then(res =>{
@@ -283,6 +308,10 @@ const App = () => {
     }
   }
 
+  let submitCats = (value) => {
+    setSelectedOptions(value);
+  }
+
   return (
     <div className="App">
       {!!user ?
@@ -344,6 +373,9 @@ const App = () => {
                                       chats={chats}
                                       onSubmitChat = {handleChatIdFromMess}
                                   />
+                                  {user.type==="player" &&(
+                                      <CategorySelect categories={cats} submitCats={submitCats}/>
+                                      )}
                                   <Input onSendMessage={onSendMessage}
                                          categoryCreate={categoryCreate}/>
                                 </div>} />

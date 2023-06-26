@@ -5,6 +5,7 @@ import TextField from '@material-ui/core/TextField';
 const Input = ({ onSendMessage}) => {
     const [text, setText] = useState("")
 
+
     let onChange = (e) => {
         setText(e.target.value)
     }
@@ -13,6 +14,8 @@ const Input = ({ onSendMessage}) => {
         setText("")
         onSendMessage(text);
     }
+
+
 
     return (
         <div className="message-input">

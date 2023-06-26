@@ -14,11 +14,12 @@ const chatAPI = {
       return api.get(`allChats/${username}`);
     },
 
-    sendMessage: (username, text, chat) => {
+    sendMessage: (username, text, chat, cats) => {
         let msg = {
             messageType: "message",
             sender: username,
-            content: text
+            content: text,
+            categories: cats
         }
         console.log(chat.chatId)
         return api.post(`send/${chat.chatId}`, msg);
@@ -44,6 +45,7 @@ const chatAPI = {
             email: email
         }
         return api.post(`register/player`, msg);
+        // return api.post(`reg/emp`);
     },
     logout: () => {
         return api.get(`logout`);

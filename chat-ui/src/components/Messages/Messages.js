@@ -6,9 +6,7 @@ const Messages = ({ messages, currentUser, chats, onSubmitChat }) => {
     const bottomRef = useRef(null);
     console.log("in messages ",chats)
 
-    useEffect(() => {
-        // 👇️ scroll to bottom every time messages change
-        bottomRef.current?.scrollIntoView({behavior: 'instant'});
+    useEffect(() => {bottomRef.current?.scrollIntoView({behavior: 'instant'});
     }, [messages]);
 
     let renderMessage = (message) => {
@@ -76,8 +74,7 @@ const Messages = ({ messages, currentUser, chats, onSubmitChat }) => {
         );
     }
 
-    return (
-        <div className="messagecomp">
+    return (<div className="messagecomp">
             {/*<ul className="chats-list">*/}
             {/*    {chats.map(m=>renderChat(m))}*/}
             {/*</ul>*/}

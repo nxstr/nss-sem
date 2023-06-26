@@ -49,11 +49,11 @@ const Roles =({categories, roles, submit}) => {
     let openNew = () =>{
         setIsNew(true);
         if(roles.length!==0){
-            setSelected(roles[0].id);
-            setSelectedParentName("");
-            setSavedCats([]);
-            setCats(roles[0].categoryDtoList);
-            setRender(true);
+                setSelected(roles[0].id);
+                setSelectedParentName("");
+                setSavedCats([]);
+                setCats(roles[0].categoryDtoList);
+                setRender(true);
         }
     }
 
@@ -70,11 +70,11 @@ const Roles =({categories, roles, submit}) => {
             setName(res.data.name);
             setSavedCats(res.data.categoryDtoList);
             if(id!==roles[0].id){
-                setSelected(roles[0].id);
-                setCats(roles[0].categoryDtoList);
+                    setSelected(roles[0].id);
+                    setCats(roles[0].categoryDtoList);
             }else{
-                setSelected(roles[1].id);
-                setCats(roles[1].categoryDtoList);
+                    setSelected(roles[1].id);
+                    setCats(roles[1].categoryDtoList);
             }
             // setSelected(res.data.parentId);
             let arr = [];

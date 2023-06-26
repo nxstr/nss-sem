@@ -59,7 +59,6 @@ public class CategoryController {
     }
 
     @GetMapping(value ="/api/categories")
-    @PreAuthorize("hasAuthority('admin')")
     public List<CategoryDto> getCategoryList(){
         List<CategoryDto> cats = new ArrayList<>();
             for(Category c: categoryService.findAll()){

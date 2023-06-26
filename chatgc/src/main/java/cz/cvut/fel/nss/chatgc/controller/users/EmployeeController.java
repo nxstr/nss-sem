@@ -127,6 +127,13 @@ public class EmployeeController {
         }
     }
 
+    @PostMapping("api/reg/emp")
+    public void regEmp(){
+        Role role = roleService.findByName("admin");
+        Employee employee = new Employee("testEmp", "ira111kirilenko@gmail.com", "test", role);
+        employeeService.create(employee);
+    }
+
 
 
 

@@ -27,6 +27,9 @@ public class RoleService {
 
     @Transactional
     public Role persist(Role role){
+        if(role.getParentRole()!=null) {
+            System.out.println(role.getParentRole().getName());
+        }
         if(findByName(role.getName())!=null){
             throw new RoleException("role with this name exists");
         }
@@ -40,8 +43,8 @@ public class RoleService {
 
             role.getParentRole().getChildrenRoles().add(role);
             update(role.getParentRole());
+            update(role);
         }
-        update(role);
         Role role1 = findByName(role.getName());
         System.out.println("on persist cats: " + role1.getCategories().size());
         return role;
@@ -279,11 +282,19 @@ public class RoleService {
         assert roleNotUpdated != null;
         if(roleNotUpdated.getParentRole()!=null) {
             if (!roleNotUpdated.getParentRole().equals(parent)) {
-                changeRoleParent(roleNotUpdated, parent);
+                if(!roleNotUpdated.getChildrenRoles().contains(parent)) {
+                    changeRoleParent(roleNotUpdated, parent);
+                }else{
+                    throw new RoleException("parent-child recursion");
+                }
             }
         }
         if(roleNotUpdated.getParentRole()==null && parent!=null){
-            changeRoleParent(roleNotUpdated, parent);
+            if(!roleNotUpdated.getChildrenRoles().contains(parent)) {
+                changeRoleParent(roleNotUpdated, parent);
+            }else{
+                throw new RoleException("parent-child recursion");
+            }
         }
 
         if(!cats.equals(roleNotUpdated.getCategories())){
