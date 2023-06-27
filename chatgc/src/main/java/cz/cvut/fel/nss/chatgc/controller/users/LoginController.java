@@ -1,8 +1,9 @@
 package cz.cvut.fel.nss.chatgc.controller.users;
 
+import cz.cvut.fel.nss.chatgc.constants.KafkaConstants;
 import cz.cvut.fel.nss.chatgc.dto.MessageDto;
 import cz.cvut.fel.nss.chatgc.security.model.AuthenticationToken;
-import cz.cvut.fel.nss.chatgc.service.utils.LoginService;
+import cz.cvut.fel.nss.chatgc.service.impl.utils.LoginService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.messaging.simp.user.SimpUser;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @RestController
 public class LoginController {
@@ -29,10 +33,12 @@ public class LoginController {
     private final LoginService loginService;
     @Autowired
     private KafkaTemplate<String, MessageDto> kafkaTemplate;
+    private final SimpUserRegistry simpUserRegistry;
 
     @Autowired
-    public LoginController(LoginService loginService) {
+    public LoginController(LoginService loginService, SimpUserRegistry simpUserRegistry) {
         this.loginService = loginService;
+        this.simpUserRegistry = simpUserRegistry;
     }
 
     @PostMapping(value = "/api/login", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -55,12 +61,12 @@ public class LoginController {
             final AuthenticationToken auth = (AuthenticationToken) principal;
             String name = auth.getPrincipal().getAccount().getUsername();
 //            SecurityUtils.setCurrentUser(null);
-            SecurityContext context = SecurityContextHolder.getContext();
-            SecurityContextHolder.clearContext();
-            context.setAuthentication(null);
+//            SecurityContext context = SecurityContextHolder.getContext();
+//            SecurityContextHolder.clearContext();
+//            context.setAuthentication(null);
             MessageDto m = new MessageDto("logout", name);
             m.setContent("logout-action");
-            kafkaTemplate.send("logout-topic", m);
+            kafkaTemplate.send(KafkaConstants.KAFKA_TOPIC_LOGOUT, m);
             return new ResponseEntity<>(HttpStatus.OK);
         }catch (NullPointerException | BadCredentialsException e){
             System.out.println(e.getMessage());
@@ -73,7 +79,7 @@ public class LoginController {
     public void loginMessage(@RequestBody MessageDto m) {
         try {
             m.setContent("logged-in-action/" + m.getContent());
-            kafkaTemplate.send("login-topic", m).get();
+            kafkaTemplate.send(KafkaConstants.KAFKA_TOPIC_LOGIN, m).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }

@@ -6,7 +6,6 @@ const CategorySelect = ({categories, submitCats}) => {
     let handleChange = (e) => {
         let value = Array.from(e.target.selectedOptions, option => option.value);
         setSelectedOptions(value);
-        console.log(value);
         submitCats(value);
     }
 
@@ -16,7 +15,7 @@ const CategorySelect = ({categories, submitCats}) => {
 
     return (
         <>
-            <select onChange={handleChange} value={selectedOptions} multiple={true} >
+            <select onChange={handleChange} value={selectedOptions} multiple={true} className="catSelect">
                 {categories.map(option =>
                     renderCategory(option)
                 )}

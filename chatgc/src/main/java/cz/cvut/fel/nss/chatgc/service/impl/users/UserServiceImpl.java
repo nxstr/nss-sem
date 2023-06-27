@@ -1,8 +1,9 @@
-package cz.cvut.fel.nss.chatgc.service.users;
+package cz.cvut.fel.nss.chatgc.service.impl.users;
 
 import cz.cvut.fel.nss.chatgc.exceptions.ExistsException;
 import cz.cvut.fel.nss.chatgc.model.users.User;
 import cz.cvut.fel.nss.chatgc.repository.users.UserRepository;
+import cz.cvut.fel.nss.chatgc.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
-public abstract class UserService<T extends User> {
+public abstract class UserServiceImpl<T extends User> implements UserService {
 
     private final UserRepository<T, Integer> userDao;
     private final ApplicationEventPublisher publisher;
@@ -21,14 +22,14 @@ public abstract class UserService<T extends User> {
 
 
     @Transactional
-    public void persist(T user){
+    public void persist(User user){
         user.encodePassword(encoder);
         userDao.save(user);
         System.out.println("saved");
     }
 
     @Transactional
-    public void update(T user){
+    public void update(User user){
         userDao.save(user);
         System.out.println("updates");
     }

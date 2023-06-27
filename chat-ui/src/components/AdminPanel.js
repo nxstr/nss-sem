@@ -14,7 +14,6 @@ const AdminPanel =({user}) => {
     let getCats = () =>{
         categoryAPI.getCats(user.username).then(res=> {
             setCats(res.data);
-            console.log("all cats ",res.data)
         }).catch(() => {
             console.log('Error Occured while getting cats to api');
         })
@@ -24,7 +23,6 @@ const AdminPanel =({user}) => {
     let getRoles = () =>{
         categoryAPI.getRoles().then(res=> {
             setRoles(res.data);
-            console.log("all cats ",res.data)
         }).catch(() => {
             console.log('Error Occured while getting roles to api');
         })
@@ -33,7 +31,6 @@ const AdminPanel =({user}) => {
     let getEmps = () => {
         categoryAPI.getEmps().then(res=> {
             setEmps(res.data);
-            console.log("all cats ",res.data)
         }).catch(() => {
             console.log('Error Occured while getting roles to api');
         })
@@ -68,7 +65,6 @@ const AdminPanel =({user}) => {
     }
 
     let submit = () => {
-        console.log("submit")
         categoryAPI.getRoles().then(res=> {
             setRoles(res.data);
             return (<Roles roles={roles} categories={cats} submit={submit}/>);

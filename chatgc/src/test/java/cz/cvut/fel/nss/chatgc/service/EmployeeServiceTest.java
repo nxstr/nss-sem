@@ -1,8 +1,6 @@
 package cz.cvut.fel.nss.chatgc.service;
 
 import cz.cvut.fel.nss.chatgc.DataGenerator;
-import cz.cvut.fel.nss.chatgc.configuration.AppConfig;
-import cz.cvut.fel.nss.chatgc.exceptions.ExistsException;
 import cz.cvut.fel.nss.chatgc.exceptions.RoleException;
 import cz.cvut.fel.nss.chatgc.model.Category;
 import cz.cvut.fel.nss.chatgc.model.Chat;
@@ -11,18 +9,15 @@ import cz.cvut.fel.nss.chatgc.model.messages.MessageType;
 import cz.cvut.fel.nss.chatgc.model.messages.Response;
 import cz.cvut.fel.nss.chatgc.model.users.Employee;
 import cz.cvut.fel.nss.chatgc.repository.CategoryRepository;
-import cz.cvut.fel.nss.chatgc.repository.ChatRepository;
 import cz.cvut.fel.nss.chatgc.repository.RoleRepository;
-import cz.cvut.fel.nss.chatgc.repository.messages.ResponseRepository;
 import cz.cvut.fel.nss.chatgc.repository.users.EmployeeRepository;
-import cz.cvut.fel.nss.chatgc.service.messages.ResponseService;
-import cz.cvut.fel.nss.chatgc.service.users.EmployeeService;
+import cz.cvut.fel.nss.chatgc.service.impl.users.EmployeeServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,7 +37,8 @@ public class EmployeeServiceTest {
     private EmployeeRepository employeeDao;
 
     @Mock
-    private ResponseService responseService;
+    @Qualifier("response")
+    private MessageService responseService;
 
     @Mock
     private ChatService chatService;
@@ -57,7 +53,7 @@ public class EmployeeServiceTest {
     private ArgumentCaptor<Employee> userArgumentCaptor;
 
     @InjectMocks
-    private EmployeeService employeeService;
+    private EmployeeServiceImpl employeeService;
 
     @Test
     public void createTestReturnsException(){

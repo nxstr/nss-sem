@@ -19,21 +19,13 @@ const Categories = ({cats, user, onSendMessageCat}) => {
     }
 
     let handleUpdate = (event, id) => {
-        console.log("here ", id)
         setUid(id);
-        // return (
-        //     <div>
-        //         <Input onSendMessage={getUpdateName}/>
-        //     </div>
-        //     );
 
     }
 
 
 
     let handleDelete = (event, id) => {
-        console.log("here ", id)
-        // onSubmitChat(id);
         categoryAPI.deleteCategory(user.username, id).then(res => {
             if(res.status===200){
                 onSendMessageCat();
@@ -46,11 +38,7 @@ const Categories = ({cats, user, onSendMessageCat}) => {
 
 
     let onSendMess = (msgText) => {
-        // onSendMessageCat(msgText);
-
-
         categoryAPI.createCategory(user.username, msgText).then(res => {
-            console.log('Sent', res);
             if(res.status===201){
                 onSendMessageCat();
             }
@@ -75,7 +63,6 @@ const Categories = ({cats, user, onSendMessageCat}) => {
     let renderCategory = (category) => {
 
         const {id, name} = category;
-        console.log(category)
         return (
             <li className="Messages-list">
                 <span

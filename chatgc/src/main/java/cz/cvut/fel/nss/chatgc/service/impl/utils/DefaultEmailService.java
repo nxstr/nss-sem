@@ -1,5 +1,6 @@
-package cz.cvut.fel.nss.chatgc.service.utils;
+package cz.cvut.fel.nss.chatgc.service.impl.utils;
 
+import cz.cvut.fel.nss.chatgc.exceptions.AccountException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -29,7 +30,7 @@ public class DefaultEmailService{
             };
             emailSender.send(preparator);
         } catch (MailException exception) {
-            throw exception;
+            throw new AccountException("email is not valid");
         }
     }
 

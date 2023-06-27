@@ -1,0 +1,39 @@
+package cz.cvut.fel.nss.chatgc.consumer;
+
+import cz.cvut.fel.nss.chatgc.events.CommunicationEvent;
+import cz.cvut.fel.nss.chatgc.service.impl.users.EmployeeServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.user.SimpUser;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
+
+import javax.persistence.DiscriminatorValue;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+public abstract class AbstractHandler{
+
+    private final SimpUserRegistry simpUserRegistry;
+    private final EmployeeServiceImpl employeeService;
+
+    @Autowired
+    public AbstractHandler(SimpUserRegistry simpUserRegistry, EmployeeServiceImpl employeeService) {
+        this.simpUserRegistry = simpUserRegistry;
+        this.employeeService = employeeService;
+    }
+
+
+    public List<String> getOnlineEmps(){
+        List<String> onlineUsers = simpUserRegistry
+                .getUsers()
+                .stream()
+                .map(SimpUser::getName).toList();
+        ArrayList<String> onlineEmps = new ArrayList<>();
+        for(String name: onlineUsers){
+            if(Objects.equals(employeeService.findByUsername(name).getClass().getAnnotation(DiscriminatorValue.class).value(), "EMPLOYEE")) {
+                onlineEmps.add(name);
+            }
+        }
+        return onlineEmps;
+    }
+}

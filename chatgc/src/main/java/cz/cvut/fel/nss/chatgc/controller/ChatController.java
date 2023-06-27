@@ -1,9 +1,11 @@
 package cz.cvut.fel.nss.chatgc.controller;
 
 import cz.cvut.fel.nss.chatgc.constants.KafkaConstants;
+import cz.cvut.fel.nss.chatgc.constants.MessageTypeConstants;
 import cz.cvut.fel.nss.chatgc.dto.CategoryDto;
 import cz.cvut.fel.nss.chatgc.dto.ChatDTO;
 import cz.cvut.fel.nss.chatgc.dto.MessageDto;
+import cz.cvut.fel.nss.chatgc.exceptions.ExistsException;
 import cz.cvut.fel.nss.chatgc.model.Category;
 import cz.cvut.fel.nss.chatgc.model.Chat;
 import cz.cvut.fel.nss.chatgc.model.messages.Message;
@@ -11,11 +13,11 @@ import cz.cvut.fel.nss.chatgc.model.messages.Request;
 import cz.cvut.fel.nss.chatgc.model.messages.Response;
 import cz.cvut.fel.nss.chatgc.model.users.Employee;
 import cz.cvut.fel.nss.chatgc.model.users.Player;
-import cz.cvut.fel.nss.chatgc.security.SecurityUtils;
 import cz.cvut.fel.nss.chatgc.security.model.AuthenticationToken;
+import cz.cvut.fel.nss.chatgc.service.CategoryService;
 import cz.cvut.fel.nss.chatgc.service.ChatService;
-import cz.cvut.fel.nss.chatgc.service.users.EmployeeService;
-import cz.cvut.fel.nss.chatgc.service.users.PlayerService;
+import cz.cvut.fel.nss.chatgc.service.impl.users.EmployeeServiceImpl;
+import cz.cvut.fel.nss.chatgc.service.impl.users.PlayerServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,14 +35,16 @@ public class ChatController {
 
     @Autowired
     private KafkaTemplate<String, MessageDto> kafkaTemplate;
-    private final EmployeeService employeeService;
-    private final PlayerService playerService;
+    private final EmployeeServiceImpl employeeService;
+    private final PlayerServiceImpl playerService;
     private final ChatService chatService;
+    private final CategoryService categoryService;
 
-    public ChatController(EmployeeService employeeService, PlayerService playerService, ChatService chatService) {
+    public ChatController(EmployeeServiceImpl employeeService, PlayerServiceImpl playerService, ChatService chatService, CategoryService categoryService) {
         this.employeeService = employeeService;
         this.playerService = playerService;
         this.chatService = chatService;
+        this.categoryService = categoryService;
     }
 
     @GetMapping(value="/api/allChats/{username}")
@@ -76,7 +80,8 @@ public class ChatController {
             m = chat.getMessages().get(chat.getMessages().size() - 1);
             dto.setContent(m.getDataPath());
             dto.setChat(chat.getPlayerUsername());
-            dto.setMessageType("message");
+            dto.setMessageType(MessageTypeConstants.MESSAGE);
+            dto.setDate(m.getDate());
             if (Objects.equals(m.getClass().getAnnotation(DiscriminatorValue.class).value(), "RESPONSE")) {
                 Response r = (Response) m;
                 if (r.getEmployee() != null) {
@@ -114,9 +119,10 @@ public class ChatController {
         });
         for(Message m: msgs){
             MessageDto messageDto = new MessageDto();
-            messageDto.setMessageType("message");
+            messageDto.setMessageType(MessageTypeConstants.MESSAGE);
             messageDto.setChat(chatService.findById(id).getPlayerUsername());
             messageDto.setContent(m.getDataPath());
+            messageDto.setDate(m.getDate());
             if(Objects.equals(m.getClass().getAnnotation(DiscriminatorValue.class).value(), "RESPONSE")){
                 Response r = (Response) m;
                 if(r.getEmployee()!=null) {
@@ -145,7 +151,7 @@ public class ChatController {
     public void sendMessage(@RequestBody MessageDto message, @PathVariable Integer chatId) {
         try {
             message.setChat(chatService.findById(chatId).getPlayerUsername());
-            kafkaTemplate.send(KafkaConstants.KAFKA_TOPIC, message).get();
+            kafkaTemplate.send(KafkaConstants.KAFKA_TOPIC_CHAT, message).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
@@ -163,5 +169,42 @@ public class ChatController {
         playerService.update(player);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @PutMapping(value = "api/chats/{id}/close")
+    @PreAuthorize("hasAuthority('EMPLOYEE')")
+    public ResponseEntity setChatClose(@PathVariable Integer id){
+        try {
+            Chat chat = chatService.findById(id);
+            chatService.setChatClose(chat);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch (ExistsException e){
+            return new ResponseEntity(HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @PutMapping(value = "api/chats/{id}/cats")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseEntity setCategoriesByAdmin(@PathVariable Integer id, @RequestBody List<CategoryDto> categories){
+        try{
+            Chat chat = chatService.findById(id);
+            categoryService.setCategoriesToChat(chat, categories);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch (ExistsException e){
+            return new ResponseEntity(HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @PutMapping(value = "api/chats/{id}/open")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseEntity setChatOpen(@PathVariable Integer id){
+        try {
+            Chat chat = chatService.findById(id);
+            chatService.setChatOpen(chat);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch (ExistsException e){
+            return new ResponseEntity(HttpStatus.FORBIDDEN);
+        }
+    }
+
 
 }

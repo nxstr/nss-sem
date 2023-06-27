@@ -1,4 +1,4 @@
-package cz.cvut.fel.nss.chatgc.service.users;
+package cz.cvut.fel.nss.chatgc.service.impl.users;
 
 import cz.cvut.fel.nss.chatgc.dto.EmployeeDTO;
 import cz.cvut.fel.nss.chatgc.events.EmployeeEvent;
@@ -11,11 +11,11 @@ import cz.cvut.fel.nss.chatgc.model.messages.Response;
 import cz.cvut.fel.nss.chatgc.model.users.Employee;
 import cz.cvut.fel.nss.chatgc.model.users.User;
 import cz.cvut.fel.nss.chatgc.repository.ChatRepository;
-import cz.cvut.fel.nss.chatgc.repository.RoleRepository;
 import cz.cvut.fel.nss.chatgc.repository.users.EmployeeRepository;
 import cz.cvut.fel.nss.chatgc.repository.users.UserRepository;
-import cz.cvut.fel.nss.chatgc.service.RoleService;
-import cz.cvut.fel.nss.chatgc.service.messages.ResponseService;
+import cz.cvut.fel.nss.chatgc.service.MessageService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,16 +25,17 @@ import javax.persistence.DiscriminatorValue;
 import java.util.*;
 
 @Service
-public class EmployeeService extends UserService<Employee> {
+public class EmployeeServiceImpl extends UserServiceImpl<Employee> {
 
-    public static final long DEFAULT_TIMEOUT = Long.MAX_VALUE;
     private final EmployeeRepository employeeDao;
     private final ChatRepository chatRepository;
     private final PasswordEncoder encoder;
-    private final ResponseService responseService;
+    @Qualifier("response")
+    private final MessageService responseService;
     private final ApplicationEventPublisher publisher;
 
-    public EmployeeService(UserRepository<Employee, Integer> userDao, ApplicationEventPublisher publisher, EmployeeRepository employeeDao, ChatRepository chatRepository, PasswordEncoder encoder, PasswordEncoder encoder1, ResponseService responseService, ApplicationEventPublisher publisher1) {
+    @Autowired
+    public EmployeeServiceImpl(UserRepository<Employee, Integer> userDao, ApplicationEventPublisher publisher, EmployeeRepository employeeDao, ChatRepository chatRepository, PasswordEncoder encoder, PasswordEncoder encoder1, @Qualifier("response") MessageService responseService, ApplicationEventPublisher publisher1) {
         super(userDao, publisher, encoder);
         this.employeeDao = employeeDao;
         this.chatRepository = chatRepository;
@@ -88,12 +89,6 @@ public class EmployeeService extends UserService<Employee> {
         publisher.publishEvent(new EmployeeEvent("changeData", new EmployeeDTO(employee.getUsername(), employee.getPassword(), employee.getEmail(), employee.getRole().getId(), employee.getRole().getName(), employee.getId())));
     }
 
-//    @Transactional
-//    public void changeEmail(Employee employee, String email){
-//        super.changeEmail(employee, email);
-//        publisher.publishEvent(new EmployeeEvent("changeData", new EmployeeDTO(employee.getUsername(), employee.getPassword(), employee.getEmail(), employee.getRole().getId())));
-//    }
-
     @Transactional
     public void changeEmployeePassword(Employee employee, String password){
         publisher.publishEvent(new EmployeeEvent("changePass", new EmployeeDTO(employee.getUsername(), password, employee.getEmail(), employee.getRole().getId(), employee.getRole().getName(), employee.getId())));
@@ -131,13 +126,13 @@ public class EmployeeService extends UserService<Employee> {
         if(!employee.getRole().getName().equals("admin")) {
             Set<Category> cats = employee.getRole().getCategories();
             for (Category c : cats) {
-//                chats.addAll(chatRepository.findChatsByCategories(c));
                 List<Chat> chatsWithCat = chatRepository.findChatsByCategories(c);
                 for(Chat chat: chatsWithCat){
                     boolean hasAccess = true;
                     for(Category cat: chat.getCategories()){
-                        if(!employee.getRole().getCategories().contains(cat)){
+                        if (!employee.getRole().getCategories().contains(cat)) {
                             hasAccess = false;
+                            break;
                         }
                     }
                     if(hasAccess){
@@ -146,9 +141,7 @@ public class EmployeeService extends UserService<Employee> {
                 }
             }
         }else{
-            System.out.println("here " + employee.getUsername() + " " + employee.getRole());
             for(Chat i: chatRepository.findAll()){
-                System.out.println(i + " chat");
                 chats.add(i);
             }
         }

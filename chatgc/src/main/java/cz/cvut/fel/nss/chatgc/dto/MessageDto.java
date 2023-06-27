@@ -1,5 +1,6 @@
 package cz.cvut.fel.nss.chatgc.dto;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class MessageDto {
@@ -9,6 +10,7 @@ public class MessageDto {
     String chat;
     //List<CategoryDto> categories (прямо як в RoleDto)
     List<CategoryDto> categories;
+    LocalDateTime date;
 
     public MessageDto() {
     }
@@ -56,6 +58,14 @@ public class MessageDto {
 
     public void setCategories(List<CategoryDto> categories) {
         this.categories = categories;
+    }
+
+    public LocalDateTime getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDateTime date) {
+        this.date = date;
     }
 
     @Override

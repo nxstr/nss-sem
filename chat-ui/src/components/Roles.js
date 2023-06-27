@@ -22,23 +22,17 @@ const Roles =({categories, roles, submit}) => {
 
 
     let showRoleCategories = (id) => {
-        console.log("role id: ", id, typeof id)
         for(let i=0; i<roles.length; i++){
-
-            console.log("roles id: ", roles[i].id, typeof roles[i].id)
             if(roles[i].id.toString()===id){
 
                 setCats(roles[i].categoryDtoList);
                 setAddedCats([]);
-                console.log(roles[i].categoryDtoList);
             }
         }
     }
 
     const handleChange = event => {
-        console.log(event.target.value);
         setSelected(event.target.value);
-        console.log(event.target.value)
         setRender(true);
         showRoleCategories(event.target.value);
     };
@@ -65,7 +59,6 @@ const Roles =({categories, roles, submit}) => {
         setIsNew(true);
         categoryapi.getRole(id).then(res => {
             setRender(true);
-            console.log(res);
             setId(res.data.id);
             setName(res.data.name);
             setSavedCats(res.data.categoryDtoList);
@@ -164,19 +157,15 @@ const Roles =({categories, roles, submit}) => {
     }
 
     let handleChangeCat = event => {
-        console.log(event.target.value);
         setSelectedCat(event.target.value);
     }
 
     let addCategory = () => {
         setRender(false);
-        console.log("here", selectedCat)
-        console.log(selectedCat, typeof selectedCat)
         for(let i=0; i<categories.length; i++){
             if(categories[i].id.toString()===selectedCat){
                 setCats(cats.concat(categories[i]));
                 setAddedCats(addedCats.concat(categories[i]));
-                console.log("here");
             }
         }
         setRender(true);

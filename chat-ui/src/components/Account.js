@@ -29,18 +29,32 @@ const Account =({currentAcc, type}) => {
     }
 
     let updateAccount = () => {
-        console.log(newEmail, newPass);
+        setIsPass(false);
+        setIsEmail(false);
         // if(newEmail===""){
         //     setNewEmail(currentAcc.email);
         // }
         if(type!=="player"){
-            chatapi.updateCurrent(currentAcc.username, newEmail, newPass, currentAcc.id).then(res => {
+            chatapi.updateCurrent(currentAcc.username, newEmail, newPass, currentAcc.id, "employee").then(res => {
                 if(res.status===200){
                     currentAcc.email=newEmail;
                     cancel();
                 }
             }).catch(() => {
                 console.log('Error Occured while creating role to api');
+                setIsPass(true);
+                setIsEmail(true);
+            });
+        }else{
+            chatapi.updateCurrent(currentAcc.username, newEmail, newPass, currentAcc.id, "player").then(res => {
+                if(res.status===200){
+                    currentAcc.email=newEmail;
+                    cancel();
+                }
+            }).catch(() => {
+                console.log('Error Occured while creating role to api');
+                setIsPass(true);
+                setIsEmail(true);
             });
         }
     }

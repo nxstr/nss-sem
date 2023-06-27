@@ -3,14 +3,8 @@ import Button from '@material-ui/core/Button';
 import chatAPI from "../services/chatapi";
 
 const AllChats = ({chats, currentUser, onSubmitChat})=>{
-    console.log("allchats", chats)
     const [messages, setMessages] = useState([])
     const [chat ,setChat] = useState(null)
-
-    let onMessageReceived = (msg) => {
-        console.log('New Message Received!!', msg);
-        setMessages(messages.concat(msg));
-    }
 
     // console.log(chats)
 
@@ -23,24 +17,13 @@ const AllChats = ({chats, currentUser, onSubmitChat})=>{
     }
 
     let handleSubmit = (event, id, name) => {
-        // window.location.replace('api/allChats');
-        console.log("here ", id)
         onSubmitChat(id, name);
-        // setChat({
-        //     chatId: id
-        // })
-        // chatAPI.getMessages(id).then(res =>{
-        //     console.log(res.data)
-        //     setMessages(messages.concat(res.data))
-        // }).catch(err => {
-        //     console.log('Error Occured while getting messages to api');
-        // })
     }
 
     let renderChat = (chat) => {
 
         const {id, playerUsername, lastMessage} = chat;
-        console.log(chat)
+        const d = new Date(lastMessage.date);
         return (
             <li className="chat-box">
                 <span
@@ -51,6 +34,7 @@ const AllChats = ({chats, currentUser, onSubmitChat})=>{
                     <div className="chat-username">
                         {playerUsername}
                     </div>
+                    <div>{d.getHours()}:{d.getMinutes()}, {d.getDate()}.{d.getMonth()}.{d.getFullYear()}</div>
                     <div className="chat-last-sender">
                         {lastMessage.sender} :
                     </div>

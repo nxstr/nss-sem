@@ -1,8 +1,8 @@
 package cz.cvut.fel.nss.chatgc.security.service;
 
 import cz.cvut.fel.nss.chatgc.security.model.AccountDetails;
-import cz.cvut.fel.nss.chatgc.service.users.EmployeeService;
-import cz.cvut.fel.nss.chatgc.service.users.PlayerService;
+import cz.cvut.fel.nss.chatgc.service.impl.users.EmployeeServiceImpl;
+import cz.cvut.fel.nss.chatgc.service.impl.users.PlayerServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class AccountDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
 
-    private final PlayerService userDao;
-    private final EmployeeService adminDao;
+    private final PlayerServiceImpl userDao;
+    private final EmployeeServiceImpl adminDao;
 
     @Autowired
-    public AccountDetailsService(PlayerService userDao, EmployeeService adminDao) {
+    public AccountDetailsService(PlayerServiceImpl userDao, EmployeeServiceImpl adminDao) {
         this.userDao = userDao;
         this.adminDao = adminDao;
     }

@@ -12,6 +12,7 @@
   margin: 2vh;
 }
 
+
 .mainButton{
   display: inline-flex;
   flex-direction: row;
@@ -35,7 +36,7 @@
   color: white;
 }
 .messagecomp{
-  height: 85%;
+  height: 83%;
   display: inline-block;
 }
 
@@ -44,11 +45,16 @@
   flex-direction: column;
   width: 100%;
 }
+
+.chatInfo {
+  display: inline-flex;
+  flex-direction: column;
+  width: 25%;
+}
 .chats{
   width: 30%;
   display: inline-flex;
   flex-direction: column;
-  margin-right: 2vh;
 }
 .cats{
   display: inline-flex;
@@ -103,6 +109,7 @@
   flex-direction: column;
   float:left;
   height: 90%;
+  padding-left: 0;
 }
 
 .adminFunc {
@@ -193,13 +200,21 @@
 
 .message-input {
   display: flex;
-  margin-left: 7%;
+  margin-left: 1%;
   margin-bottom: 1vh;
-  width: 90%;
+  margin-top: 2vh;
   justify-content: space-between;
   max-width: 900px;
   /*margin-bottom: 38px;*/
 }
+
+.cats1{
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 
 .inputField {
   padding: 5px;

@@ -4,13 +4,13 @@ import {yellow} from "@material-ui/core/colors";
 
 const Messages = ({ messages, currentUser, chats, onSubmitChat }) => {
     const bottomRef = useRef(null);
-    console.log("in messages ",chats)
 
     useEffect(() => {bottomRef.current?.scrollIntoView({behavior: 'instant'});
     }, [messages]);
 
     let renderMessage = (message) => {
-        const { sender, content, color } = message;
+        const { sender, content, color, date } = message;
+        const d = new Date(date);
         // const messageFromMe = currentUser.username === message.sender;
         let messageFromMe = false;
         if(currentUser.username!==message.chat && message.sender!==message.chat){
@@ -21,15 +21,12 @@ const Messages = ({ messages, currentUser, chats, onSubmitChat }) => {
         const className = messageFromMe ? "Messages-message currentUser" : "Messages-message";
         return (
             <li className={className}>
-                <span
-                    className="avatar"
-                    style={{ backgroundColor: color }}
-                />
                 <div className="Message-content">
                     <div className="username">
                         {sender}
                     </div>
                     <div className="text">{content}</div>
+                    <div>{d.getHours()}:{d.getMinutes()}, {d.getDate()}.{d.getMonth()}.{d.getFullYear()}</div>
                 </div>
             </li>
         );
@@ -38,22 +35,10 @@ const Messages = ({ messages, currentUser, chats, onSubmitChat }) => {
 
 
     let handleSubmit = (event, id, name) => {
-        // window.location.replace('api/allChats');
-        console.log("here ", id)
         onSubmitChat(id, name);
-        // setChat({
-        //     chatId: id
-        // })
-        // chatAPI.getMessages(id).then(res =>{
-        //     console.log(res.data)
-        //     setMessages(messages.concat(res.data))
-        // }).catch(err => {
-        //     console.log('Error Occured while getting messages to api');
-        // })
     }
 
     let renderChat = (chat) => {
-        console.log("hereeeee",chat)
         const {id, playerUsername, lastMessage} = chat;
         return (
             <li className="Chats-list">

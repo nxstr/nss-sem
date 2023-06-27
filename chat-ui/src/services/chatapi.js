@@ -6,7 +6,6 @@ const api = Axios.create({
 
 const chatAPI = {
     getMessages: (groupId, username) => {
-        console.log('Calling get messages from API');
         return api.get(`${username}/chat/${groupId}`);
     },
 
@@ -21,12 +20,10 @@ const chatAPI = {
             content: text,
             categories: cats
         }
-        console.log(chat.chatId)
         return api.post(`send/${chat.chatId}`, msg);
     },
     
     loginMessage: (username) => {
-        console.log("here ")
         let msg = {
             messageType: "message",
             sender: username,
@@ -53,14 +50,32 @@ const chatAPI = {
     getCurrentEmployee:() => {
         return api.get(`employee/current`);
     },
-    updateCurrent:(username, email, password, id) => {
+    getCurrentPlayer:() => {
+        return api.get(`player/current`);
+    },
+    updateCurrent:(username, email, password, id, type) => {
+
         let dto = {
             "username": username,
             "password": password,
             "email": email,
             "id": id
         }
-        return api.put(`employee/current/edit`, dto);
+        if(type==="employee"){
+            return api.put(`employee/current/edit`, dto);
+        }else{
+            return api.put(`player/current/edit`, dto);
+        }
+
+    },
+    closeChat:(id)=>{
+        return api.put(`chats/${id}/close`);
+    },
+    openChat:(id)=>{
+        return api.put(`chats/${id}/open`);
+    },
+    saveCategories:(id, list) => {
+        return api.put(`chats/${id}/cats`, list);
     }
 }
 

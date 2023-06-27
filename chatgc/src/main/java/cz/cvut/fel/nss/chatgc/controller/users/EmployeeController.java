@@ -7,7 +7,7 @@ import cz.cvut.fel.nss.chatgc.model.Role;
 import cz.cvut.fel.nss.chatgc.model.users.Employee;
 import cz.cvut.fel.nss.chatgc.security.model.AuthenticationToken;
 import cz.cvut.fel.nss.chatgc.service.RoleService;
-import cz.cvut.fel.nss.chatgc.service.users.EmployeeService;
+import cz.cvut.fel.nss.chatgc.service.impl.users.EmployeeServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +17,13 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
 public class EmployeeController {
 
-    private final EmployeeService employeeService;
+    private final EmployeeServiceImpl employeeService;
     private final RoleService roleService;
 
     @PostMapping("/api/employee/new")
@@ -127,11 +128,16 @@ public class EmployeeController {
         }
     }
 
-    @PostMapping("api/reg/emp")
-    public void regEmp(){
-        Role role = roleService.findByName("admin");
-        Employee employee = new Employee("testEmp", "ira111kirilenko@gmail.com", "test", role);
-        employeeService.create(employee);
+    @PostMapping("api/register/emp")
+    public void registerAdminOnSystemInitialization(@RequestBody EmployeeDTO dto){
+        if(employeeService.findAllEmployees().stream().filter(d-> d.getRole().getName().equals("admin")).toList().isEmpty()){
+            if(Objects.isNull(roleService.findByName("admin"))){
+                roleService.initializeAdminRole();
+            }
+            Role role = roleService.findByName("admin");
+            Employee employee = new Employee(dto.getUsername(), dto.getEmail(), dto.getPassword(), role);
+            employeeService.create(employee);
+        }
     }
 
 

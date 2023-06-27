@@ -1,28 +1,22 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import SockJsClient from 'react-stomp';
 import './App.css';
 
 import chatAPI from './services/chatapi';
-import { randomColor } from './utils/common';
+import {randomColor} from './utils/common';
 
 import categoryAPI from "./services/categoryapi";
 import Button from "@material-ui/core/Button";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate, useLocation,
-} from 'react-router-dom';
+import {BrowserRouter as Router, Navigate, Route, Routes,} from 'react-router-dom';
 import RegForm from "./components/RegForm";
 import LoginForm from "./components/LoginForm";
 import AllChats from "./components/AllChats";
 import Input from "./components/Input";
 import Messages from "./components/Messages";
-import Categories from "./components/Categories";
 import AdminPanel from "./components/AdminPanel";
 import Account from "./components/Account";
 import CategorySelect from "./components/CategorySelect";
-
+import ChatInfo from "./components/ChatInfo";
 
 
 const SOCKET_URL = 'http://localhost:8080/ws-chat/';
@@ -42,12 +36,12 @@ const App = () => {
   const [currentAcc, setCurrentAcc] = useState([]);
   const [isPlayer, setPlayer] = useState(true);
   const [selectedOptions, setSelectedOptions] = useState([]);
+  const [chatInfo, setChatInfo] = useState(null);
   let path = "/home"
 
 
   let onConnected = () => {
     console.log("Connected!!")
-    console.log(user.username, " username")
     chatAPI.loginMessage(user.username).then(res => {
       console.log('Sent login', res);
     }).catch(err => {
@@ -58,8 +52,9 @@ const App = () => {
 
   let getChats = (user) =>{
     chatAPI.getChats(user.username).then(res=> {
+      res.data.sort((a,b) => Date.parse(b.lastMessage.date) - Date.parse(a.lastMessage.date));
+      res.data.sort((a, b)=> Number(b.open)-Number(a.open));
         setChats(res.data)
-      console.log(res.data)
       // setChats(chats => res.data)
       let hasChatObj = false;
       for(let i=0; i<res.data.length; i++){
@@ -69,13 +64,10 @@ const App = () => {
         }
       }
       if(!hasChatObj){
-        console.log("len is 0", res.data.length, res.data)
         setHasChat(false);
       }else{
-        console.log("len is not 0 " , res.data.length, res.data)
         setHasChat(true);
       }
-      console.log("all chats ",chats)
     }).catch(() => {
       console.log('Error Occurred while getting chats to api');
     })
@@ -103,24 +95,36 @@ const App = () => {
   //
   // }
 
+
+
   let onMessageReceived = (msg) => {
+    // msg.date = Date.parse(msg.date);
     console.log('New Message Received!!', msg);
     if(msg.messageType==="message"){
-      console.log(msg.chat.id, " active chatttttt")
       if(activeChat!=null && msg.chat===activeChat.chatName){
         setMessages(messages.concat(msg));
-        // let chatsCopy = chats;
         for(let i=0; i<chats.length; i++){
-          console.log("chatsssss: ", chats)
           if(chats[i].playerUsername===activeChat.chatName){
             chats[i].lastMessage = msg;
-            console.log(chats[i])
           }
         }
+        chats.sort((a,b) => Date.parse(b.lastMessage.date) - Date.parse(a.lastMessage.date));
+        chats.sort((a, b)=> Number(b.open)-Number(a.open));
+        console.log(chats);
         setChats([].concat(chats))
-        console.log(messages, " messages")
+      }else if(activeChat===null || msg.chat!==activeChat.chatName){
+        for(let i=0; i<chats.length; i++){
+          if(chats[i].playerUsername===msg.chat){
+            chats[i].lastMessage = msg;
+          }
+        }
+        chats.sort((a,b) => Date.parse(b.lastMessage.date) - Date.parse(a.lastMessage.date));
+        chats.sort((a, b)=> Number(b.open)-Number(a.open));
+        console.log(chats);
+        setChats([].concat(chats))
       }
     }else if(msg.messageType==="chatListUpdate"){
+
       getChats(user);
     }else if(msg.messageType==="login"){
       user.type = msg.content;
@@ -129,25 +133,25 @@ const App = () => {
       }else{
         setPlayer(true);
       }
-      console.log(user.type, "typeeeeeeeeeeeeee")
       if(user.type==="admin"){
         setEmp(true);
       }
+    }else if(msg.messageType==="forceLogout"){
+      logout();
     }
 
   }
 
   let onSendMessage = (msgText) => {
     let arr = [];
-    console.log(selectedOptions, "aaaaaaaaaaaaa");
     for(let i=0; i<selectedOptions.length; i++){
       for(let j=0; j<cats.length; j++){
+
         if(selectedOptions[i].toString()===cats[j].id.toString()){
-          arr.push(cats[i]);
+          arr.push(cats[j]);
         }
       }
     }
-    console.log(arr);
     chatAPI.sendMessage(user.username, msgText, activeChat, arr).then(res => {
       console.log('Sent', res);
     }).catch(() => {
@@ -166,7 +170,6 @@ const App = () => {
 
   const login = async (username, password) => {
     categoryAPI.login(username, password).then(res =>{
-      console.log(res, "=================================")
       if(res.status===200){
         setUser({
           username: username,
@@ -211,14 +214,24 @@ const App = () => {
       chatId: id,
       chatName: name
     })
+
     if(user.type==="player"){
       getCats();
+    }else{
+      let ch = null;
+      for(let i=0; i<chats.length; i++){
+        if(chats[i].id.toString()===id.toString()){
+          ch = chats[i];
+        }
+      }
+      setChatInfo(ch);
+      getCats();
+      console.log(ch);
     }
     setShowAcc(false);
     setIsShown(false);
     // window.location.replace(`http://localhost:3000/allChats/${id}`)
     chatAPI.getMessages(id, user.username).then(res =>{
-      console.log(res.data)
       setMessages([].concat(res.data))
     }).catch(() => {
       console.log('Error Occured while getting messages to api');
@@ -234,11 +247,19 @@ const App = () => {
     })
     if(user.type==="player"){
       getCats();
+    }else{
+      let ch = null;
+      for(let i=0; i<chats.length; i++){
+        if(chats[i].id.toString()===id.toString()){
+          ch = chats[id];
+        }
+      }
+      setChatInfo(ch);
+      getCats();
     }
     setIsShown(false);
     setShowAcc(false);
     chatAPI.getMessages(id, user.username).then(res =>{
-      console.log(res.data)
       setMessages([].concat(res.data))
     }).catch(() => {
       console.log('Error Occured while getting messages to api');
@@ -247,7 +268,6 @@ const App = () => {
 
   let getChat = (user) => {
     if (user) {
-      console.log(" user is " + user.username)
       return user.username
     } return ""
   }
@@ -257,6 +277,7 @@ const App = () => {
     setIsShown(true);
     setShowAcc(false);
     setActiveChat(null);
+    setChatInfo(null);
     path = "/home/cats";
   }
 
@@ -284,11 +305,13 @@ const App = () => {
     chatAPI.logout().then(() => {
       setUser(null);
       setActiveChat(null);
+      setChatInfo(null);
       setChats([]);
       setHasChat(false);
       setMessages([])
       setEmp(false);
       setShowAcc(false);
+      setIsShown(false);
       console.log("logout")
     }).catch(() => {
       console.log('Error Occured while getting messages to api');
@@ -298,8 +321,17 @@ const App = () => {
   let loadCurrent = () => {
     setShowAcc(true);
     setIsShown(false);
+    setActiveChat(null);
+    setChatInfo(null);
     if(user.type!=="player"){
       chatAPI.getCurrentEmployee().then(res => {
+        setCurrentAcc(res.data);
+        console.log(res.data.username);
+      }).catch(() => {
+        console.log('Error Occured while getting messages to api');
+      })
+    }else{
+      chatAPI.getCurrentPlayer().then(res => {
         setCurrentAcc(res.data);
         console.log(res.data.username);
       }).catch(() => {
@@ -309,6 +341,7 @@ const App = () => {
   }
 
   let submitCats = (value) => {
+    console.log("valueeeeeeeeeee", value);
     setSelectedOptions(value);
   }
 
@@ -365,20 +398,30 @@ const App = () => {
                           <Router>
                             <Routes>
                               <Route exact path="/" element={
-                                <div className="chat">
+                                <>
+                                  <div className="chat">
 
-                                  <Messages
-                                      messages={messages}
-                                      currentUser={user}
-                                      chats={chats}
-                                      onSubmitChat = {handleChatIdFromMess}
-                                  />
-                                  {user.type==="player" &&(
-                                      <CategorySelect categories={cats} submitCats={submitCats}/>
-                                      )}
-                                  <Input onSendMessage={onSendMessage}
-                                         categoryCreate={categoryCreate}/>
-                                </div>} />
+                                    <Messages
+                                        messages={messages}
+                                        currentUser={user}
+                                        chats={chats}
+                                        onSubmitChat = {handleChatIdFromMess}
+                                    />
+                                    {user.type==="player" &&(
+                                        <CategorySelect categories={cats} submitCats={submitCats}/>
+                                    )
+                                    }
+                                    <Input onSendMessage={onSendMessage}
+                                           categoryCreate={categoryCreate}/>
+                                  </div>
+                                  {user.type !== "player" && (
+                                      <div className="chatInfo">
+                                          <ChatInfo activeChat={chatInfo} categories={cats} isAdmin={isEmp}/>
+                                      </div>
+                                  )
+                                  }
+                                </>
+                                } />
                               <Route path="/" element={<Navigate replace to={{
                                 pathname: `/`
                               }} />} />

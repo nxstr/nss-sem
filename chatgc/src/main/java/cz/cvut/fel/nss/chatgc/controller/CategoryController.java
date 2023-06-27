@@ -2,18 +2,13 @@ package cz.cvut.fel.nss.chatgc.controller;
 
 import cz.cvut.fel.nss.chatgc.dto.CategoryDto;
 import cz.cvut.fel.nss.chatgc.model.Category;
-import cz.cvut.fel.nss.chatgc.model.users.Employee;
 import cz.cvut.fel.nss.chatgc.service.CategoryService;
-import cz.cvut.fel.nss.chatgc.service.users.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
-import javax.persistence.DiscriminatorValue;
-import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
 @RestController

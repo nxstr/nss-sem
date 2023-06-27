@@ -29,7 +29,6 @@ const categoryAPI = {
             username: username,
             password:password
         }
-        console.log(password, "password")
         return api.post(`login`, msg);
     },
     getRoles:()=>{
