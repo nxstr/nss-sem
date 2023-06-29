@@ -141,11 +141,13 @@ public class EmployeeServiceTest {
         Chat chat = new Chat(true, null, new ArrayList<>(), new HashSet<>(), new HashSet<>(), "test");
         chatService.persist(chat);
         for(int i=0; i<4; i++){
-            Response r = new Response(e);
-            r.setDataPath("test"+new Random().nextInt(10));
-            r.setType(MessageType.TEXT);
-            r.setDate(LocalDateTime.now());
-            r.setChat(chat);
+
+            Response r = new Response.ResponseBuilder().addEmployee(e)
+                    .addDataPath("test"+new Random().nextInt(10))
+                    .addDate(LocalDateTime.now())
+                    .addChat(chat)
+                    .addType(MessageType.TEXT).build();
+
             responseService.persist(r);
             chat.getMessages().add(r);
             responses.add(r);

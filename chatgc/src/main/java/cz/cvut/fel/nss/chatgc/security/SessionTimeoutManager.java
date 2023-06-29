@@ -12,10 +12,5 @@ public class SessionTimeoutManager implements HttpSessionListener {
     public void sessionCreated(HttpSessionEvent se) {
         se.getSession().setMaxInactiveInterval(SecurityConstants.SESSION_TIMEOUT);
     }
-
-    @Override
-    public void sessionDestroyed(HttpSessionEvent se) {
-        //do nothing
-    }
 }
 

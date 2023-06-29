@@ -1,5 +1,8 @@
 package cz.cvut.fel.nss.chatgc.dto;
 
+import cz.cvut.fel.nss.chatgc.mapper.Visitor;
+import cz.cvut.fel.nss.chatgc.model.Category;
+
 public class CategoryDto {
     Integer id;
     String name;
@@ -26,5 +29,9 @@ public class CategoryDto {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public Category accept(Visitor v){
+        return v.visitCategoryDto(this);
     }
 }

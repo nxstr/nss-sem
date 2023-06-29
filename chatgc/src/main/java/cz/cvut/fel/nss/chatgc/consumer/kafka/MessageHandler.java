@@ -46,6 +46,11 @@ public class MessageHandler extends BaseKafkaHandler{
         this.categoryService = categoryService;
     }
 
+    /**
+     * Handles message event. Sends message to topic, on which users, who have to receive this message, are subscribed.
+     * Saves message to database and updates chat.
+     * @param message MessageDto is event data
+     */
     @KafkaListener(
             topics = KafkaConstants.KAFKA_TOPIC_CHAT,
             groupId = KafkaConstants.GROUP_ID
@@ -54,11 +59,12 @@ public class MessageHandler extends BaseKafkaHandler{
         getLOG().info("{} sending via kafka-chat listener..", message.getSender());
 
         if(!message.getSender().equals(message.getChat())){
-            Response r = new Response((Employee) employeeService.findByUsername(message.getSender()));
-            r.setChat(chatService.findByPlayer(message.getChat()));
-            r.setDataPath(message.getContent());
-            r.setDate(LocalDateTime.now());
-            r.setType(MessageType.TEXT);
+            Response r = new Response.ResponseBuilder().addEmployee((Employee) employeeService.findByUsername(message.getSender()))
+                    .addDataPath(message.getContent())
+                    .addDate(LocalDateTime.now())
+                    .addChat(chatService.findByPlayer(message.getChat()))
+                    .addType(MessageType.TEXT).build();
+
             message.setDate(r.getDate());
             responseService.persist(r);
             Chat chat = updateChat(message.getChat(), r);
@@ -74,7 +80,12 @@ public class MessageHandler extends BaseKafkaHandler{
                     }
                 }
             }
-            Request r = new Request(message.getContent(), LocalDateTime.now(), chatService.findByPlayer(message.getChat()), MessageType.TEXT, cats);
+
+            Request r = new Request.RequestBuilder().addCategories(cats)
+                    .addDataPath(message.getContent())
+                    .addDate(LocalDateTime.now())
+                    .addChat(chatService.findByPlayer(message.getChat()))
+                    .addType(MessageType.TEXT).build();
             message.setDate(r.getDate());
             Chat chat = updateChat(message.getChat(), r);
             chat.setOpen(true);
@@ -85,7 +96,7 @@ public class MessageHandler extends BaseKafkaHandler{
             }
             chatService.update(chat);
             getLOG().info("Chat {} updated. New request from {} added: {} ", chat.getPlayerUsername(), message.getSender(), message.getContent());
-            getLOG().info("Chat {} has categories: {} ", chat.getPlayerUsername(), message.getCategories().stream().map(CategoryDto::getName).toList());
+            getLOG().info("Chat {} has categories: {} ", chat.getPlayerUsername(), chat.getCategories().stream().map(Category::getName).toList());
         }
 
         for(String i: getOnlineEmps()){

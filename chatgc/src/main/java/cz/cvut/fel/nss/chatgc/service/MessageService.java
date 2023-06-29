@@ -10,27 +10,27 @@ public interface MessageService {
 
     /**
      * Creates new message.
-     * @param message entity that will be saved
+     * @param message Message that will be saved
      * @return Message
      */
     Message persist(Message message);
 
     /**
      * Updates existing message.
-     * @param message entity that will be updated
+     * @param message Message that will be updated
      */
     void update(Message message);
 
     /**
      * Finds message by its id.
-     * @param id Id of message
+     * @param id Integer id of message
      * @return Message
      */
     Message findById(Integer id);
 
     /**
      * Deletes message.
-     * @param message entity that will be deleted
+     * @param message Message that will be deleted
      */
     void delete(Message message);
 }

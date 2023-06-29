@@ -49,7 +49,7 @@ public class EmployeeServiceImpl extends UserServiceImpl<Employee> {
 
     /**
      * Validates data and creates new employee.
-     * @param employee entity that will be saved
+     * @param employee Employee that will be saved
      */
     @Transactional
     public void create(Employee employee){
@@ -88,8 +88,8 @@ public class EmployeeServiceImpl extends UserServiceImpl<Employee> {
 
     /**
      * Changes user's username.
-     * @param employee entity that will be updated
-     * @param newName new username of player
+     * @param employee Employee that will be updated
+     * @param newName String new username of player
      */
     @Transactional
     public void changeUsername(Employee employee, String newName){
@@ -108,8 +108,8 @@ public class EmployeeServiceImpl extends UserServiceImpl<Employee> {
 
     /**
      * Changes employee's password.
-     * @param employee entity that will be updated
-     * @param password new raw password of employee
+     * @param employee Employee that will be updated
+     * @param password String new raw password of employee
      */
     @Transactional
     public void changeEmployeePassword(Employee employee, String password){
@@ -119,7 +119,7 @@ public class EmployeeServiceImpl extends UserServiceImpl<Employee> {
 
     /**
      * Deletes employee.
-     * @param employee entity that will be deleted
+     * @param employee Employee that will be deleted
      */
     @Transactional
     public void delete(Employee employee){
@@ -132,8 +132,8 @@ public class EmployeeServiceImpl extends UserServiceImpl<Employee> {
 
     /**
      * Changes employee's role.
-     * @param employee entity that will be updated
-     * @param role new role of employee
+     * @param employee Employee that will be updated
+     * @param role Role of employee
      */
     @Transactional
     public void changeRole(Employee employee, Role role){
@@ -147,7 +147,7 @@ public class EmployeeServiceImpl extends UserServiceImpl<Employee> {
 
     /**
      * Finds employee by its id.
-     * @param id Id of employee
+     * @param id Integer id of employee
      * @return Employee
      */
     @Transactional
@@ -158,7 +158,7 @@ public class EmployeeServiceImpl extends UserServiceImpl<Employee> {
 
     /**
      * Finds all chats for employee. Employee role contains categories and gives access to chats, that has same categories.
-     * @param employee has role that gives access to some chats
+     * @param employee Employee has role that gives access to some chats
      * @return Set<Chat>
      */
     public Set<Chat> findAllChats(Employee employee){
@@ -181,9 +181,7 @@ public class EmployeeServiceImpl extends UserServiceImpl<Employee> {
                 }
             }
         }else{
-            for(Chat i: chatRepository.findAll()){
-                chats.add(i);
-            }
+            chats.addAll(chatRepository.findAll());
         }
         return chats;
     }
@@ -192,7 +190,7 @@ public class EmployeeServiceImpl extends UserServiceImpl<Employee> {
     /**
      * Validates data from EmployeeDto and calls update.
      * @param dto EmployeeDto entity
-     * @param id Id of employee that will be updated
+     * @param id Integer id of employee that will be updated
      */
     @Transactional
     public void updateEmployeeFromDto(EmployeeDTO dto, Integer id){

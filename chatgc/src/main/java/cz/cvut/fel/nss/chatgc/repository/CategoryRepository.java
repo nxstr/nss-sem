@@ -13,5 +13,5 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
      * @return Category
      */
 
-    public Category findByName(String name);
+    Category findByName(String name);
 }

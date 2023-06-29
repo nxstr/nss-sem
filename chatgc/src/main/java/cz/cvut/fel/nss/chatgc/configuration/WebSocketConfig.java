@@ -18,7 +18,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // chat client will use this to connect to the server
         registry.addEndpoint("/ws-chat").setAllowedOriginPatterns("*").withSockJS();
     }
 

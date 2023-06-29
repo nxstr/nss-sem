@@ -12,8 +12,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class LogoutHandler extends BaseKafkaHandler{
-    @Autowired
+
     private static final String handlerType = "logout";
+    @Autowired
     private final MessageHandler messageHandler;
     public LogoutHandler(SimpUserRegistry simpUserRegistry, EmployeeServiceImpl employeeService, MessageHandler messageHandler) {
         super(handlerType, simpUserRegistry, employeeService);
@@ -21,7 +22,10 @@ public class LogoutHandler extends BaseKafkaHandler{
         this.setNext(messageHandler);
     }
 
-
+    /**
+     * Handles logout event. Clears SecurityContext and authentication.
+     * @param message MessageDto is event data
+     */
     @KafkaListener(
             topics = KafkaConstants.KAFKA_TOPIC_LOGOUT,
             groupId = KafkaConstants.GROUP_ID

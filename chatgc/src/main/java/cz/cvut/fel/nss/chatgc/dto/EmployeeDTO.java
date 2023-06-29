@@ -1,5 +1,7 @@
 package cz.cvut.fel.nss.chatgc.dto;
 
+import cz.cvut.fel.nss.chatgc.mapper.Visitor;
+import cz.cvut.fel.nss.chatgc.model.users.Employee;
 import lombok.*;
 
 @AllArgsConstructor
@@ -12,4 +14,8 @@ public class EmployeeDTO {
     Integer roleId;
     String roleName;
     Integer id;
+
+    public Employee accept(Visitor v){
+        return v.visitEmployeeDto(this);
+    }
 }

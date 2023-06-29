@@ -23,17 +23,13 @@ public class ChatDTO {
     private Set<Category> categories;
     @Getter
     @Setter
-    private Set<Folder> folders;
-    @Getter
-    @Setter
     private MessageDto lastMessage;
 
-    public ChatDTO(boolean isOpen, String playerUsername, Integer id, Set<Category> categories, Set<Folder> folders, MessageDto lastMessage) {
+    public ChatDTO(boolean isOpen, String playerUsername, Integer id, Set<Category> categories, MessageDto lastMessage) {
         this.isOpen = isOpen;
         this.playerUsername = playerUsername;
         this.id = id;
         this.categories = categories;
-        this.folders = folders;
         this.lastMessage = lastMessage;
     }
 

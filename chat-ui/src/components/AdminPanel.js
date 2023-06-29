@@ -23,6 +23,7 @@ const AdminPanel =({user}) => {
     }
 
     let getRoles = () =>{
+        console.log(user);
         categoryAPI.getRoles().then(res=> {
             setRoles(res.data);
         }).catch(() => {

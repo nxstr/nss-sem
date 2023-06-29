@@ -152,7 +152,6 @@ public class RoleServiceTest {
         roleService.addChild(parent1, actualRole);
 
         assertEquals(2, parent1.getChildrenRoles().size());
-//        assertTrue(parent1.getChildrenRoles().contains(actualRole));
         assertEquals(1, parent1.getChildrenRoles().stream().filter(d-> Objects.equals(d.getName(), actualRole.getName())).count());
         assertEquals(parent1, actualRole.getParentRole());
 

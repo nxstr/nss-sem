@@ -54,7 +54,6 @@ public class CategoryServiceImpl implements CategoryService {
             for(Chat c: chatService.findAllByCategoryId(category.getId())){
                 for(Category cat: c.getCategories()){
                     if(cat.getId().equals(category.getId())){
-                        cat = category;
                         break;
                     }
                 }
@@ -82,10 +81,6 @@ public class CategoryServiceImpl implements CategoryService {
 
     public Category findById(Integer id){
         return categoryRepository.findById(id).orElse(null);
-    }
-
-    public Category findByName(String name){
-        return categoryRepository.findByName(name);
     }
 
     @Cacheable()

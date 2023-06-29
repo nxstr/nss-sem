@@ -51,7 +51,7 @@ const Account =({currentAcc, type}) => {
                     cancel();
                 }
                 setErrMess("");
-            }).catch(() => {
+            }).catch(err => {
                 setErrMess(err?.response?.data);
                 setIsPass(true);
                 setIsEmail(true);

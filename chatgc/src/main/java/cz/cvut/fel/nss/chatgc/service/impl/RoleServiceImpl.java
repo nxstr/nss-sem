@@ -12,7 +12,6 @@ import cz.cvut.fel.nss.chatgc.service.RoleService;
 import cz.cvut.fel.nss.chatgc.service.impl.users.EmployeeServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +24,6 @@ public class RoleServiceImpl implements RoleService {
     private final RoleRepository roleRepository;
     @Autowired
     private final CategoryService categoryService;
-    private final ApplicationEventPublisher publisher;
     private final EmployeeServiceImpl employeeService;
 
     @Transactional
@@ -36,34 +34,14 @@ public class RoleServiceImpl implements RoleService {
         roleRepository.save(role);
         if(role.getParentRole()!=null){
             Set<Category> cats = role.getCategories();
-            for(Category r: role.getParentRole().getCategories()){
-                cats.add(r);
-            }
+            cats.addAll(role.getParentRole().getCategories());
             role.setCategories(cats);
 
             role.getParentRole().getChildrenRoles().add(role);
             update(role.getParentRole());
             update(role);
         }
-        Role role1 = findByName(role.getName());
         return role;
-    }
-
-    @Transactional
-    public void createRoleFromDto(RoleDto dto){
-        Role parent = null;
-        Set<Category> cats = new HashSet<>();
-        for (CategoryDto categoryDto : dto.getCategoryDtoList()) {
-            Integer id = categoryDto.getId();
-            if (categoryService.findById(id) != null) {
-                cats.add(categoryService.findById(id));
-            }
-        }
-        if (dto.getParentId() != null) {
-            parent = findById(dto.getParentId()).orElse(null);
-        }
-        Role role = new Role(dto.getName(), cats, parent, new HashSet<>());
-        role = persist(role);
     }
 
     public List<Employee> findAllEmployeesByRoleId(Integer id){
@@ -185,7 +163,7 @@ public class RoleServiceImpl implements RoleService {
             Set<Role> roles = new HashSet<>(parent.getChildrenRoles());
             roles.remove(role);
             parent.setChildrenRoles(roles);
-            parent = update(parent);
+            update(parent);
         }
     }
 
@@ -246,7 +224,7 @@ public class RoleServiceImpl implements RoleService {
                 cats.add(category);
                 removeParentRoleCategories(c, cats);
             }
-            role = update(role);
+            update(role);
         }
     }
 

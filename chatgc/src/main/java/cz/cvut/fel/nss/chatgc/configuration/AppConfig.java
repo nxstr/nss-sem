@@ -30,9 +30,6 @@ public class AppConfig {
         return new RestTemplate();
     }
 
-    /**
-     * {@link MultipartResolver} is used to support file upload.
-     */
     @Bean(name = "multipartResolver")
     public MultipartResolver multipartResolver() {
         return new StandardServletMultipartResolver();

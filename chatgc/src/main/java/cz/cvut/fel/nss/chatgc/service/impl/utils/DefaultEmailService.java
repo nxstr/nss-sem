@@ -22,9 +22,9 @@ public class DefaultEmailService{
 
     /**
      * Sends email from predefined email address.
-     * @param toAddress message will be sent to this address
-     * @param subject subject of email
-     * @param message content of email
+     * @param toAddress String message will be sent to this address
+     * @param subject String subject of email
+     * @param message String content of email
      */
     @Transactional
     public void sendSimpleEmail(String toAddress, String subject, String message) {

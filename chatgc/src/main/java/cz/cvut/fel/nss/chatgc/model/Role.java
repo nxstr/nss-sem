@@ -1,5 +1,7 @@
 package cz.cvut.fel.nss.chatgc.model;
 
+import cz.cvut.fel.nss.chatgc.dto.RoleDto;
+import cz.cvut.fel.nss.chatgc.mapper.Visitor;
 import lombok.*;
 
 import javax.persistence.*;
@@ -34,6 +36,10 @@ public class Role extends AbstractEntity{
     @Getter
     @Setter
     private Set<Role> childrenRoles;
+
+    public RoleDto accept(Visitor v){
+        return v.visitRoleEntity(this);
+    }
 
     @Override
     public boolean equals(Object o) {

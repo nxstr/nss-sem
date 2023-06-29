@@ -1,6 +1,8 @@
 package cz.cvut.fel.nss.chatgc.model.users;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import cz.cvut.fel.nss.chatgc.dto.EmployeeDTO;
+import cz.cvut.fel.nss.chatgc.mapper.Visitor;
 import cz.cvut.fel.nss.chatgc.model.Role;
 import cz.cvut.fel.nss.chatgc.model.messages.Response;
 import lombok.*;
@@ -35,6 +37,10 @@ public class Employee extends User{
     public Employee(String username, String email, String password, Role role) {
         super(username, email, password);
         this.role = role;
+    }
+
+    public EmployeeDTO accept(Visitor v){
+        return v.visitEmployeeEntity(this);
     }
 
     @Override

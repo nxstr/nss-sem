@@ -17,8 +17,6 @@ import javax.persistence.Table;
  */
 
 @Data
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "response")
@@ -27,4 +25,31 @@ public class Response extends Message{
 
     @ManyToOne(optional = false)
     private Employee employee;
+
+    private Response(ResponseBuilder builder){
+        super(builder);
+        this.employee = builder.employee;
+    }
+
+    public static class ResponseBuilder extends Message.MessageBuilder<ResponseBuilder> {
+        private Employee employee;
+
+        public ResponseBuilder() {
+        }
+
+        public ResponseBuilder addEmployee(Employee employee){
+            this.employee = employee;
+            return this;
+        }
+
+        @Override
+        public Response build() {
+            return new Response(this);
+        }
+
+        @Override
+        protected ResponseBuilder self() {
+            return this;
+        }
+    }
 }

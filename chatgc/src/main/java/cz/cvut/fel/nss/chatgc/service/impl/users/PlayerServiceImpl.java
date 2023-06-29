@@ -3,13 +3,14 @@ package cz.cvut.fel.nss.chatgc.service.impl.users;
 import cz.cvut.fel.nss.chatgc.dto.PlayerDto;
 import cz.cvut.fel.nss.chatgc.events.PlayerEvent;
 import cz.cvut.fel.nss.chatgc.exceptions.ExistsException;
+import cz.cvut.fel.nss.chatgc.mapper.Visitor;
 import cz.cvut.fel.nss.chatgc.model.Chat;
-import cz.cvut.fel.nss.chatgc.model.users.Employee;
 import cz.cvut.fel.nss.chatgc.model.users.Player;
 import cz.cvut.fel.nss.chatgc.model.users.User;
 import cz.cvut.fel.nss.chatgc.repository.users.PlayerRepository;
 import cz.cvut.fel.nss.chatgc.repository.users.UserRepository;
 import cz.cvut.fel.nss.chatgc.service.ChatService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,9 @@ public class PlayerServiceImpl extends UserServiceImpl<Player> {
     private final PasswordEncoder encoder;
     private final ChatService chatService;
 
+    @Autowired
+    private Visitor v;
+
     public PlayerServiceImpl(UserRepository<Player, Integer> userDao, ApplicationEventPublisher publisher, PlayerRepository playerDao, PasswordEncoder encoder, ChatService chatService) {
         super(userDao, publisher, encoder);
         this.playerDao = playerDao;
@@ -42,7 +46,7 @@ public class PlayerServiceImpl extends UserServiceImpl<Player> {
 
     /**
      * Validates data and creates new player.
-     * @param player entity that will be saved
+     * @param player Player that will be saved
      */
     @Transactional
     public void create(Player player){
@@ -57,13 +61,13 @@ public class PlayerServiceImpl extends UserServiceImpl<Player> {
         if(!patternMatches(player.getEmail(), regexPattern)){
             throw new ExistsException("email is not valid");
         }
-//        publisher.publishEvent(new PlayerEvent("create", new PlayerDto(player.getUsername(), player.getEmail(), player.getPassword(), null)));
+        publisher.publishEvent(new PlayerEvent("create", new PlayerDto(player.getUsername(), player.getEmail(), player.getPassword(), null)));
         this.persist(player);
     }
 
     /**
      * Finds player by its id.
-     * @param id Id of player
+     * @param id Integer id of player
      * @return Player
      */
     @Transactional
@@ -73,22 +77,22 @@ public class PlayerServiceImpl extends UserServiceImpl<Player> {
 
     /**
      * Changes user's username.
-     * @param player entity that will be updated
-     * @param newName new username of player
+     * @param player Player that will be updated
+     * @param newName String new username of player
      */
     @Transactional
     public void changeUsername(Player player, String newName){
         if(findByUsername(newName)!=null){
             throw new ExistsException("username already exists");
         }
-        publisher.publishEvent(new PlayerEvent("updateData", new PlayerDto(player.getUsername(), player.getEmail(), "", player.getId())));
+        publisher.publishEvent(new PlayerEvent("updateData", player.accept(v)));
         player.setUsername(newName);
         Chat chat = player.getChat();
         chat.setPlayerUsername(newName);
         chat.setPlayer(player);
         chatService.update(chat);
         update(player);
-        publisher.publishEvent(new PlayerEvent("updateUsername", new PlayerDto(player.getUsername(), player.getEmail(), "", player.getId())));
+        publisher.publishEvent(new PlayerEvent("updateUsername", player.accept(v)));
     }
 
     /**
@@ -109,7 +113,7 @@ public class PlayerServiceImpl extends UserServiceImpl<Player> {
     /**
      * Validates data and updates player.
      * @param dto PlayerDTO entity that contains data for validation
-     * @param id Id of player that will be updated
+     * @param id Integer id of player that will be updated
      */
     @Transactional
     public void updatePlayer(PlayerDto dto, Integer id){

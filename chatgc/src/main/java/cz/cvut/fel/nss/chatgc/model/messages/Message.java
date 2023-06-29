@@ -31,4 +31,47 @@ public abstract class Message extends AbstractEntity {
 
     private MessageType type;
 
+    public Message(MessageBuilder<?> builder) {
+        this.dataPath = builder.dataPath;
+        this.date = builder.date;
+        this.chat = builder.chat;
+        this.type = builder.type;
+    }
+
+    /**
+     * Abstract Message Builder.
+     * @param <T> RequestBuilder or ResponseBuilder
+     */
+
+    abstract static class MessageBuilder<T extends MessageBuilder> {
+        private String dataPath;
+        private LocalDateTime date;
+        private Chat chat;
+        private MessageType type;
+
+        abstract Message build();
+
+        public T addDataPath(String dataPath){
+            this.dataPath = dataPath;
+            return self();
+        }
+
+        public T addDate(LocalDateTime date){
+            this.date = date;
+            return self();
+        }
+
+        public T addChat(Chat chat){
+            this.chat = chat;
+            return self();
+        }
+
+        public T addType(MessageType type){
+            this.type = type;
+            return self();
+        }
+
+        protected abstract T self();
+    }
+
 }

@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -19,8 +20,6 @@ import java.util.Set;
  */
 
 @Data
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "requests")
@@ -30,8 +29,45 @@ public class Request extends Message{
     @ManyToMany
     private Set<Category> categories;
 
-    public Request(String content, LocalDateTime date, Chat chat, MessageType type, Set<Category> categories) {
-        super(content, date, chat, type);
-        this.categories = categories;
+    private Request(RequestBuilder builder){
+        super(builder);
+        categories = builder.categories;
+    }
+
+    public void addCategory(Category category) {
+        categories.add(category);
+    }
+
+    public void removeCategory(Category category) {
+        categories.remove(category);
+    }
+
+
+
+    public static class RequestBuilder extends Message.MessageBuilder<RequestBuilder>{
+        private Set<Category> categories = new HashSet<>();
+
+        public RequestBuilder(){
+        }
+
+        public RequestBuilder addCategories(Set<Category> categories){
+            this.categories = categories;
+            return this;
+        }
+
+        public RequestBuilder addCategory(Category category){
+            this.categories.add(category);
+            return this;
+        }
+
+        @Override
+        public Request build(){
+            return new Request(this);
+        }
+
+        @Override
+        protected RequestBuilder self() {
+            return this;
+        }
     }
 }

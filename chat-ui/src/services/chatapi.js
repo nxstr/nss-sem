@@ -1,7 +1,7 @@
 import Axios from "axios";
 
 const api = Axios.create({
-    baseURL: '/api/',
+    baseURL: 'http://localhost:3000/api/',
 });
 
 const chatAPI = {
@@ -76,6 +76,9 @@ const chatAPI = {
     },
     saveCategories:(id, list) => {
         return api.put(`chats/${id}/cats`, list);
+    },
+    getChat:(id) => {
+        return api.get(`chats/${id}/get`);
     }
 }
 

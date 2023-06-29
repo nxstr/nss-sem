@@ -8,7 +8,6 @@ public class MessageDto {
     String sender;
     String content;
     String chat;
-    //List<CategoryDto> categories (прямо як в RoleDto)
     List<CategoryDto> categories;
     LocalDateTime date;
 

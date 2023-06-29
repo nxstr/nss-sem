@@ -11,6 +11,10 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * Player Event Listener.
+ */
 @Component
 public class PlayerEventHandler extends AbstractHandler{
     @Autowired
@@ -23,21 +27,23 @@ public class PlayerEventHandler extends AbstractHandler{
         this.emailService = emailService;
     }
 
+    /**
+     * Handles player event. According to type of event, forces employees to actualise data, sends emails or forces logout player.
+     * @param event PlayerEvent has event type and PlayerDto
+     */
     @EventListener
     @Transactional
     public void handlePlayerEvent(PlayerEvent event){
         switch (event.message()) {
-            case "create":
-                emailService.sendSimpleEmail(event.dto().getEmail(), "Your account data", "You have a new account in the GC web-chat app, here are your data:\n" +
-                        "username: " + event.dto().getUsername() + ",\n" +
-                        "password: " + event.dto().getPassword() + "\n");
-                break;
-            case "updateData":
+            case "create" -> emailService.sendSimpleEmail(event.dto().getEmail(), "Your account data", "You have a new account in the GC web-chat app, here are your data:\n" +
+                    "username: " + event.dto().getUsername() + ",\n" +
+                    "password: " + event.dto().getPassword() + "\n");
+            case "updateData" -> {
                 MessageDto messageDto = new MessageDto();
                 messageDto.setMessageType(MessageTypeConstants.LOGOUT);
                 template.convertAndSend("/topic/group/" + event.dto().getUsername(), messageDto);
-                break;
-            case "updateUsername":
+            }
+            case "updateUsername" -> {
                 emailService.sendSimpleEmail(event.dto().getEmail(), "Your account data", "Your account has been changed in the GC web-chat app, here are your data:\n" +
                         "username: " + event.dto().getUsername() + "\n");
                 for (String i : getOnlineEmps()) {
@@ -45,11 +51,9 @@ public class PlayerEventHandler extends AbstractHandler{
                     message.setMessageType(MessageTypeConstants.CHAT);
                     template.convertAndSend("/topic/group/" + i, message);
                 }
-                break;
-            case "updatePass":
-                emailService.sendSimpleEmail(event.dto().getEmail(), "Your account data", "Your password has been changed in the GC web-chat app, here are your new data:\n" +
-                        "password: " + event.dto().getPassword() + "\n");
-                break;
+            }
+            case "updatePass" -> emailService.sendSimpleEmail(event.dto().getEmail(), "Your account data", "Your password has been changed in the GC web-chat app, here are your new data:\n" +
+                    "password: " + event.dto().getPassword() + "\n");
         }
     }
 }

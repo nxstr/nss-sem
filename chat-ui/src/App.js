@@ -41,6 +41,7 @@ const App = () => {
   let path = "/home"
 
 
+
   let onConnected = () => {
     console.log("Connected!!")
     chatAPI.loginMessage(user.username).then(res => {
@@ -109,6 +110,10 @@ const App = () => {
         for(let i=0; i<chats.length; i++){
           if(chats[i].playerUsername===activeChat.chatName){
             chats[i].lastMessage = msg;
+            // chats[i].categories = msg.categories;
+            if(msg.sender===chats[i].playerUsername){
+              chats[i].open = true;
+            }
           }
         }
         chats.sort((a,b) => Date.parse(b.lastMessage.date) - Date.parse(a.lastMessage.date));
@@ -119,6 +124,10 @@ const App = () => {
         for(let i=0; i<chats.length; i++){
           if(chats[i].playerUsername===msg.chat){
             chats[i].lastMessage = msg;
+            // chats[i].categories = msg.categories;
+            if(msg.sender===chats[i].playerUsername){
+              chats[i].open = true;
+            }
           }
         }
         chats.sort((a,b) => Date.parse(b.lastMessage.date) - Date.parse(a.lastMessage.date));
@@ -217,13 +226,20 @@ const App = () => {
     if(user.type==="player"){
       getCats();
     }else{
+
       let ch = null;
       for(let i=0; i<chats.length; i++){
         if(chats[i].id.toString()===id.toString()){
           ch = chats[i];
         }
       }
+
       setChatInfo(ch);
+      console.log("bbbbbb", ch);
+      chatAPI.getChat(id).then(res=>{
+        console.log("aaaaaaaa", res.data);
+        setChatInfo(res.data);
+      })
       getCats();
       console.log(ch);
     }
@@ -255,6 +271,10 @@ const App = () => {
         }
       }
       setChatInfo(ch);
+      chatAPI.getChat(id).then(res=>{
+        console.log("aaaaaaaa2222", res.data);
+        setChatInfo(res.data);
+      })
       getCats();
     }
     setIsShown(false);
@@ -346,6 +366,8 @@ const App = () => {
   let submitCats = (value) => {
     setSelectedOptions(value);
   }
+
+
 
   return (
     <div className="App">

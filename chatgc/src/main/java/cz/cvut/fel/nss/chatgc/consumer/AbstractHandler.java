@@ -1,6 +1,5 @@
 package cz.cvut.fel.nss.chatgc.consumer;
 
-import cz.cvut.fel.nss.chatgc.events.CommunicationEvent;
 import cz.cvut.fel.nss.chatgc.service.impl.users.EmployeeServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.user.SimpUser;
@@ -10,6 +9,10 @@ import javax.persistence.DiscriminatorValue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+/**
+ * General handler class. Serves for getting actual online employees.
+ */
 
 public abstract class AbstractHandler{
 
@@ -22,7 +25,11 @@ public abstract class AbstractHandler{
         this.employeeService = employeeService;
     }
 
-
+    /**
+     * Finds list of authorized employees' names.
+     * Using List<String> because users subscribes to topics that are identical to their usernames.
+     * @return List<String>
+     */
     public List<String> getOnlineEmps(){
         List<String> onlineUsers = simpUserRegistry
                 .getUsers()

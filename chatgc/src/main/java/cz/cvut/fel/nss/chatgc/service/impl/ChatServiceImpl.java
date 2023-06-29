@@ -49,14 +49,12 @@ public class ChatServiceImpl implements ChatService {
     }
 
     public Chat findByPlayer(String player){
-        Chat chat = chatRepository.findByPlayerUsername(player);
-        return chat;
+        return chatRepository.findByPlayerUsername(player);
     }
 
     @Transactional
     public Chat update(Chat chat){
-        Chat res = chatRepository.save(chat);
-        return res;
+        return chatRepository.save(chat);
     }
 
     @Transactional
@@ -69,8 +67,6 @@ public class ChatServiceImpl implements ChatService {
         update(chat);
         publisher.publishEvent(new ChatEvent("update", chat));
     }
-
-
 
     @Transactional
     public void setChatOpen(Chat chat){

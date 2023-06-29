@@ -14,6 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Chat Event Listener.
+ */
 @Component
 public class ChatEventHandler extends AbstractHandler{
 
@@ -27,7 +30,10 @@ public class ChatEventHandler extends AbstractHandler{
         this.employeeService = employeeService;
     }
 
-
+    /**
+     * Handles chat event and notifies all employees, that have access to this chat, about update.
+     * @param event ChatEvent has event type and ChatDto
+     */
     @EventListener
     @Transactional
     public void handleChatEvent(ChatEvent event){

@@ -12,11 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.messaging.simp.user.SimpUser;
-import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,6 +35,11 @@ public class LoginController {
         this.loginService = loginService;
     }
 
+    /**
+     * Login user into system.
+     * @param request HashMap<String, String> represents username and raw password
+     * @return ResponseEntity<String>
+     */
     @PostMapping(value = "/api/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> loginUser(@RequestBody HashMap<String, String> request){
         try {
@@ -52,6 +53,11 @@ public class LoginController {
     }
 
 
+    /**
+     * Logout authorizes user.
+     * @param principal Principal
+     * @return ResponseEntity<String>
+     */
     @GetMapping(value = "/api/logout")
     public ResponseEntity<String> logoutUser(Principal principal){
         try {
@@ -71,7 +77,11 @@ public class LoginController {
         }
     }
 
-
+    /**
+     * Sends "system" login-message.
+     * @param m MessageDto
+     * @return ResponseEntity<String>
+     */
     @PostMapping(value = "/api/log", consumes = "application/json", produces = "application/json")
     public ResponseEntity<String> loginMessage(@RequestBody MessageDto m) {
         try {

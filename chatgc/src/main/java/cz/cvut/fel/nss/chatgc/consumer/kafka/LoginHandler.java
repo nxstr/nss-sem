@@ -27,7 +27,10 @@ public class LoginHandler extends BaseKafkaHandler {
         this.setNext(logoutHandler);
     }
 
-
+    /**
+     * Handles login event. Sends message to topic, on which user is subscribed.
+     * @param message MessageDto is event data
+     */
     @KafkaListener(
             topics = KafkaConstants.KAFKA_TOPIC_LOGIN,
             groupId = KafkaConstants.GROUP_ID

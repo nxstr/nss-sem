@@ -25,15 +25,6 @@ public class AccountDetails implements org.springframework.security.core.userdet
         addUserRole();
     }
 
-    public AccountDetails(User user, Collection<GrantedAuthority> authorities) {
-        Objects.requireNonNull(user);
-        Objects.requireNonNull(authorities);
-        this.user = user;
-        this.authorities = new HashSet<>();
-        addUserRole();
-        this.authorities.addAll(authorities);
-    }
-
     private void addUserRole() {
         authorities.add(new SimpleGrantedAuthority(user.getClass().getAnnotation(DiscriminatorValue.class).value()));
         if(user.getClass().getAnnotation(DiscriminatorValue.class).value().equals("EMPLOYEE")){
@@ -82,10 +73,6 @@ public class AccountDetails implements org.springframework.security.core.userdet
 
     public User getAccount() {
         return user;
-    }
-
-    public void eraseCredentials() {
-        user.erasePassword();
     }
 
 

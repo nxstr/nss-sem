@@ -1,6 +1,5 @@
 package cz.cvut.fel.nss.chatgc.consumer.kafka;
 
-import cz.cvut.fel.nss.chatgc.controller.users.EmployeeController;
 import cz.cvut.fel.nss.chatgc.dto.MessageDto;
 import cz.cvut.fel.nss.chatgc.service.impl.users.EmployeeServiceImpl;
 import org.slf4j.Logger;
@@ -47,6 +46,11 @@ public abstract class BaseKafkaHandler implements KafkaHandler {
     @Override
     public abstract void handle(MessageDto message);
 
+    /**
+     * Finds list of authorized employees' names.
+     * Using List<String> because users subscribes to topics that are identical to their usernames.
+     * @return List<String>
+     */
     public List<String> getOnlineEmps(){
         List<String> onlineUsers = simpUserRegistry
                 .getUsers()

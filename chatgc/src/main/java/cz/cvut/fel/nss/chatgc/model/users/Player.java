@@ -2,6 +2,8 @@ package cz.cvut.fel.nss.chatgc.model.users;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import cz.cvut.fel.nss.chatgc.dto.PlayerDto;
+import cz.cvut.fel.nss.chatgc.mapper.Visitor;
 import cz.cvut.fel.nss.chatgc.model.Chat;
 import lombok.*;
 
@@ -34,6 +36,10 @@ public class Player extends User{
     public Player(String username, String email, String password, PlayerRoles role) {
         super(username, email, password);
         this.role = role;
+    }
+
+    public PlayerDto accept(Visitor v){
+        return v.visitPlayerEntity(this);
     }
 
     @Override
