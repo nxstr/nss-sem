@@ -1,0 +1,242 @@
+.App {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  text-align: center;
+}
+.main{
+  display: flex;
+  flex-direction: row;
+  height: 85vh;
+  width: 94%;
+  margin: 2vh;
+}
+
+
+.mainButton{
+  display: inline-flex;
+  flex-direction: row;
+  list-style: none;
+  margin-bottom: 0;
+}
+
+.accInfo {
+  list-style: none;
+}
+
+.mainButton li {
+  padding-right: 5vh;
+}
+
+.App-header {
+  background-color: #262626;
+  overflow: visible;
+  width: 100%;
+  text-align: center;
+  color: white;
+}
+.messagecomp{
+  height: 83%;
+  display: inline-block;
+}
+
+.chat{
+  display: inline-flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.chatInfo {
+  display: inline-flex;
+  flex-direction: column;
+  width: 25%;
+}
+.chats{
+  width: 30%;
+  display: inline-flex;
+  flex-direction: column;
+}
+.cats{
+  display: inline-flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.chat-box{
+  background-color: lightblue;
+  float:left;
+  text-align: left;
+  padding: 2%;
+  margin: 1%;
+  display: flex;
+  flex-direction: row;
+
+}
+
+.box-content{
+  width: 80%;
+  margin: 1%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-username{
+  font-weight: bold;
+}
+
+.chat-box-button{
+  height: 5%;
+  width: 10px;
+}
+
+.chat-text{
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/*.CatsButton{*/
+/*  width: 50%;*/
+/*}*/
+
+.chat-list {
+  width: 100%;
+  margin: 0;
+  list-style: none;
+  flex-grow: 1;
+  overflow: auto;
+  display: inline-flex;
+  flex-direction: column;
+  float:left;
+  height: 90%;
+  padding-left: 0;
+}
+
+.adminFunc {
+  display: flex;
+  flex-direction: row;
+  list-style: none;
+}
+
+.adminFunc li {
+  padding-left: 2vh;
+}
+
+.messages-list {
+  display: inline-block;
+  vertical-align: top;
+  padding: 20px 0;
+  width: 100%;
+  list-style: none;
+  flex-grow: 1;
+  overflow: auto;
+  margin-right: 5%;
+  height: 90%;
+  margin-bottom: 5%;
+}
+
+.chats-list {
+  display: inline-block;
+  vertical-align: top;
+  width: 30%;
+  margin: 0;
+  list-style: none;
+  flex-grow: 1;
+  overflow: auto;
+}
+
+.Messages-message {
+  display: flex;
+  margin-top: 10px;
+  text-align: left;
+}
+
+/*.Chats-list {*/
+/*  display: flex;*/
+/*  margin-top: 10px;*/
+/*}*/
+
+.Messages-message.currentUser {
+  /*justify-content: flex-end;*/
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.Message-content {
+  display: inline-block;
+}
+
+.currentUser>.Message-content {
+  align-items: flex-end;
+}
+
+.Messages-message>.avatar {
+  height: 35px;
+  width: 35px;
+  border-radius: 50%;
+  display: inline-block;
+  margin: 0 10px -10px;
+}
+
+.Message-content>.username, .Message-content-1>.username {
+  display: block;
+  color: gray;
+  font-size: 14px;
+}
+
+.Message-content {
+  padding: 0 10px;
+  max-width: 400px;
+  margin: 0;
+  border-radius: 12px;
+  background-color: rgb(148, 216, 255);
+  color: rgb(90, 90, 90);
+  display: inline-block;
+}
+
+.Message-content-1 {
+  padding: 0 10px;
+  max-width: 400px;
+  margin: 1%;
+  border-radius: 12px;
+  background-color: rgb(148, 216, 255);
+  color: rgb(90, 90, 90);
+  display: inline-block;
+  height: 90%;
+}
+
+.currentUser>.Message-content {
+  background-color: rgb(143, 255, 152);
+}
+
+.date{
+  font-size: 70%;
+}
+
+.message-input {
+  display: flex;
+  margin-left: 1%;
+  margin-bottom: 1vh;
+  margin-top: 2vh;
+  justify-content: space-between;
+  max-width: 900px;
+  /*margin-bottom: 38px;*/
+}
+
+.cats1{
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+
+.inputField {
+  padding: 5px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid orangered;
+  flex-grow: 1;
+}
+
