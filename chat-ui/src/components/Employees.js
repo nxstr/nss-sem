@@ -16,6 +16,7 @@ const Employees =({employees, roles, submitEmployee}) => {
     const [cats, setCats] = useState([]);
     const [saveAccess, setSaveAccess] = useState(false);
     const [eid, setEid] = useState(-1);
+    const [errMess, setErrMess] = useState("");
 
     let openNew = () => {
         setIsNew(true);
@@ -68,8 +69,9 @@ const Employees =({employees, roles, submitEmployee}) => {
                 if(res.status===200){
                     back();
                 }
-            }).catch(() => {
-                console.log('Error Occured while creating role to api');
+                setErrMess("");
+            }).catch(err => {
+                setErrMess(err?.response?.data);
                 setSaveAccess(true);
             })
         }else{
@@ -77,8 +79,9 @@ const Employees =({employees, roles, submitEmployee}) => {
                 if(res.status===200){
                     back();
                 }
-            }).catch(() => {
-                console.log('Error Occured while creating role to api');
+                setErrMess("");
+            }).catch(err => {
+                setErrMess(err?.response?.data);
                 setSaveAccess(true);
             })
         }
@@ -117,9 +120,10 @@ const Employees =({employees, roles, submitEmployee}) => {
                 }
             }
             setSaveAccess(true);
-        }).catch(() => {
-        console.log('Error Occured while creating role to api');
-    })
+            setErrMess("");
+        }).catch(err => {
+            setErrMess(err?.response?.data);
+        })
     }
 
     let handleDelete = (event, id) => {
@@ -127,8 +131,9 @@ const Employees =({employees, roles, submitEmployee}) => {
             if(res.status===200){
                 submitEmployee();
             }
-        }).catch(() => {
-            console.log('Error Occured while creating role to api');
+            setErrMess("");
+        }).catch(err => {
+            setErrMess(err?.response?.data);
         })
     }
 
@@ -140,7 +145,7 @@ const Employees =({employees, roles, submitEmployee}) => {
                     className="avatar"
                     style={{ backgroundColor: "yellow" }}
                 />
-                    <div className="Message-content">
+                    <div className="Message-content-1">
                         <div className="username">
                             {employee.roleName}
                         </div>
@@ -160,6 +165,9 @@ const Employees =({employees, roles, submitEmployee}) => {
 
     return (
         <>
+            {errMess!=="" && (
+                <p>{errMess}</p>
+            )}
             {!!isNew ? (
                 <>
                     <TextField

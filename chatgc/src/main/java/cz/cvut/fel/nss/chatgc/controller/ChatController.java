@@ -18,6 +18,8 @@ import cz.cvut.fel.nss.chatgc.service.CategoryService;
 import cz.cvut.fel.nss.chatgc.service.ChatService;
 import cz.cvut.fel.nss.chatgc.service.impl.users.EmployeeServiceImpl;
 import cz.cvut.fel.nss.chatgc.service.impl.users.PlayerServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,12 +34,13 @@ import java.util.concurrent.ExecutionException;
 
 @RestController
 public class ChatController {
-
+    private static final Logger LOG = LoggerFactory.getLogger(ChatController.class);
     @Autowired
     private KafkaTemplate<String, MessageDto> kafkaTemplate;
     private final EmployeeServiceImpl employeeService;
     private final PlayerServiceImpl playerService;
     private final ChatService chatService;
+    @Autowired
     private final CategoryService categoryService;
 
     public ChatController(EmployeeServiceImpl employeeService, PlayerServiceImpl playerService, ChatService chatService, CategoryService categoryService) {
@@ -50,7 +53,6 @@ public class ChatController {
     @GetMapping(value="/api/allChats/{username}")
     public Set<ChatDTO> getAllChatsForUser(@PathVariable String username){
         Set<ChatDTO> chats = new HashSet<>();
-        System.out.println("find chat: " + chatService.findByPlayer("e"));
         if(Objects.equals(employeeService.findByUsername(username).getClass().getAnnotation(DiscriminatorValue.class).value(), "EMPLOYEE")){
             for(Chat chat:employeeService.findAllChats((Employee) employeeService.findByUsername(username)).stream().filter(d -> d.getPlayer()!=null).toList()){
                 Message m = null;
@@ -148,61 +150,74 @@ public class ChatController {
     }
 
     @PostMapping(value = "/api/send/{chatId}", consumes = "application/json", produces = "application/json")
-    public void sendMessage(@RequestBody MessageDto message, @PathVariable Integer chatId) {
+    public ResponseEntity<String> sendMessage(@RequestBody MessageDto message, @PathVariable Integer chatId) {
         try {
             message.setChat(chatService.findById(chatId).getPlayerUsername());
             kafkaTemplate.send(KafkaConstants.KAFKA_TOPIC_CHAT, message).get();
+            return new ResponseEntity<>("" ,HttpStatus.OK);
         } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping(value = "api/chats/new")
     @PreAuthorize("hasAuthority('PLAYER')")
-    public ResponseEntity createChat(Principal principal){
-        final AuthenticationToken auth = (AuthenticationToken) principal;
-        Integer id = auth.getPrincipal().getAccount().getId();
-        Player player = playerService.findById(id);
-        Chat chat = new Chat(true, player, new ArrayList<>(), new HashSet<>(), new HashSet<>(), player.getUsername());
-        chatService.persist(chat);
-        player.setChat(chat);
-        playerService.update(player);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<String> createChat(Principal principal){
+        try {
+            final AuthenticationToken auth = (AuthenticationToken) principal;
+            Integer id = auth.getPrincipal().getAccount().getId();
+            Player player = playerService.findById(id);
+            Chat chat = new Chat(true, player, new ArrayList<>(), new HashSet<>(), new HashSet<>(), player.getUsername());
+            chatService.persist(chat);
+            player.setChat(chat);
+            playerService.update(player);
+            LOG.info("Chat {} successfully created", player.getUsername());
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch (NullPointerException e){
+            LOG.info(e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PutMapping(value = "api/chats/{id}/close")
     @PreAuthorize("hasAuthority('EMPLOYEE')")
-    public ResponseEntity setChatClose(@PathVariable Integer id){
+    public ResponseEntity<String> setChatClose(@PathVariable Integer id){
         try {
             Chat chat = chatService.findById(id);
             chatService.setChatClose(chat);
+            LOG.info("Chat {} successfully closed", id);
             return new ResponseEntity<>(HttpStatus.OK);
         }catch (ExistsException e){
-            return new ResponseEntity(HttpStatus.FORBIDDEN);
+            LOG.info(e.getMessage() + ": {}", id);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PutMapping(value = "api/chats/{id}/cats")
     @PreAuthorize("hasAuthority('admin')")
-    public ResponseEntity setCategoriesByAdmin(@PathVariable Integer id, @RequestBody List<CategoryDto> categories){
+    public ResponseEntity<String> setCategoriesByAdmin(@PathVariable Integer id, @RequestBody List<CategoryDto> categories){
         try{
             Chat chat = chatService.findById(id);
             categoryService.setCategoriesToChat(chat, categories);
+            LOG.info("Chat {} successfully updated", id);
             return new ResponseEntity<>(HttpStatus.OK);
         }catch (ExistsException e){
-            return new ResponseEntity(HttpStatus.FORBIDDEN);
+            LOG.info(e.getMessage() + ": {}", id);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PutMapping(value = "api/chats/{id}/open")
     @PreAuthorize("hasAuthority('admin')")
-    public ResponseEntity setChatOpen(@PathVariable Integer id){
+    public ResponseEntity<String> setChatOpen(@PathVariable Integer id){
         try {
             Chat chat = chatService.findById(id);
             chatService.setChatOpen(chat);
+            LOG.info("Chat {} successfully opened", id);
             return new ResponseEntity<>(HttpStatus.OK);
         }catch (ExistsException e){
-            return new ResponseEntity(HttpStatus.FORBIDDEN);
+            LOG.info(e.getMessage() + ": {}", id);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 

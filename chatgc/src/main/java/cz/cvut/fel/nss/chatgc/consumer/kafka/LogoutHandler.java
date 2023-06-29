@@ -10,18 +10,15 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.DiscriminatorValue;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 @Component
 public class LogoutHandler extends BaseKafkaHandler{
     @Autowired
-    private final EmployeeServiceImpl employeeService;
     private static final String handlerType = "logout";
-    public LogoutHandler(SimpUserRegistry simpUserRegistry, EmployeeServiceImpl employeeService) {
+    private final MessageHandler messageHandler;
+    public LogoutHandler(SimpUserRegistry simpUserRegistry, EmployeeServiceImpl employeeService, MessageHandler messageHandler) {
         super(handlerType, simpUserRegistry, employeeService);
-        this.employeeService = employeeService;
+        this.messageHandler = messageHandler;
+        this.setNext(messageHandler);
     }
 
 
@@ -31,17 +28,9 @@ public class LogoutHandler extends BaseKafkaHandler{
     )
     @Override
     public void handle(MessageDto message){
-//        if(employeeService.findByUsername(message.getSender())!=null && Objects.equals(employeeService.findByUsername(message.getSender()).getClass().getAnnotation(DiscriminatorValue.class).value(), "EMPLOYEE")) {
-//            if (getOnlineEmps().contains(message.getSender())) {
-//                ArrayList<String> emps = getOnlineEmps();
-//                emps.remove(message.getSender());
-//                setOnlineEmps(emps);
-//            }
-//        }
+        getLOG().info("{} sending via kafka-logout listener..", message.getSender());
         SecurityContext context = SecurityContextHolder.getContext();
         SecurityContextHolder.clearContext();
         context.setAuthentication(null);
-        //make logger and maybe smth else, but no more hand control of online users
-        System.out.println(">>>>>>>>>>>>>>>>>>>>>> logout"+getOnlineEmps());
     }
 }

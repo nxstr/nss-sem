@@ -11,12 +11,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.internet.InternetAddress;
 
+/**
+ * Represents Email Service.
+ */
 @Service
 public class DefaultEmailService{
 
     @Autowired
     public JavaMailSender emailSender;
 
+    /**
+     * Sends email from predefined email address.
+     * @param toAddress message will be sent to this address
+     * @param subject subject of email
+     * @param message content of email
+     */
     @Transactional
     public void sendSimpleEmail(String toAddress, String subject, String message) {
 

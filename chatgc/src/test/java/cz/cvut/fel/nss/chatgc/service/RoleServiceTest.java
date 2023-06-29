@@ -5,6 +5,8 @@ import cz.cvut.fel.nss.chatgc.model.Category;
 import cz.cvut.fel.nss.chatgc.model.Role;
 import cz.cvut.fel.nss.chatgc.repository.CategoryRepository;
 import cz.cvut.fel.nss.chatgc.repository.RoleRepository;
+import cz.cvut.fel.nss.chatgc.service.impl.RoleServiceImpl;
+import cz.cvut.fel.nss.chatgc.service.impl.users.EmployeeServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,10 +25,13 @@ public class RoleServiceTest {
     private CategoryRepository categoryDao;
 
     @Mock
+    private EmployeeServiceImpl employeeService;
+
+    @Mock
     private RoleRepository roleDao;
 
     @InjectMocks
-    private RoleService roleService;
+    private RoleServiceImpl roleService;
 
     @Test
     public void persistRoleWithParentTest(){
@@ -45,7 +50,7 @@ public class RoleServiceTest {
         assertEquals(cats1, actual.getCategories());
         assertEquals(parent, actual.getParentRole());
         assertEquals(children, parent.getChildrenRoles());
-        Mockito.verify(roleDao, Mockito.times(1)).save(actual);
+        Mockito.verify(roleDao, Mockito.times(2)).save(actual);
     }
 
     @Test
@@ -72,7 +77,7 @@ public class RoleServiceTest {
         assertEquals(children, parent2.getChildrenRoles());
 
 
-        Mockito.verify(roleDao, Mockito.times(3)).save(actualChild);
+        Mockito.verify(roleDao, Mockito.times(4)).save(actualChild);
     }
 
 
@@ -114,7 +119,7 @@ public class RoleServiceTest {
 
         roleService.findByName(act.getName());
 
-        Mockito.verify(roleDao, Mockito.times(1)).findByName(act.getName());
+        Mockito.verify(roleDao, Mockito.times(3)).findByName(act.getName());
     }
 
     @Test

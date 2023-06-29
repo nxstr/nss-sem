@@ -11,6 +11,7 @@ import cz.cvut.fel.nss.chatgc.service.CategoryService;
 import cz.cvut.fel.nss.chatgc.service.RoleService;
 import cz.cvut.fel.nss.chatgc.service.impl.users.EmployeeServiceImpl;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,15 +23,13 @@ import java.util.*;
 public class RoleServiceImpl implements RoleService {
 
     private final RoleRepository roleRepository;
+    @Autowired
     private final CategoryService categoryService;
     private final ApplicationEventPublisher publisher;
     private final EmployeeServiceImpl employeeService;
 
     @Transactional
     public Role persist(Role role){
-        if(role.getParentRole()!=null) {
-            System.out.println(role.getParentRole().getName());
-        }
         if(findByName(role.getName())!=null){
             throw new RoleException("role with this name exists");
         }
@@ -47,9 +46,7 @@ public class RoleServiceImpl implements RoleService {
             update(role);
         }
         Role role1 = findByName(role.getName());
-        System.out.println("on persist cats: " + role1.getCategories().size());
         return role;
-        //publisher
     }
 
     @Transactional
@@ -67,7 +64,6 @@ public class RoleServiceImpl implements RoleService {
         }
         Role role = new Role(dto.getName(), cats, parent, new HashSet<>());
         role = persist(role);
-        System.out.println("on dto create cats: " + role.getCategories().size());
     }
 
     public List<Employee> findAllEmployeesByRoleId(Integer id){
@@ -127,7 +123,8 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public List<Role> changeCategoryInAllRoles(Category category){
         List<Role> roles = findAllRolesByCategoryId(category.getId());
-        if(roles!=null){
+        System.out.println(roles);
+        if(roles!=null && !roles.isEmpty()){
             Category cat = roles.get(0).getCategories().stream().filter(d-> d.getId().equals(category.getId())).findAny().orElse(null);
             if(cat!=null){
                 for(Role r: roles){
@@ -170,7 +167,6 @@ public class RoleServiceImpl implements RoleService {
             for(Role c: role.getChildrenRoles()){
                 c.getParentRole().setName(name);
                 update(c);
-                System.out.println("on update parent name : " + c.getParentRole().getName());
             }
         }
         role.setName(name);
@@ -327,7 +323,6 @@ public class RoleServiceImpl implements RoleService {
     }
 
     public List<Role> findAll(){
-//        List<Role> roles = new ArrayList<>(roleRepository.findAll().stream().filter(d -> !d.getName().equals("admin")).toList());
         return roleRepository.findAll();
     }
 

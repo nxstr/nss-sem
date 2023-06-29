@@ -70,7 +70,6 @@ public class EmployeeEventHandler extends AbstractHandler{
                     MessageDto messageDto = new MessageDto();
                     if (i.equals(event.employee().getUsername())) {
                         messageDto.setMessageType(MessageTypeConstants.LOGOUT);
-                        System.out.println(messageDto.getMessageType() + " " + i);
                         template.convertAndSend("/topic/group/" + i, messageDto);
                         break;
                     }

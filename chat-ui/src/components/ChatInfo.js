@@ -7,7 +7,7 @@ const ChatInfo = ({activeChat, categories, isAdmin}) => {
     const [savedCats, setSavedCats] = useState([]);
     const [availableCats, setAvailableCats] = useState([]);
     const [selectedCat, setSelectedCat] = useState(null);
-
+    const [errMess, setErrMess] = useState("");
 
 
     let addCategory = () => {
@@ -60,8 +60,9 @@ const ChatInfo = ({activeChat, categories, isAdmin}) => {
                 activeChat.open=false;
                 activeChat.categories = [];
             }
-        }).catch(() => {
-            console.log('Error Occured while creating role to api');
+            setErrMess("");
+        }).catch(err => {
+            setErrMess(err?.response?.data);
         })
     }
 
@@ -70,8 +71,9 @@ const ChatInfo = ({activeChat, categories, isAdmin}) => {
             if(res.status===200){
                 activeChat.open=true;
             }
-        }).catch(() => {
-            console.log('Error Occured while creating role to api');
+            setErrMess("");
+        }).catch(err => {
+            setErrMess(err?.response?.data);
         })
     }
 
@@ -81,14 +83,19 @@ const ChatInfo = ({activeChat, categories, isAdmin}) => {
                 activeChat.categories=savedCats;
                 setSavedCats([]);
                 setAddCat(false);
+
             }
-        }).catch(() => {
-            console.log('Error Occured while creating role to api');
+            setErrMess("");
+        }).catch(err => {
+            setErrMess(err?.response?.data);
         })
     }
 
     return (
         <>
+            {errMess!=="" && (
+                <p>{errMess}</p>
+            )}
             <p>chatName: {activeChat.playerUsername}</p>
             <p>isOpen: {activeChat.open.toString()}</p>
             {activeChat.open===true?(

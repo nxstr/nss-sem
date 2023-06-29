@@ -26,6 +26,6 @@ public class DataGenerator {
     }
 
     public static Employee generateEmployee(){
-        return new Employee("test"+randomInt(), "email"+randomInt(), "pass"+randomInt(), null);
+        return new Employee("test"+randomInt(), "email"+randomInt()+"@aaa.aaa", "pass"+randomInt(), null);
     }
 }

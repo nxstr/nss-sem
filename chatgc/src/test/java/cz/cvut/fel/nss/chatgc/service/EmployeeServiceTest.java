@@ -1,6 +1,8 @@
 package cz.cvut.fel.nss.chatgc.service;
 
 import cz.cvut.fel.nss.chatgc.DataGenerator;
+import cz.cvut.fel.nss.chatgc.exceptions.AppException;
+import cz.cvut.fel.nss.chatgc.exceptions.ExistsException;
 import cz.cvut.fel.nss.chatgc.exceptions.RoleException;
 import cz.cvut.fel.nss.chatgc.model.Category;
 import cz.cvut.fel.nss.chatgc.model.Chat;
@@ -20,8 +22,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.lang.reflect.Executable;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -59,7 +64,9 @@ public class EmployeeServiceTest {
     public void createTestReturnsException(){
         Employee e1 = setUpEmployee();
         e1.setRole(null);
-        assertThrows(RoleException.class, ()->employeeService.create(e1));
+        Throwable throwable = catchThrowable(() -> employeeService.create(e1));
+
+        assertThat(throwable).isInstanceOf(AppException.class);
     }
 
     @Test

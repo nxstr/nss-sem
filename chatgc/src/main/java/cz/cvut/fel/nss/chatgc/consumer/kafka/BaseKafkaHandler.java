@@ -1,7 +1,10 @@
 package cz.cvut.fel.nss.chatgc.consumer.kafka;
 
+import cz.cvut.fel.nss.chatgc.controller.users.EmployeeController;
 import cz.cvut.fel.nss.chatgc.dto.MessageDto;
 import cz.cvut.fel.nss.chatgc.service.impl.users.EmployeeServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.user.SimpUser;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 
@@ -11,6 +14,7 @@ import java.util.List;
 import java.util.Objects;
 
 public abstract class BaseKafkaHandler implements KafkaHandler {
+    private final Logger LOG = LoggerFactory.getLogger(this.getClass());
     private KafkaHandler next;
     private final String handlerType;
     private final SimpUserRegistry simpUserRegistry;
@@ -34,6 +38,10 @@ public abstract class BaseKafkaHandler implements KafkaHandler {
         }else if(!dto.getMessageType().equals(handlerType) && next!=null){
             this.next.canHandle(dto);
         }
+    }
+
+    public Logger getLOG() {
+        return LOG;
     }
 
     @Override

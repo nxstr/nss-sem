@@ -2,6 +2,7 @@ package cz.cvut.fel.nss.chatgc.controller.users;
 
 import cz.cvut.fel.nss.chatgc.constants.KafkaConstants;
 import cz.cvut.fel.nss.chatgc.dto.MessageDto;
+import cz.cvut.fel.nss.chatgc.exceptions.AccountException;
 import cz.cvut.fel.nss.chatgc.security.model.AuthenticationToken;
 import cz.cvut.fel.nss.chatgc.service.impl.utils.LoginService;
 import org.slf4j.Logger;
@@ -24,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 @RestController
 public class LoginController {
@@ -33,55 +33,53 @@ public class LoginController {
     private final LoginService loginService;
     @Autowired
     private KafkaTemplate<String, MessageDto> kafkaTemplate;
-    private final SimpUserRegistry simpUserRegistry;
 
     @Autowired
-    public LoginController(LoginService loginService, SimpUserRegistry simpUserRegistry) {
+    public LoginController(LoginService loginService) {
         this.loginService = loginService;
-        this.simpUserRegistry = simpUserRegistry;
     }
 
     @PostMapping(value = "/api/login", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity loginUser(@RequestBody HashMap<String, String> request){
+    public ResponseEntity<String> loginUser(@RequestBody HashMap<String, String> request){
         try {
             loginService.loginUser(request.get("username"), request.get("password"));
-
-            LOG.trace("User {} successfully logged in", request.get("username"));
-            return new ResponseEntity<>(HttpStatus.OK);
-        }catch (NullPointerException | BadCredentialsException e){
-            System.out.println(e.getMessage());
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            LOG.info("User {} successfully logged in", request.get("username"));
+            return new ResponseEntity<>("", HttpStatus.OK);
+        }catch (AccountException | BadCredentialsException e){
+            LOG.info(e.getMessage() + ": {} ", request.get("username"));
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
-    @GetMapping(value = "/api/logout")
-    public ResponseEntity logoutUser(Principal principal){
-        try {
 
+    @GetMapping(value = "/api/logout")
+    public ResponseEntity<String> logoutUser(Principal principal){
+        try {
             final AuthenticationToken auth = (AuthenticationToken) principal;
+            if(auth==null){
+                return new ResponseEntity<>(HttpStatus.OK);
+            }
             String name = auth.getPrincipal().getAccount().getUsername();
-//            SecurityUtils.setCurrentUser(null);
-//            SecurityContext context = SecurityContextHolder.getContext();
-//            SecurityContextHolder.clearContext();
-//            context.setAuthentication(null);
             MessageDto m = new MessageDto("logout", name);
             m.setContent("logout-action");
             kafkaTemplate.send(KafkaConstants.KAFKA_TOPIC_LOGOUT, m);
+            LOG.info("User {} successfully logged out", name);
             return new ResponseEntity<>(HttpStatus.OK);
         }catch (NullPointerException | BadCredentialsException e){
-            System.out.println(e.getMessage());
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            LOG.info(e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
 
     @PostMapping(value = "/api/log", consumes = "application/json", produces = "application/json")
-    public void loginMessage(@RequestBody MessageDto m) {
+    public ResponseEntity<String> loginMessage(@RequestBody MessageDto m) {
         try {
             m.setContent("logged-in-action/" + m.getContent());
             kafkaTemplate.send(KafkaConstants.KAFKA_TOPIC_LOGIN, m).get();
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 }

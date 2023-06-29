@@ -9,7 +9,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
 
-
+/**
+ * Abstract user entity.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,9 +27,18 @@ public abstract class User extends AbstractEntity {
     private String email;
     private String password;
 
+    /**
+     * Encode raw password.
+     * @param passwordEncoder
+     */
+
     public void encodePassword(PasswordEncoder passwordEncoder) {
         password = passwordEncoder.encode(password);
     }
+
+    /**
+     * Reset password.
+     */
     public void erasePassword() {
         this.password = null;
     }

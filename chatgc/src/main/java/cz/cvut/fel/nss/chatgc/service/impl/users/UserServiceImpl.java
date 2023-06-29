@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.regex.Pattern;
+
 
 @Service
 @AllArgsConstructor
@@ -25,13 +27,11 @@ public abstract class UserServiceImpl<T extends User> implements UserService {
     public void persist(User user){
         user.encodePassword(encoder);
         userDao.save(user);
-        System.out.println("saved");
     }
 
     @Transactional
     public void update(User user){
         userDao.save(user);
-        System.out.println("updates");
     }
 
     @Transactional
@@ -61,7 +61,18 @@ public abstract class UserServiceImpl<T extends User> implements UserService {
         if(findByEmail(email)!=null){
             throw new ExistsException("email already exists");
         }
+        String regexPattern = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@"
+                + "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
+        if(!patternMatches(email, regexPattern)){
+            throw new ExistsException("email is not valid");
+        }
         user.setEmail(email);
         userDao.save(user);
+    }
+
+    public static boolean patternMatches(String emailAddress, String regexPattern) {
+        return Pattern.compile(regexPattern)
+                .matcher(emailAddress)
+                .matches();
     }
 }

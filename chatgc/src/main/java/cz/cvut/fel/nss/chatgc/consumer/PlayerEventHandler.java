@@ -32,16 +32,12 @@ public class PlayerEventHandler extends AbstractHandler{
                         "username: " + event.dto().getUsername() + ",\n" +
                         "password: " + event.dto().getPassword() + "\n");
                 break;
-            case "updatePass":
-                emailService.sendSimpleEmail(event.dto().getEmail(), "Your account data", "Your password has been changed in the GC web-chat app, here are your new data:\n" +
-                        "password: " + event.dto().getPassword() + "\n");
-                break;
-            case "changeData":
+            case "updateData":
                 MessageDto messageDto = new MessageDto();
                 messageDto.setMessageType(MessageTypeConstants.LOGOUT);
                 template.convertAndSend("/topic/group/" + event.dto().getUsername(), messageDto);
                 break;
-            case "changeUsername":
+            case "updateUsername":
                 emailService.sendSimpleEmail(event.dto().getEmail(), "Your account data", "Your account has been changed in the GC web-chat app, here are your data:\n" +
                         "username: " + event.dto().getUsername() + "\n");
                 for (String i : getOnlineEmps()) {
@@ -49,6 +45,10 @@ public class PlayerEventHandler extends AbstractHandler{
                     message.setMessageType(MessageTypeConstants.CHAT);
                     template.convertAndSend("/topic/group/" + i, message);
                 }
+                break;
+            case "updatePass":
+                emailService.sendSimpleEmail(event.dto().getEmail(), "Your account data", "Your password has been changed in the GC web-chat app, here are your new data:\n" +
+                        "password: " + event.dto().getPassword() + "\n");
                 break;
         }
     }

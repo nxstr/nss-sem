@@ -1,5 +1,6 @@
 package cz.cvut.fel.nss.chatgc.configuration;
 
+import com.hazelcast.config.*;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -68,6 +69,22 @@ public class AppConfig {
         props.put("mail.smtp.starttls.enable", "true");
 
         return mailSender;
+    }
+
+    @Bean
+    public Config hazelCastConfig(){
+        Config config = new Config()
+                .setInstanceName("hazelcast-instance")
+                .addMapConfig(
+                        new MapConfig()
+                                .setName("categories")
+                                .setEvictionConfig(new EvictionConfig()
+                                    .setSize(200)
+                                    .setMaxSizePolicy(MaxSizePolicy.FREE_HEAP_SIZE)
+                                    .setEvictionPolicy(EvictionPolicy.LRU)
+                ));
+        config.getJetConfig().setEnabled(true);
+        return config;
     }
 
 

@@ -1,6 +1,8 @@
 package cz.cvut.fel.nss.chatgc.controller.users;
 
+import cz.cvut.fel.nss.chatgc.controller.CategoryController;
 import cz.cvut.fel.nss.chatgc.dto.EmployeeDTO;
+import cz.cvut.fel.nss.chatgc.exceptions.AccountException;
 import cz.cvut.fel.nss.chatgc.exceptions.ExistsException;
 import cz.cvut.fel.nss.chatgc.exceptions.RoleException;
 import cz.cvut.fel.nss.chatgc.model.Role;
@@ -9,6 +11,8 @@ import cz.cvut.fel.nss.chatgc.security.model.AuthenticationToken;
 import cz.cvut.fel.nss.chatgc.service.RoleService;
 import cz.cvut.fel.nss.chatgc.service.impl.users.EmployeeServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,13 +26,14 @@ import java.util.Objects;
 @RestController
 @RequiredArgsConstructor
 public class EmployeeController {
+    private static final Logger LOG = LoggerFactory.getLogger(EmployeeController.class);
 
     private final EmployeeServiceImpl employeeService;
     private final RoleService roleService;
 
     @PostMapping("/api/employee/new")
     @PreAuthorize("hasAuthority('admin')")
-    public ResponseEntity createEmployee(@RequestBody EmployeeDTO dto){
+    public ResponseEntity<String> createEmployee(@RequestBody EmployeeDTO dto){
         try{
             Role role = roleService.findById(dto.getRoleId()).orElse(null);
             if(role==null){
@@ -37,10 +42,11 @@ public class EmployeeController {
             Employee e = new Employee(dto.getUsername(), dto.getEmail(), dto.getPassword(), role);
             e.setResponses(new ArrayList<>());
             employeeService.create(e);
+            LOG.info("Employee {} successfully created", dto.getUsername());
             return new ResponseEntity<>(HttpStatus.OK);
-        }catch (RoleException | ExistsException e){
-            System.out.println(e.getMessage());
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }catch (RoleException | ExistsException | AccountException e){
+            LOG.info(e.getMessage(), ": {}", dto.getUsername());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -79,30 +85,36 @@ public class EmployeeController {
 
     @PutMapping("/api/employee/update/{id}")
     @PreAuthorize("hasAuthority('admin')")
-    public ResponseEntity updateEmployee(@RequestBody EmployeeDTO dto, @PathVariable Integer id){
+    public ResponseEntity<String> updateEmployee(@RequestBody EmployeeDTO dto, @PathVariable Integer id){
         try {
             Employee e = employeeService.findById(id);
             if (!e.getRole().getId().equals(dto.getRoleId())) {
-                System.out.println("role");
                 Role role = roleService.findById(dto.getRoleId()).orElse(null);
                 if (role != null) {
                     employeeService.changeRole(e, role);
                 }
             }
             employeeService.updateEmployeeFromDto(dto, id);
-            //update role if not updateFromDto
+            LOG.info("Employee {} successfully updated", dto.getUsername());
             return new ResponseEntity<>(HttpStatus.OK);
-        }catch (RoleException | ExistsException e){
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }catch (RoleException | ExistsException | AccountException e){
+            LOG.info(e.getMessage(), ": {}", dto.getUsername());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @DeleteMapping("/api/emaployee/delete/{id}")
     @PreAuthorize("hasAuthority('admin')")
-    public ResponseEntity deleteEmployee(@PathVariable Integer id){
-        Employee e = employeeService.findById(id);
-        employeeService.delete(e);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<String> deleteEmployee(@PathVariable Integer id){
+        try {
+            Employee e = employeeService.findById(id);
+            employeeService.delete(e);
+            LOG.info("Employee {} successfully deleted", id);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch (NullPointerException e){
+            LOG.info(e.getMessage(), ": {}", id);
+            return new ResponseEntity<>("employee does not exist", HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping(value = "/api/employee/current")
@@ -117,19 +129,21 @@ public class EmployeeController {
 
     @PutMapping(value = "api/employee/current/edit")
     @PreAuthorize("hasAuthority('EMPLOYEE')")
-    public ResponseEntity editCurrent(Principal principal, @RequestBody EmployeeDTO dto){
+    public ResponseEntity<String> editCurrent(Principal principal, @RequestBody EmployeeDTO dto){
         try {
             final AuthenticationToken auth = (AuthenticationToken) principal;
             Integer id = auth.getPrincipal().getAccount().getId();
             employeeService.updateEmployeeFromDto(dto, id);
+            LOG.info("Employee {} successfully updated", dto.getUsername());
             return new ResponseEntity<>(HttpStatus.OK);
-        }catch (RoleException | ExistsException e){
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }catch (RoleException | ExistsException | AccountException e){
+            LOG.info(e.getMessage(), ": {}", dto.getUsername());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("api/register/emp")
-    public void registerAdminOnSystemInitialization(@RequestBody EmployeeDTO dto){
+    public ResponseEntity<String> registerAdminOnSystemInitialization(@RequestBody EmployeeDTO dto){
         if(employeeService.findAllEmployees().stream().filter(d-> d.getRole().getName().equals("admin")).toList().isEmpty()){
             if(Objects.isNull(roleService.findByName("admin"))){
                 roleService.initializeAdminRole();
@@ -137,6 +151,11 @@ public class EmployeeController {
             Role role = roleService.findByName("admin");
             Employee employee = new Employee(dto.getUsername(), dto.getEmail(), dto.getPassword(), role);
             employeeService.create(employee);
+            LOG.info("Employee {} successfully created", dto.getUsername());
+            return new ResponseEntity<>(HttpStatus.OK);
+        }else{
+            LOG.info("admin account already exist");
+            return new ResponseEntity<>("admin account already exist", HttpStatus.BAD_REQUEST);
         }
     }
 

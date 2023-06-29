@@ -50,7 +50,6 @@ public class ChatServiceImpl implements ChatService {
 
     public Chat findByPlayer(String player){
         Chat chat = chatRepository.findByPlayerUsername(player);
-        System.out.println(chat);
         return chat;
     }
 

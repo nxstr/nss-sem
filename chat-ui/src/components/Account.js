@@ -8,6 +8,7 @@ const Account =({currentAcc, type}) => {
     const [isPass, setIsPass] = useState(false);
     const [newEmail, setNewEmail] = useState("");
     const [newPass, setNewPass] = useState("");
+    const [errMess, setErrMess] = useState("");
 
     let handleEmailChange = event => setNewEmail(event.target.value);
     let handlePassChange = event => setNewPass(event.target.value);
@@ -31,17 +32,15 @@ const Account =({currentAcc, type}) => {
     let updateAccount = () => {
         setIsPass(false);
         setIsEmail(false);
-        // if(newEmail===""){
-        //     setNewEmail(currentAcc.email);
-        // }
         if(type!=="player"){
             chatapi.updateCurrent(currentAcc.username, newEmail, newPass, currentAcc.id, "employee").then(res => {
                 if(res.status===200){
                     currentAcc.email=newEmail;
                     cancel();
                 }
-            }).catch(() => {
-                console.log('Error Occured while creating role to api');
+                setErrMess("");
+            }).catch(err => {
+                setErrMess(err?.response?.data);
                 setIsPass(true);
                 setIsEmail(true);
             });
@@ -51,8 +50,9 @@ const Account =({currentAcc, type}) => {
                     currentAcc.email=newEmail;
                     cancel();
                 }
+                setErrMess("");
             }).catch(() => {
-                console.log('Error Occured while creating role to api');
+                setErrMess(err?.response?.data);
                 setIsPass(true);
                 setIsEmail(true);
             });
@@ -61,6 +61,9 @@ const Account =({currentAcc, type}) => {
 
     return (
         <>
+            {errMess!=="" && (
+                <p>{errMess}</p>
+            )}
             <div className="chat">
             <ul className="accInfo">
                 <li>

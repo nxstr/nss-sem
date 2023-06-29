@@ -8,6 +8,10 @@ import lombok.*;
 import javax.persistence.*;
 import java.util.Objects;
 
+/**
+ * Concrete User class representing Player entity.
+ */
+
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

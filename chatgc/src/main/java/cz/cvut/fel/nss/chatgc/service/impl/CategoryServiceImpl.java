@@ -3,12 +3,14 @@ package cz.cvut.fel.nss.chatgc.service.impl;
 import cz.cvut.fel.nss.chatgc.dto.CategoryDto;
 import cz.cvut.fel.nss.chatgc.events.CategoryEvent;
 import cz.cvut.fel.nss.chatgc.events.ChatEvent;
+import cz.cvut.fel.nss.chatgc.exceptions.ExistsException;
 import cz.cvut.fel.nss.chatgc.model.Category;
 import cz.cvut.fel.nss.chatgc.model.Chat;
 import cz.cvut.fel.nss.chatgc.repository.CategoryRepository;
 import cz.cvut.fel.nss.chatgc.service.CategoryService;
 import cz.cvut.fel.nss.chatgc.service.ChatService;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.*;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +19,7 @@ import java.util.*;
 
 @Service
 @AllArgsConstructor
+@CacheConfig(cacheNames = "categories")
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
@@ -24,6 +27,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final ChatService chatService;
 
     @Transactional
+    @CacheEvict(allEntries = true)
     public void persist(Category category){
         categoryRepository.save(category);
         publisher.publishEvent(new CategoryEvent("persist", category));
@@ -36,10 +40,13 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Transactional
+    @CacheEvict(allEntries = true)
     public void updateCategoryFromDto(CategoryDto categoryDto, Integer id){
         if (findById(id)!=null) {
             Category category = findById(id);
-
+            if(!notExists(categoryDto.getName())){
+                throw new ExistsException("category name is not unique");
+            }
             category.setName(categoryDto.getName());
             publisher.publishEvent(new CategoryEvent("changeCatIntoRole", category));
 
@@ -60,6 +67,7 @@ public class CategoryServiceImpl implements CategoryService {
 
 
     @Transactional
+    @CacheEvict(allEntries = true)
     public void delete(Category category){
         for(Chat c: chatService.findAllByCategoryId(category.getId())){
             Set<Category> cats = c.getCategories();
@@ -80,6 +88,7 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.findByName(name);
     }
 
+    @Cacheable()
     public List<Category> findAll(){
         return categoryRepository.findAll();
     }

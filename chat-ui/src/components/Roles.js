@@ -19,6 +19,7 @@ const Roles =({categories, roles, submit}) => {
     const [selectedParentName, setSelectedParentName] = useState("");
     const [savedCats, setSavedCats] = useState([]);
     const [id, setId] = useState(-1);
+    const [errMess, setErrMess] = useState("");
 
 
     let showRoleCategories = (id) => {
@@ -69,30 +70,16 @@ const Roles =({categories, roles, submit}) => {
                     setSelected(roles[1].id);
                     setCats(roles[1].categoryDtoList);
             }
-            // setSelected(res.data.parentId);
             let arr = [];
             let tmp = false;
             for(let i=0; i<roles.length; i++){
                 if(roles[i].id.toString()===res.data.parentId.toString()){
                     setSelectedParentName(roles[i].name);
-            //         for(let k=0; k<res.data.categoryDtoList; k++) {
-            //             for (let j = 0; j < roles[i].categoryDtoList.length; j++) {
-            //                 if (roles[i].categoryDtoList[j] === res.data.categoryDtoList[k]){
-            //                     tmp = true;
-            //                     break;
-            //                 }
-            //             }
-            //             if(!tmp){
-            //                 arr.push(res.data.categoryDtoList[k]);
-            //             }
-            //         }
                 }
-            //
             }
-            // setAddedCats(arr);
-
-        }).catch(() => {
-            console.log('Error Occured while creating role to api');
+            setErrMess("");
+        }).catch(err => {
+            setErrMess(err?.response?.data);
         })
     }
 
@@ -101,8 +88,9 @@ const Roles =({categories, roles, submit}) => {
             if(res.status===200){
                 submit();
             }
-        }).catch(() => {
-            console.log('Error Occured while creating role to api');
+            setErrMess("");
+        }).catch(err => {
+            setErrMess(err?.response?.data);
         })
     }
 
@@ -116,11 +104,11 @@ const Roles =({categories, roles, submit}) => {
                     className="avatar"
                     style={{ backgroundColor: "yellow" }}
                 />
-                    <div className="Message-content">
+                    <div className="Message-content-1">
                         <div className="username">
-                            {name}
+                            {id}
                         </div>
-                        <div className="text">{id}</div>
+                        <div className="text">{name}</div>
                     </div>
                     <Button variant="contained" color="primary" onClick={event => handleOpen(event, id)} >
                         Open
@@ -201,8 +189,9 @@ const Roles =({categories, roles, submit}) => {
                 if(res.status===200){
                     back();
                 }
-            }).catch(() => {
-                console.log('Error Occured while creating role to api');
+                setErrMess("");
+            }).catch(err => {
+                setErrMess(err?.response?.data);
             })
         }else{
             categoryapi.updateRole(name, selected, addedCats, id).then(res => {
@@ -210,8 +199,9 @@ const Roles =({categories, roles, submit}) => {
                 if(res.status===200){
                     back();
                 }
-            }).catch(() => {
-                console.log('Error Occured while creating role to api');
+                setErrMess("");
+            }).catch(err => {
+                setErrMess(err?.response?.data);
             })
         }
 
@@ -239,6 +229,9 @@ const Roles =({categories, roles, submit}) => {
 
     return (
         <>
+            {errMess!=="" && (
+                <p>{errMess}</p>
+            )}
             {!!isNew?(
                 <>
                     <TextField

@@ -14,6 +14,10 @@ import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+/**
+ * Concrete Message class representing Request entity.
+ */
+
 @Data
 @Builder
 @AllArgsConstructor

@@ -37,15 +37,16 @@ const App = () => {
   const [isPlayer, setPlayer] = useState(true);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [chatInfo, setChatInfo] = useState(null);
+  const [errMess, setErrMess] = useState("");
   let path = "/home"
 
 
   let onConnected = () => {
     console.log("Connected!!")
     chatAPI.loginMessage(user.username).then(res => {
-      console.log('Sent login', res);
+      setErrMess("");
     }).catch(err => {
-      console.log('Error Occured while sending message to api', err);
+      setErrMess(err?.response?.data);
     })
     getChats(user);
   }
@@ -55,6 +56,7 @@ const App = () => {
       res.data.sort((a,b) => Date.parse(b.lastMessage.date) - Date.parse(a.lastMessage.date));
       res.data.sort((a, b)=> Number(b.open)-Number(a.open));
         setChats(res.data)
+      console.log(res.data);
       // setChats(chats => res.data)
       let hasChatObj = false;
       for(let i=0; i<res.data.length; i++){
@@ -68,8 +70,9 @@ const App = () => {
       }else{
         setHasChat(true);
       }
-    }).catch(() => {
-      console.log('Error Occurred while getting chats to api');
+      setErrMess("");
+    }).catch(err => {
+      setErrMess(err?.response?.data);
     })
 
   }
@@ -153,46 +156,41 @@ const App = () => {
       }
     }
     chatAPI.sendMessage(user.username, msgText, activeChat, arr).then(res => {
-      console.log('Sent', res);
-    }).catch(() => {
-      console.log('Error Occured while sending message to api');
+      setErrMess("");
+    }).catch(err => {
+      setErrMess(err?.response?.data);
     })
   }
 
 
   let categoryCreate = () => {
     categoryAPI.createCategory(user.username).then(res => {
-      console.log('Cat', res);
-    }).catch(() => {
-      console.log('Error Occured while creating category');
+      setErrMess("");
+    }).catch(err => {
+      setErrMess(err?.response?.data);
     })
   }
 
   const login = async (username, password) => {
     categoryAPI.login(username, password).then(res =>{
+      console.log(res);
       if(res.status===200){
         setUser({
           username: username,
           color: randomColor(),
           type: "player"
         })
-        getChats(user)
-      }else{
-        console.log("FORBIDDEN")
+        getChats(user);
+        setErrMess("");
       }
-    }).catch(() => {
-      console.log('Error Occured while getting messages to api');
+    }).catch(err => {
+      setErrMess(err?.response?.data);
     })
 
   };
 
   let handleLoginSubmit = (username, password) => {
-    login(username, password).then(res => {
-      console.log('Sent loginnnnnnnnnnnnnnnnnnnnn', res, " ", hasChat);
-
-    }).catch(err => {
-      console.log('Error Occured while sending message to api', err);
-    });
+    login(username, password);
   }
 
   let handleReg = () => {
@@ -202,9 +200,10 @@ const App = () => {
   let getCats = () => {
     categoryAPI.getCats(user.username).then(res => {
       setCats(res.data);
-    }).catch(err=>{
-      console.log('Error Occured while sending message to api', err);
-    });
+      setErrMess("");
+    }).catch(err => {
+      setErrMess(err?.response?.data);
+    })
   }
 
 
@@ -233,8 +232,9 @@ const App = () => {
     // window.location.replace(`http://localhost:3000/allChats/${id}`)
     chatAPI.getMessages(id, user.username).then(res =>{
       setMessages([].concat(res.data))
-    }).catch(() => {
-      console.log('Error Occured while getting messages to api');
+      setErrMess("");
+    }).catch(err => {
+      setErrMess(err?.response?.data);
     })
   }
 
@@ -261,8 +261,9 @@ const App = () => {
     setShowAcc(false);
     chatAPI.getMessages(id, user.username).then(res =>{
       setMessages([].concat(res.data))
-    }).catch(() => {
-      console.log('Error Occured while getting messages to api');
+      setErrMess("");
+    }).catch(err => {
+      setErrMess(err?.response?.data);
     })
   }
 
@@ -286,8 +287,9 @@ const App = () => {
       if(res.status===200){
         getChats(user);
       }
-    }).catch(() => {
-      console.log('Error Occured while getting messages to api');
+      setErrMess("");
+    }).catch(err => {
+      setErrMess(err?.response?.data);
     })
   }
 
@@ -296,8 +298,9 @@ const App = () => {
       setIsReg(false);
       setHasChat(false);
       setShowAcc(false);
-    }).catch(() => {
-      console.log('Error Occured while getting messages to api');
+      setErrMess("");
+    }).catch(err => {
+      setErrMess(err?.response?.data);
     })
   }
 
@@ -312,9 +315,9 @@ const App = () => {
       setEmp(false);
       setShowAcc(false);
       setIsShown(false);
-      console.log("logout")
-    }).catch(() => {
-      console.log('Error Occured while getting messages to api');
+      setErrMess("");
+    }).catch(err => {
+      setErrMess(err?.response?.data);
     })
   }
 
@@ -326,27 +329,29 @@ const App = () => {
     if(user.type!=="player"){
       chatAPI.getCurrentEmployee().then(res => {
         setCurrentAcc(res.data);
-        console.log(res.data.username);
-      }).catch(() => {
-        console.log('Error Occured while getting messages to api');
+        setErrMess("");
+      }).catch(err => {
+        setErrMess(err?.response?.data);
       })
     }else{
       chatAPI.getCurrentPlayer().then(res => {
         setCurrentAcc(res.data);
-        console.log(res.data.username);
-      }).catch(() => {
-        console.log('Error Occured while getting messages to api');
+        setErrMess("");
+      }).catch(err => {
+        setErrMess(err?.response?.data);
       })
     }
   }
 
   let submitCats = (value) => {
-    console.log("valueeeeeeeeeee", value);
     setSelectedOptions(value);
   }
 
   return (
     <div className="App">
+      {errMess!=="" && (
+          <p>{errMess}</p>
+      )}
       {!!user ?
         (
 

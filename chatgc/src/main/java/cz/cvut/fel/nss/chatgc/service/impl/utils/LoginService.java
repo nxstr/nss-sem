@@ -8,7 +8,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
+/**
+ * Represents Login Service.
+ */
 @Service
 public class LoginService {
 
@@ -21,6 +23,11 @@ public class LoginService {
         this.userDetailsService = userDetailsService;
     }
 
+    /**
+     * Provides user authentication.
+     * @param username username from client request
+     * @param password raw password from client request
+     */
     @Transactional
     public void loginUser (String username, String password){
 

@@ -5,12 +5,14 @@ import Categories from "./Categories";
 import categoryAPI from "../services/categoryapi";
 import Roles from "./Roles";
 import Employees from "./Employees";
+import Players from "./Players";
 
 const AdminPanel =({user}) => {
     const [cats, setCats] = useState([]);
     const [roles, setRoles] = useState([]);
     const [emps, setEmps] = useState([]);
     const [showNum, setShowNum] = useState(0);
+    const [players, setPlayers] = useState([]);
     let getCats = () =>{
         categoryAPI.getCats(user.username).then(res=> {
             setCats(res.data);
@@ -36,6 +38,14 @@ const AdminPanel =({user}) => {
         })
     }
 
+    let getPlayers = () => {
+        categoryAPI.getPlayers().then(res =>{
+            setPlayers(res.data);
+        }).catch(() => {
+            console.log('Error Occured while getting roles to api');
+        })
+    }
+
     let loadCats = () =>{
         getCats();
         setShowNum(1);
@@ -53,9 +63,15 @@ const AdminPanel =({user}) => {
         setShowNum(3);
     }
 
+    let loadPlayers = () => {
+        getPlayers();
+        setShowNum(4);
+    }
+
     let onSendMessageCat = () => {
         categoryAPI.getCats(user.username).then(res => {
             setCats(res.data);
+            console.log(res.data);
             return (<Categories cats={cats}
                                 user={user}
                                 onSendMessageCat={onSendMessageCat}/>);
@@ -82,6 +98,15 @@ const AdminPanel =({user}) => {
         })
     }
 
+    let submitPlayer = () => {
+        categoryAPI.getPlayers().then(res =>{
+            setPlayers(res.data);
+            return(<Players players={players} submitPlayer={submitPlayer}/>);
+        }).catch(() => {
+            console.log('Error Occured while getting roles to api');
+        })
+    }
+
     return (
         <div className="chat">
             <ul className="adminFunc">
@@ -101,7 +126,7 @@ const AdminPanel =({user}) => {
                     </Button>
                 </li>
                 <li>
-                    <Button className="CatsButton">
+                    <Button onClick={loadPlayers} className="CatsButton">
                         Players
                     </Button>
                 </li>
@@ -116,7 +141,7 @@ const AdminPanel =({user}) => {
                <Employees employees={emps} roles={roles} submitEmployee={submitEmployee}/>
             )}
             {showNum===4 && (
-                console.log("players")
+                <Players players={players} submitPlayer={submitPlayer}/>
             )}
         </div>
     )

@@ -84,6 +84,21 @@ const categoryAPI = {
             "id": id
         }
         return api.put(`employee/update/${id}`, dto);
+    },
+    getPlayers:()=>{
+        return api.get(`player/all`);
+    },
+    getPlayer:(id)=>{
+        return api.get(`player/${id}`);
+    },
+    updatePlayer:(username, email, password, id)=>{
+        let dto = {
+            "username": username,
+            "email": email,
+            "password": password,
+            "id": id
+        }
+        return api.put(`player/${id}/edit`, dto);
     }
 
 }

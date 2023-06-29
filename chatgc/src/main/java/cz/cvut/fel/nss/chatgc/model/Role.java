@@ -6,7 +6,9 @@ import javax.persistence.*;
 import java.util.Objects;
 import java.util.Set;
 
-
+/**
+ * Representing Role entity.
+ */
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,8 +24,6 @@ public class Role extends AbstractEntity{
     @Getter
     @Setter
     private Set<Category> categories;
-
-//    private int depth;
 
     @ManyToOne
     @Getter

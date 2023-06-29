@@ -1,5 +1,6 @@
 package cz.cvut.fel.nss.chatgc.security.model;
 
+import cz.cvut.fel.nss.chatgc.exceptions.AccountException;
 import cz.cvut.fel.nss.chatgc.model.users.Employee;
 import cz.cvut.fel.nss.chatgc.model.users.Player;
 import cz.cvut.fel.nss.chatgc.model.users.User;
@@ -16,7 +17,9 @@ public class AccountDetails implements org.springframework.security.core.userdet
     private final Set<GrantedAuthority> authorities;
 
     public AccountDetails(User user) {
-        Objects.requireNonNull(user);
+        if(user==null){
+            throw new AccountException("username does not exist");
+        }
         this.user = user;
         this.authorities = new HashSet<>();
         addUserRole();

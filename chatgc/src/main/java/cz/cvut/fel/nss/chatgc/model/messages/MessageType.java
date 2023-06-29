@@ -1,5 +1,8 @@
 package cz.cvut.fel.nss.chatgc.model.messages;
 
+/**
+ * Types for Message entity.
+ */
 public enum MessageType {
     TEXT("TEXT"), FILE("FILE");
 

@@ -26,7 +26,7 @@ const Messages = ({ messages, currentUser, chats, onSubmitChat }) => {
                         {sender}
                     </div>
                     <div className="text">{content}</div>
-                    <div>{d.getHours()}:{d.getMinutes()}, {d.getDate()}.{d.getMonth()}.{d.getFullYear()}</div>
+                    <div className="date">{d.getHours()}:{d.getMinutes()}, {d.getDate()}.{d.getMonth()}.{d.getFullYear()}</div>
                 </div>
             </li>
         );

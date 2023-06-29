@@ -60,6 +60,7 @@
   display: inline-flex;
   flex-direction: column;
   width: 100%;
+  height: 100%;
 }
 
 .chat-box{
@@ -148,6 +149,7 @@
 .Messages-message {
   display: flex;
   margin-top: 10px;
+  text-align: left;
 }
 
 /*.Chats-list {*/
@@ -181,11 +183,10 @@
   display: block;
   color: gray;
   font-size: 14px;
-  padding-bottom: 4px;
 }
 
-.Message-content>.text {
-  padding: 10px;
+.Message-content {
+  padding: 0 10px;
   max-width: 400px;
   margin: 0;
   border-radius: 12px;
@@ -194,8 +195,23 @@
   display: inline-block;
 }
 
-.currentUser>.Message-content .text {
+.Message-content-1 {
+  padding: 0 10px;
+  max-width: 400px;
+  margin: 1%;
+  border-radius: 12px;
+  background-color: rgb(148, 216, 255);
+  color: rgb(90, 90, 90);
+  display: inline-flex;
+  height: 90%;
+}
+
+.currentUser>.Message-content {
   background-color: rgb(143, 255, 152);
+}
+
+.date{
+  font-size: 70%;
 }
 
 .message-input {

@@ -24,9 +24,7 @@ public class LoginHandler extends BaseKafkaHandler {
         super(handlerType, simpUserRegistry, employeeService);
         this.employeeService = employeeService;
         this.logoutHandler = logoutHandler;
-//        this.messageHandler = messageHandler;
         this.setNext(logoutHandler);
-//        this.logoutHandler.setNext(messageHandler);
     }
 
 
@@ -37,14 +35,10 @@ public class LoginHandler extends BaseKafkaHandler {
     @Override
     public void handle(MessageDto message){
         message.setMessageType("login");
-        System.out.println("sending via kafka login-topic listener.." + message.getSender());
+        getLOG().info("{} sending via kafka-login listener..", message.getSender());
         if(employeeService.findByUsername(message.getSender())!=null && Objects.equals(employeeService.findByUsername(message.getSender()).getClass().getAnnotation(DiscriminatorValue.class).value(), "EMPLOYEE")) {
-//            if (!getOnlineEmps().contains(message.getSender())){
-//                getOnlineEmps().add(message.getSender());
-//            }
             Employee e = (Employee) employeeService.findByUsername(message.getSender());
             message.setContent(e.getRole().getName());
-            System.out.println(">>>>>>>>>>>>>>>>>>>>>> "+getOnlineEmps());
         }else{
             message.setContent("player");
         }
