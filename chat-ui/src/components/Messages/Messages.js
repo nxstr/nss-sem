@@ -5,7 +5,7 @@ import {yellow} from "@material-ui/core/colors";
 const Messages = ({ messages, currentUser, chats, onSubmitChat }) => {
     const bottomRef = useRef(null);
 
-    useEffect(() => {bottomRef.current?.scrollIntoView({behavior: 'instant'});
+    useEffect(() => {bottomRef.current.scrollIntoView();
     }, [messages]);
 
     let renderMessage = (message) => {
