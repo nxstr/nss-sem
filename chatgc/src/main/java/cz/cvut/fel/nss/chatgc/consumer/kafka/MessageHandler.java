@@ -27,7 +27,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Component
-public class MessageHandler extends BaseKafkaHandler{
+public class MessageHandler extends BaseKafkaHandler {
     @Autowired
     SimpMessagingTemplate template;
     private final EmployeeServiceImpl employeeService;
@@ -49,6 +49,7 @@ public class MessageHandler extends BaseKafkaHandler{
     /**
      * Handles message event. Sends message to topic, on which users, who have to receive this message, are subscribed.
      * Saves message to database and updates chat.
+     *
      * @param message MessageDto is event data
      */
     @KafkaListener(
@@ -58,7 +59,7 @@ public class MessageHandler extends BaseKafkaHandler{
     public void handle(MessageDto message) {
         getLOG().info("{} sending via kafka-chat listener..", message.getSender());
 
-        if(!message.getSender().equals(message.getChat())){
+        if (!message.getSender().equals(message.getChat())) {
             Response r = new Response.ResponseBuilder().addEmployee((Employee) employeeService.findByUsername(message.getSender()))
                     .addDataPath(message.getContent())
                     .addDate(LocalDateTime.now())
@@ -70,9 +71,9 @@ public class MessageHandler extends BaseKafkaHandler{
             Chat chat = updateChat(message.getChat(), r);
             chatService.update(chat);
             getLOG().info("Chat {} updated. New response from {} added: {} ", chat.getPlayerUsername(), message.getSender(), message.getContent());
-        }else{
+        } else {
             Set<Category> cats = new HashSet<>();
-            if(message.getCategories()!=null && !message.getCategories().isEmpty()) {
+            if (message.getCategories() != null && !message.getCategories().isEmpty()) {
                 for (CategoryDto c : message.getCategories()) {
                     Category category = categoryService.findById(c.getId());
                     if (category != null) {
@@ -89,9 +90,9 @@ public class MessageHandler extends BaseKafkaHandler{
             message.setDate(r.getDate());
             Chat chat = updateChat(message.getChat(), r);
             chat.setOpen(true);
-            if(chat.getCategories()==null){
+            if (chat.getCategories() == null) {
                 chat.setCategories(new HashSet<>());
-            }else{
+            } else {
                 chat.getCategories().addAll(cats);
             }
             chatService.update(chat);
@@ -99,19 +100,19 @@ public class MessageHandler extends BaseKafkaHandler{
             getLOG().info("Chat {} has categories: {} ", chat.getPlayerUsername(), chat.getCategories().stream().map(Category::getName).toList());
         }
 
-        for(String i: getOnlineEmps()){
-            template.convertAndSend("/topic/group/"+i, message);
+        for (String i : getOnlineEmps()) {
+            template.convertAndSend("/topic/group/" + i, message);
         }
 
-        if(!message.getSender().equals(message.getChat())){
+        if (!message.getSender().equals(message.getChat())) {
             message.setSender("Employee");
         }
-        template.convertAndSend("/topic/group/"+message.getChat(), message);
+        template.convertAndSend("/topic/group/" + message.getChat(), message);
 
     }
 
 
-    public Chat updateChat(String chatName, Message r){
+    public Chat updateChat(String chatName, Message r) {
         Chat chat = chatService.findByPlayer(chatName);
         ArrayList<Message> mess = chat.getMessages();
         mess.add(r);

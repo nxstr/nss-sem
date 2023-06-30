@@ -25,18 +25,18 @@ public class ChatServiceImpl implements ChatService {
 
 
     @Transactional
-    public void persist(Chat chat){
+    public void persist(Chat chat) {
         chatRepository.save(chat);
     }
 
-    public List<Chat> findAll(){
+    public List<Chat> findAll() {
         return chatRepository.findAll();
     }
 
-    public List<Chat> findAllByCategoryId(Integer id){
+    public List<Chat> findAllByCategoryId(Integer id) {
         List<Chat> chats = new ArrayList<>();
-        for(Chat c: findAll()){
-            if(c.getCategories().stream().map(Category::getId).toList().contains(id)){
+        for (Chat c : findAll()) {
+            if (c.getCategories().stream().map(Category::getId).toList().contains(id)) {
                 chats.add(c);
             }
         }
@@ -44,22 +44,22 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Transactional
-    public Chat findById(Integer id){
+    public Chat findById(Integer id) {
         return chatRepository.findById(id).orElse(null);
     }
 
-    public Chat findByPlayer(String player){
+    public Chat findByPlayer(String player) {
         return chatRepository.findByPlayerUsername(player);
     }
 
     @Transactional
-    public Chat update(Chat chat){
+    public Chat update(Chat chat) {
         return chatRepository.save(chat);
     }
 
     @Transactional
-    public void setChatClose(Chat chat){
-        if(!chat.isOpen()){
+    public void setChatClose(Chat chat) {
+        if (!chat.isOpen()) {
             throw new ExistsException("chat is already closed");
         }
         chat.setOpen(false);
@@ -69,8 +69,8 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Transactional
-    public void setChatOpen(Chat chat){
-        if(chat.isOpen()){
+    public void setChatOpen(Chat chat) {
+        if (chat.isOpen()) {
             throw new ExistsException("chat is already open");
         }
         chat.setOpen(true);

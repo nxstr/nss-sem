@@ -25,11 +25,12 @@ public class LoginService {
 
     /**
      * Provides user authentication.
+     *
      * @param username username from client request
      * @param password raw password from client request
      */
     @Transactional
-    public void loginUser (String username, String password){
+    public void loginUser(String username, String password) {
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
         provider.authenticate(authentication);

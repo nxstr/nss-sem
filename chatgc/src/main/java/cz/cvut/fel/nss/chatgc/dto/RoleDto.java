@@ -17,7 +17,7 @@ public class RoleDto {
     Integer parentId;
     Integer id;
 
-    public Role accept(Visitor v){
+    public Role accept(Visitor v) {
         return v.visitRoleDto(this);
     }
 }

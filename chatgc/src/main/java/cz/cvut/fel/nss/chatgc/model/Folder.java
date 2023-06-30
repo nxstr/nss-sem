@@ -16,7 +16,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "folders")
-public class Folder extends AbstractEntity{
+public class Folder extends AbstractEntity {
     private String name;
 
     @ManyToMany

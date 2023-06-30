@@ -1,14 +1,11 @@
 package cz.cvut.fel.nss.chatgc.interceptor;
 
-import com.hazelcast.config.CacheDeserializedValues;
-import com.hazelcast.config.Config;
-import lombok.extern.java.Log;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Objects;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.ModelAndView;

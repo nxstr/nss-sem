@@ -49,22 +49,23 @@ public class EmployeeServiceImpl extends UserServiceImpl<Employee> {
 
     /**
      * Validates data and creates new employee.
+     *
      * @param employee Employee that will be saved
      */
     @Transactional
-    public void create(Employee employee){
-        if(this.findByUsername(employee.getUsername())!=null){
+    public void create(Employee employee) {
+        if (this.findByUsername(employee.getUsername()) != null) {
             throw new ExistsException("username already exists");
         }
-        if(this.findByEmail(employee.getEmail())!=null){
+        if (this.findByEmail(employee.getEmail()) != null) {
             throw new ExistsException("email already exists");
         }
         String regexPattern = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@"
                 + "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
-        if(!patternMatches(employee.getEmail(), regexPattern)){
+        if (!patternMatches(employee.getEmail(), regexPattern)) {
             throw new ExistsException("email is not valid");
         }
-        if(employee.getRole()==null){
+        if (employee.getRole() == null) {
             throw new RoleException("employee dont have role");
         }
         publisher.publishEvent(new EmployeeEvent("create", new EmployeeDTO(employee.getUsername(), employee.getPassword(), employee.getEmail(), employee.getRole().getId(), employee.getRole().getName(), null)));
@@ -73,12 +74,13 @@ public class EmployeeServiceImpl extends UserServiceImpl<Employee> {
 
     /**
      * Finds all employees.
+     *
      * @return List<Employee>
      */
-    public List<Employee> findAllEmployees(){
+    public List<Employee> findAllEmployees() {
         List<Employee> emps = new ArrayList<>();
-        for(User e: employeeDao.findAll()){
-            if(Objects.equals(e.getClass().getAnnotation(DiscriminatorValue.class).value(), "EMPLOYEE")){
+        for (User e : employeeDao.findAll()) {
+            if (Objects.equals(e.getClass().getAnnotation(DiscriminatorValue.class).value(), "EMPLOYEE")) {
                 Employee employee = (Employee) e;
                 emps.add(employee);
             }
@@ -88,17 +90,18 @@ public class EmployeeServiceImpl extends UserServiceImpl<Employee> {
 
     /**
      * Changes user's username.
+     *
      * @param employee Employee that will be updated
-     * @param newName String new username of player
+     * @param newName  String new username of player
      */
     @Transactional
-    public void changeUsername(Employee employee, String newName){
-        if(findByUsername(newName)!=null){
+    public void changeUsername(Employee employee, String newName) {
+        if (findByUsername(newName) != null) {
             throw new ExistsException("username already exists");
         }
         publisher.publishEvent(new EmployeeEvent("changeUsername", new EmployeeDTO(employee.getUsername(), employee.getPassword(), employee.getEmail(), employee.getRole().getId(), employee.getRole().getName(), employee.getId())));
         employee.setUsername(newName);
-        for(Response r: employee.getResponses()){
+        for (Response r : employee.getResponses()) {
             r.setEmployee(employee);
             responseService.update(r);
         }
@@ -108,22 +111,24 @@ public class EmployeeServiceImpl extends UserServiceImpl<Employee> {
 
     /**
      * Changes employee's password.
+     *
      * @param employee Employee that will be updated
      * @param password String new raw password of employee
      */
     @Transactional
-    public void changeEmployeePassword(Employee employee, String password){
+    public void changeEmployeePassword(Employee employee, String password) {
         publisher.publishEvent(new EmployeeEvent("changePass", new EmployeeDTO(employee.getUsername(), password, employee.getEmail(), employee.getRole().getId(), employee.getRole().getName(), employee.getId())));
         changePassword(employee, password);
     }
 
     /**
      * Deletes employee.
+     *
      * @param employee Employee that will be deleted
      */
     @Transactional
-    public void delete(Employee employee){
-        for(Response r: employee.getResponses()){
+    public void delete(Employee employee) {
+        for (Response r : employee.getResponses()) {
             r.setEmployee(null);
         }
         employeeDao.delete(employee);
@@ -132,12 +137,13 @@ public class EmployeeServiceImpl extends UserServiceImpl<Employee> {
 
     /**
      * Changes employee's role.
+     *
      * @param employee Employee that will be updated
-     * @param role Role of employee
+     * @param role     Role of employee
      */
     @Transactional
-    public void changeRole(Employee employee, Role role){
-        if(employee.getRole()==null){
+    public void changeRole(Employee employee, Role role) {
+        if (employee.getRole() == null) {
             throw new RoleException("employee does not have any role");
         }
         employee.setRole(role);
@@ -147,40 +153,42 @@ public class EmployeeServiceImpl extends UserServiceImpl<Employee> {
 
     /**
      * Finds employee by its id.
+     *
      * @param id Integer id of employee
      * @return Employee
      */
     @Transactional
     @Override
-    public Employee findById(Integer id){
+    public Employee findById(Integer id) {
         return (Employee) employeeDao.findById(id).orElse(null);
     }
 
     /**
      * Finds all chats for employee. Employee role contains categories and gives access to chats, that has same categories.
+     *
      * @param employee Employee has role that gives access to some chats
      * @return Set<Chat>
      */
-    public Set<Chat> findAllChats(Employee employee){
+    public Set<Chat> findAllChats(Employee employee) {
         Set<Chat> chats = new HashSet<>();
-        if(!employee.getRole().getName().equals("admin")) {
+        if (!employee.getRole().getName().equals("admin")) {
             Set<Category> cats = employee.getRole().getCategories();
             for (Category c : cats) {
                 List<Chat> chatsWithCat = chatRepository.findChatsByCategories(c);
-                for(Chat chat: chatsWithCat){
+                for (Chat chat : chatsWithCat) {
                     boolean hasAccess = true;
-                    for(Category cat: chat.getCategories()){
+                    for (Category cat : chat.getCategories()) {
                         if (!employee.getRole().getCategories().contains(cat)) {
                             hasAccess = false;
                             break;
                         }
                     }
-                    if(hasAccess){
+                    if (hasAccess) {
                         chats.add(chat);
                     }
                 }
             }
-        }else{
+        } else {
             chats.addAll(chatRepository.findAll());
         }
         return chats;
@@ -189,19 +197,20 @@ public class EmployeeServiceImpl extends UserServiceImpl<Employee> {
 
     /**
      * Validates data from EmployeeDto and calls update.
+     *
      * @param dto EmployeeDto entity
-     * @param id Integer id of employee that will be updated
+     * @param id  Integer id of employee that will be updated
      */
     @Transactional
-    public void updateEmployeeFromDto(EmployeeDTO dto, Integer id){
+    public void updateEmployeeFromDto(EmployeeDTO dto, Integer id) {
         Employee employee = findById(id);
-        if(!employee.getEmail().equals(dto.getEmail())){
+        if (!employee.getEmail().equals(dto.getEmail())) {
             changeEmail(employee, dto.getEmail());
         }
-        if(!dto.getPassword().equals("") && !encoder.matches(dto.getPassword(), employee.getPassword())){
+        if (!dto.getPassword().equals("") && !encoder.matches(dto.getPassword(), employee.getPassword())) {
             changeEmployeePassword(employee, dto.getPassword());
         }
-        if(!employee.getUsername().equals(dto.getUsername())){
+        if (!employee.getUsername().equals(dto.getUsername())) {
             changeUsername(employee, dto.getUsername());
         }
     }

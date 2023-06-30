@@ -15,16 +15,17 @@ import javax.mail.internet.InternetAddress;
  * Represents Email Service.
  */
 @Service
-public class DefaultEmailService{
+public class DefaultEmailService {
 
     @Autowired
     public JavaMailSender emailSender;
 
     /**
      * Sends email from predefined email address.
+     *
      * @param toAddress String message will be sent to this address
-     * @param subject String subject of email
-     * @param message String content of email
+     * @param subject   String subject of email
+     * @param message   String content of email
      */
     @Transactional
     public void sendSimpleEmail(String toAddress, String subject, String message) {

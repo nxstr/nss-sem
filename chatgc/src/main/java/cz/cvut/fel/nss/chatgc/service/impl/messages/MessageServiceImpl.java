@@ -13,22 +13,22 @@ public abstract class MessageServiceImpl<T extends Message> implements MessageSe
     private final MessageRepository<T, Integer> messageDao;
 
     @Transactional
-    public Message persist(Message message){
+    public Message persist(Message message) {
         messageDao.save(message);
         return message;
     }
 
     @Transactional
-    public void update(Message message){
+    public void update(Message message) {
         messageDao.save(message);
     }
 
     @Transactional
-    public Message findById(Integer id){
+    public Message findById(Integer id) {
         return messageDao.findById(id).orElse(null);
     }
 
-    public void delete(Message message){
+    public void delete(Message message) {
         messageDao.delete(message);
     }
 

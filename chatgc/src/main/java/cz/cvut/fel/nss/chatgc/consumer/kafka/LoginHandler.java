@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.DiscriminatorValue;
 import java.util.Objects;
+
 @Component
 public class LoginHandler extends BaseKafkaHandler {
     @Autowired
@@ -29,6 +30,7 @@ public class LoginHandler extends BaseKafkaHandler {
 
     /**
      * Handles login event. Sends message to topic, on which user is subscribed.
+     *
      * @param message MessageDto is event data
      */
     @KafkaListener(
@@ -36,15 +38,15 @@ public class LoginHandler extends BaseKafkaHandler {
             groupId = KafkaConstants.GROUP_ID
     )
     @Override
-    public void handle(MessageDto message){
+    public void handle(MessageDto message) {
         message.setMessageType("login");
         getLOG().info("{} sending via kafka-login listener..", message.getSender());
-        if(employeeService.findByUsername(message.getSender())!=null && Objects.equals(employeeService.findByUsername(message.getSender()).getClass().getAnnotation(DiscriminatorValue.class).value(), "EMPLOYEE")) {
+        if (employeeService.findByUsername(message.getSender()) != null && Objects.equals(employeeService.findByUsername(message.getSender()).getClass().getAnnotation(DiscriminatorValue.class).value(), "EMPLOYEE")) {
             Employee e = (Employee) employeeService.findByUsername(message.getSender());
             message.setContent(e.getRole().getName());
-        }else{
+        } else {
             message.setContent("player");
         }
-        template.convertAndSend("/topic/group/"+message.getSender(), message);
+        template.convertAndSend("/topic/group/" + message.getSender(), message);
     }
 }

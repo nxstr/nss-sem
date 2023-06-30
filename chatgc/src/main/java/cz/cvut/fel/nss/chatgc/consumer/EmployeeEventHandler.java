@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Employee Event Listener.
  */
 @Component
-public class EmployeeEventHandler extends AbstractHandler{
+public class EmployeeEventHandler extends AbstractHandler {
     @Autowired
     SimpMessagingTemplate template;
     private final DefaultEmailService emailService;
@@ -29,11 +29,12 @@ public class EmployeeEventHandler extends AbstractHandler{
 
     /**
      * Handles employee event. According to type of event, forces employees to actualise data, sends emails or forces logout.
+     *
      * @param event EmployeeEvent has event type and EmployeeDto
      */
     @EventListener
     @Transactional
-    public void handleEmployeeEvent(EmployeeEvent event){
+    public void handleEmployeeEvent(EmployeeEvent event) {
         switch (event.message()) {
             case "create":
                 emailService.sendSimpleEmail(event.employee().getEmail(), "Your account data", "You have a new account in the GC web-chat app, here are your data:\n" +
@@ -65,7 +66,7 @@ public class EmployeeEventHandler extends AbstractHandler{
                     MessageDto messageDto = new MessageDto();
                     if (i.equals(event.employee().getUsername())) {
                         messageDto.setMessageType(MessageTypeConstants.LOGOUT);
-                    }else{
+                    } else {
                         messageDto.setMessageType(MessageTypeConstants.CHAT);
                     }
                     template.convertAndSend("/topic/group/" + i, messageDto);

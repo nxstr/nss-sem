@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Player Event Listener.
  */
 @Component
-public class PlayerEventHandler extends AbstractHandler{
+public class PlayerEventHandler extends AbstractHandler {
     @Autowired
     SimpMessagingTemplate template;
     private final DefaultEmailService emailService;
@@ -29,11 +29,12 @@ public class PlayerEventHandler extends AbstractHandler{
 
     /**
      * Handles player event. According to type of event, forces employees to actualise data, sends emails or forces logout player.
+     *
      * @param event PlayerEvent has event type and PlayerDto
      */
     @EventListener
     @Transactional
-    public void handlePlayerEvent(PlayerEvent event){
+    public void handlePlayerEvent(PlayerEvent event) {
         switch (event.message()) {
             case "create" -> emailService.sendSimpleEmail(event.dto().getEmail(), "Your account data", "You have a new account in the GC web-chat app, here are your data:\n" +
                     "username: " + event.dto().getUsername() + ",\n" +

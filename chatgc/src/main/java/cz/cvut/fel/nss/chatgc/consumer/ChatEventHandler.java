@@ -18,7 +18,7 @@ import java.util.List;
  * Chat Event Listener.
  */
 @Component
-public class ChatEventHandler extends AbstractHandler{
+public class ChatEventHandler extends AbstractHandler {
 
     @Autowired
     SimpMessagingTemplate template;
@@ -32,16 +32,17 @@ public class ChatEventHandler extends AbstractHandler{
 
     /**
      * Handles chat event and notifies all employees, that have access to this chat, about update.
+     *
      * @param event ChatEvent has event type and ChatDto
      */
     @EventListener
     @Transactional
-    public void handleChatEvent(ChatEvent event){
+    public void handleChatEvent(ChatEvent event) {
         List<String> onlineEmps = getOnlineEmps();
-        if(event.message().equals("update")){
-            for(String i: onlineEmps){
+        if (event.message().equals("update")) {
+            for (String i : onlineEmps) {
                 Employee e = (Employee) employeeService.findByUsername(i);
-                if(e.getRole().getCategories().containsAll(event.chat().getCategories()) || e.getRole().getName().equals("admin")){
+                if (e.getRole().getCategories().containsAll(event.chat().getCategories()) || e.getRole().getName().equals("admin")) {
                     MessageDto messageDto = new MessageDto();
                     messageDto.setMessageType(MessageTypeConstants.CHAT);
                     template.convertAndSend("/topic/group/" + i, messageDto);

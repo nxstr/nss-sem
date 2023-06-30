@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 @Component
-public class VisitorImpl implements Visitor{
+public class VisitorImpl implements Visitor {
 
     private final RoleService roleService;
     private final ChatService chatService;
@@ -42,15 +42,11 @@ public class VisitorImpl implements Visitor{
     @Override
     public Category visitCategoryDto(CategoryDto categoryDto) {
         Category category = new Category(categoryDto.getName());
-        if(categoryDto.getId()!=null){
+        if (categoryDto.getId() != null) {
             category.setId(categoryDto.getId());
         }
         return category;
     }
-
-
-
-
 
     @Override
     public EmployeeDTO visitEmployeeEntity(Employee employee) {
@@ -60,12 +56,12 @@ public class VisitorImpl implements Visitor{
     @Override
     public Employee visitEmployeeDto(EmployeeDTO employeeDTO) {
         Role role = roleService.findById(employeeDTO.getRoleId()).orElse(null);
-        if(role==null){
+        if (role == null) {
             throw new RoleException("employee can not be created without role");
         }
         Employee employee = new Employee(employeeDTO.getUsername(), employeeDTO.getEmail(), employeeDTO.getPassword(), role);
         employee.setResponses(new ArrayList<>());
-        if(employeeDTO.getId()!=null){
+        if (employeeDTO.getId() != null) {
             employee.setId(employeeDTO.getId());
         }
         return employee;
@@ -81,7 +77,7 @@ public class VisitorImpl implements Visitor{
         Player player = new Player(playerDto.getUsername(), playerDto.getEmail(), playerDto.getPassword(), PlayerRoles.REGISTERED);
         Chat chat = chatService.findByPlayer(playerDto.getUsername());
         player.setChat(chat);
-        if(playerDto.getId()!=null){
+        if (playerDto.getId() != null) {
             player.setId(playerDto.getId());
         }
         return player;
@@ -90,11 +86,11 @@ public class VisitorImpl implements Visitor{
     @Override
     public RoleDto visitRoleEntity(Role role) {
         List<CategoryDto> cats = new ArrayList<>();
-        for(Category c: role.getCategories()){
+        for (Category c : role.getCategories()) {
             cats.add(c.accept(this));
         }
         Integer parentId = null;
-        if(role.getParentRole()!=null){
+        if (role.getParentRole() != null) {
             parentId = role.getParentRole().getId();
         }
         return new RoleDto(role.getName(), cats, parentId, role.getId());
@@ -103,14 +99,14 @@ public class VisitorImpl implements Visitor{
     @Override
     public Role visitRoleDto(RoleDto roleDto) {
         Set<Category> cats = new HashSet<>();
-        for(CategoryDto c: roleDto.getCategoryDtoList()){
+        for (CategoryDto c : roleDto.getCategoryDtoList()) {
             if (categoryService.findById(c.getId()) != null) {
                 cats.add(categoryService.findById(c.getId()));
             }
         }
         Role parent = null;
-        if(roleDto.getParentId()!=null) {
-             parent = roleService.findById(roleDto.getParentId()).orElse(null);
+        if (roleDto.getParentId() != null) {
+            parent = roleService.findById(roleDto.getParentId()).orElse(null);
         }
         return new Role(roleDto.getName(), cats, parent, new HashSet<>());
     }

@@ -23,13 +23,13 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "requests")
-@DiscriminatorValue(value="REQUEST")
-public class Request extends Message{
+@DiscriminatorValue(value = "REQUEST")
+public class Request extends Message {
 
     @ManyToMany
     private Set<Category> categories;
 
-    private Request(RequestBuilder builder){
+    private Request(RequestBuilder builder) {
         super(builder);
         categories = builder.categories;
     }
@@ -43,25 +43,24 @@ public class Request extends Message{
     }
 
 
-
-    public static class RequestBuilder extends Message.MessageBuilder<RequestBuilder>{
+    public static class RequestBuilder extends Message.MessageBuilder<RequestBuilder> {
         private Set<Category> categories = new HashSet<>();
 
-        public RequestBuilder(){
+        public RequestBuilder() {
         }
 
-        public RequestBuilder addCategories(Set<Category> categories){
+        public RequestBuilder addCategories(Set<Category> categories) {
             this.categories = categories;
             return this;
         }
 
-        public RequestBuilder addCategory(Category category){
+        public RequestBuilder addCategory(Category category) {
             this.categories.add(category);
             return this;
         }
 
         @Override
-        public Request build(){
+        public Request build() {
             return new Request(this);
         }
 

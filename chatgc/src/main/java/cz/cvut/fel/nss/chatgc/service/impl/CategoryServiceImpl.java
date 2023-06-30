@@ -28,32 +28,32 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Transactional
     @CacheEvict(allEntries = true)
-    public void persist(Category category){
+    public void persist(Category category) {
         categoryRepository.save(category);
         publisher.publishEvent(new CategoryEvent("persist", category));
     }
 
     @Transactional
-    public void update(Category category){
+    public void update(Category category) {
         categoryRepository.save(category);
         publisher.publishEvent(new CategoryEvent("update", category));
     }
 
     @Transactional
     @CacheEvict(allEntries = true)
-    public void updateCategoryFromDto(CategoryDto categoryDto, Integer id){
-        if (findById(id)!=null) {
+    public void updateCategoryFromDto(CategoryDto categoryDto, Integer id) {
+        if (findById(id) != null) {
             Category category = findById(id);
-            if(!notExists(categoryDto.getName())){
+            if (!notExists(categoryDto.getName())) {
                 throw new ExistsException("category name is not unique");
             }
             category.setName(categoryDto.getName());
             publisher.publishEvent(new CategoryEvent("changeCatIntoRole", category));
 
 
-            for(Chat c: chatService.findAllByCategoryId(category.getId())){
-                for(Category cat: c.getCategories()){
-                    if(cat.getId().equals(category.getId())){
+            for (Chat c : chatService.findAllByCategoryId(category.getId())) {
+                for (Category cat : c.getCategories()) {
+                    if (cat.getId().equals(category.getId())) {
                         break;
                     }
                 }
@@ -64,11 +64,10 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-
     @Transactional
     @CacheEvict(allEntries = true)
-    public void delete(Category category){
-        for(Chat c: chatService.findAllByCategoryId(category.getId())){
+    public void delete(Category category) {
+        for (Chat c : chatService.findAllByCategoryId(category.getId())) {
             Set<Category> cats = c.getCategories();
             cats.remove(category);
             c.setCategories(cats);
@@ -79,23 +78,23 @@ public class CategoryServiceImpl implements CategoryService {
 
     }
 
-    public Category findById(Integer id){
+    public Category findById(Integer id) {
         return categoryRepository.findById(id).orElse(null);
     }
 
     @Cacheable()
-    public List<Category> findAll(){
+    public List<Category> findAll() {
         return categoryRepository.findAll();
     }
 
-    public Boolean notExists(String catName){
+    public Boolean notExists(String catName) {
         return Objects.isNull(categoryRepository.findByName(catName));
     }
 
     @Transactional
-    public void setCategoriesToChat(Chat chat, List<CategoryDto> cats){
+    public void setCategoriesToChat(Chat chat, List<CategoryDto> cats) {
         Set<Category> catsForAdd = new HashSet<>();
-        for(CategoryDto c: cats){
+        for (CategoryDto c : cats) {
             Category category = findById(c.getId());
             catsForAdd.add(category);
         }

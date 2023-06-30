@@ -20,7 +20,7 @@ import java.util.List;
  * Category Event Listener.
  */
 @Component
-public class CategoryEventHandler extends AbstractHandler{
+public class CategoryEventHandler extends AbstractHandler {
     @Autowired
     SimpMessagingTemplate template;
     private final RoleService roleService;
@@ -35,17 +35,17 @@ public class CategoryEventHandler extends AbstractHandler{
 
     /**
      * Handles category event.
+     *
      * @param event CategoryEvent contains event type and CategoryDto
      */
     @EventListener
     @Transactional
-    public void handleCategory(CategoryEvent event){
+    public void handleCategory(CategoryEvent event) {
         List<String> onlineEmps = getOnlineEmps();
-        if(event.message().equals("delete")){
+        if (event.message().equals("delete")) {
             List<Role> roles = roleService.deleteCategoryInAllRoles(event.category());
             notifyEmployees(onlineEmps, roles);
-        }
-        else if(event.message().equals("changeCatIntoRole")){
+        } else if (event.message().equals("changeCatIntoRole")) {
             List<Role> roles = roleService.changeCategoryInAllRoles(event.category());
             notifyEmployees(onlineEmps, roles);
         }
@@ -54,13 +54,14 @@ public class CategoryEventHandler extends AbstractHandler{
     /**
      * Part of event processing.
      * Notifies all online employees, that had the access to old category and force users to update their current data.
+     *
      * @param onlineEmps List<String> names of online employees.
-     * @param roles List<Role> that contained old category and need to be updated
+     * @param roles      List<Role> that contained old category and need to be updated
      */
-    public void notifyEmployees(List<String> onlineEmps, List<Role> roles){
-        for(String i: onlineEmps){
+    public void notifyEmployees(List<String> onlineEmps, List<Role> roles) {
+        for (String i : onlineEmps) {
             Employee e = (Employee) employeeService.findByUsername(i);
-            if(roles.contains(e.getRole())){
+            if (roles.contains(e.getRole())) {
                 MessageDto messageDto = new MessageDto();
                 messageDto.setMessageType(MessageTypeConstants.CHAT);
                 template.convertAndSend("/topic/group/" + i, messageDto);

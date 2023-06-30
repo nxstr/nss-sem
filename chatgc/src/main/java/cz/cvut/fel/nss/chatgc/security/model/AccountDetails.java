@@ -10,14 +10,14 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import javax.persistence.DiscriminatorValue;
 import java.util.*;
 
-public class AccountDetails implements org.springframework.security.core.userdetails.UserDetails{
+public class AccountDetails implements org.springframework.security.core.userdetails.UserDetails {
 
     private final User user;
 
     private final Set<GrantedAuthority> authorities;
 
     public AccountDetails(User user) {
-        if(user==null){
+        if (user == null) {
             throw new AccountException("username does not exist");
         }
         this.user = user;
@@ -27,10 +27,10 @@ public class AccountDetails implements org.springframework.security.core.userdet
 
     private void addUserRole() {
         authorities.add(new SimpleGrantedAuthority(user.getClass().getAnnotation(DiscriminatorValue.class).value()));
-        if(user.getClass().getAnnotation(DiscriminatorValue.class).value().equals("EMPLOYEE")){
+        if (user.getClass().getAnnotation(DiscriminatorValue.class).value().equals("EMPLOYEE")) {
             Employee employee = (Employee) user;
             authorities.add(new SimpleGrantedAuthority(employee.getRole().getName()));
-        }else if(user.getClass().getAnnotation(DiscriminatorValue.class).value().equals("PLAYER")){
+        } else if (user.getClass().getAnnotation(DiscriminatorValue.class).value().equals("PLAYER")) {
             Player player = (Player) user;
             authorities.add(new SimpleGrantedAuthority(player.getRole().toString()));
         }

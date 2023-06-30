@@ -37,16 +37,17 @@ public class LoginController {
 
     /**
      * Login user into system.
+     *
      * @param request HashMap<String, String> represents username and raw password
      * @return ResponseEntity<String>
      */
     @PostMapping(value = "/api/login", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> loginUser(@RequestBody HashMap<String, String> request){
+    public ResponseEntity<String> loginUser(@RequestBody HashMap<String, String> request) {
         try {
             loginService.loginUser(request.get("username"), request.get("password"));
             LOG.info("User {} successfully logged in", request.get("username"));
             return new ResponseEntity<>("", HttpStatus.OK);
-        }catch (AccountException | BadCredentialsException e){
+        } catch (AccountException | BadCredentialsException e) {
             LOG.info(e.getMessage() + ": {} ", request.get("username"));
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -55,14 +56,15 @@ public class LoginController {
 
     /**
      * Logout authorizes user.
+     *
      * @param principal Principal
      * @return ResponseEntity<String>
      */
     @GetMapping(value = "/api/logout")
-    public ResponseEntity<String> logoutUser(Principal principal){
+    public ResponseEntity<String> logoutUser(Principal principal) {
         try {
             final AuthenticationToken auth = (AuthenticationToken) principal;
-            if(auth==null){
+            if (auth == null) {
                 return new ResponseEntity<>(HttpStatus.OK);
             }
             String name = auth.getPrincipal().getAccount().getUsername();
@@ -71,7 +73,7 @@ public class LoginController {
             kafkaTemplate.send(KafkaConstants.KAFKA_TOPIC_LOGOUT, m);
             LOG.info("User {} successfully logged out", name);
             return new ResponseEntity<>(HttpStatus.OK);
-        }catch (NullPointerException | BadCredentialsException e){
+        } catch (NullPointerException | BadCredentialsException e) {
             LOG.info(e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -79,6 +81,7 @@ public class LoginController {
 
     /**
      * Sends "system" login-message.
+     *
      * @param m MessageDto
      * @return ResponseEntity<String>
      */

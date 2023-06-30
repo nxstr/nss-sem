@@ -30,6 +30,7 @@ public class CategoryController {
 
     /**
      * Creates new category.
+     *
      * @param categoryDto CategoryDto contains data that will be saved
      * @return ResponseEntity<String>
      */
@@ -49,6 +50,7 @@ public class CategoryController {
 
     /**
      * Deletes category by id.
+     *
      * @param id Integer id of category
      * @return ResponseEntity<String>
      */
@@ -67,7 +69,8 @@ public class CategoryController {
 
     /**
      * Updates category by id.
-     * @param id Integer id of category
+     *
+     * @param id          Integer id of category
      * @param categoryDto CategoryDto has data that will be saved
      * @return ResponseEntity<String>
      */
@@ -89,6 +92,7 @@ public class CategoryController {
 
     /**
      * Finds all categories. Uses cached values.
+     *
      * @return List<CategoryDto>
      */
     @GetMapping(value = "/api/categories")

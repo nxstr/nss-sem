@@ -13,6 +13,7 @@ public interface Visitor {
 
     /**
      * Converts Category to CategoryDto.
+     *
      * @param category entity for conversion
      * @return CategoryDto
      */
@@ -20,6 +21,7 @@ public interface Visitor {
 
     /**
      * Converts CategoryDto to Category.
+     *
      * @param categoryDto dto for conversion
      * @return Category
      */
@@ -27,6 +29,7 @@ public interface Visitor {
 
     /**
      * Converts Employee to EmployeeDTO.
+     *
      * @param employee entity for conversion
      * @return EmployeeDTO
      */
@@ -34,6 +37,7 @@ public interface Visitor {
 
     /**
      * Converts EmployeeDto to Employee.
+     *
      * @param employeeDTO dto for conversion
      * @return Employee
      */
@@ -41,6 +45,7 @@ public interface Visitor {
 
     /**
      * Converts Player to PlayerDto.
+     *
      * @param player entity for conversion
      * @return PlayerDto
      */
@@ -48,6 +53,7 @@ public interface Visitor {
 
     /**
      * Converts PlayerDto to Player.
+     *
      * @param playerDto dto for conversion
      * @return Player
      */
@@ -55,6 +61,7 @@ public interface Visitor {
 
     /**
      * Converts Role to RoleDto.
+     *
      * @param role entity for conversion
      * @return RoleDto
      */
@@ -62,6 +69,7 @@ public interface Visitor {
 
     /**
      * Converts RoleDto to Role.
+     *
      * @param roleDto dto for conversion
      * @return Role
      */

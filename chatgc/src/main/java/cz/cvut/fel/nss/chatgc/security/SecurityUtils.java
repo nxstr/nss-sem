@@ -1,4 +1,5 @@
 package cz.cvut.fel.nss.chatgc.security;
+
 import cz.cvut.fel.nss.chatgc.model.users.User;
 import cz.cvut.fel.nss.chatgc.security.model.AccountDetails;
 import cz.cvut.fel.nss.chatgc.security.model.AuthenticationToken;

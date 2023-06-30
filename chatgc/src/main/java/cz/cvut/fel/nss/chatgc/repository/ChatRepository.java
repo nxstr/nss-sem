@@ -12,6 +12,7 @@ public interface ChatRepository extends JpaRepository<Chat, Integer> {
 
     /**
      * Searching for chat by playerUsername name.
+     *
      * @param playerUsername represents name of chat owner (player)
      * @return Chat
      */
@@ -20,6 +21,7 @@ public interface ChatRepository extends JpaRepository<Chat, Integer> {
 
     /**
      * Searching for chats that contain category.
+     *
      * @param category represents category, that has chat
      * @return ArrayList<Chat>
      */

@@ -20,8 +20,8 @@ import java.util.Objects;
 @NoArgsConstructor
 @Entity
 @Table(name = "employees")
-@DiscriminatorValue(value="EMPLOYEE")
-public class Employee extends User{
+@DiscriminatorValue(value = "EMPLOYEE")
+public class Employee extends User {
 
     @ManyToOne(optional = false)
     @Getter
@@ -39,7 +39,7 @@ public class Employee extends User{
         this.role = role;
     }
 
-    public EmployeeDTO accept(Visitor v){
+    public EmployeeDTO accept(Visitor v) {
         return v.visitEmployeeEntity(this);
     }
 

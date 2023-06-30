@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 public class ResponseServiceImpl extends MessageServiceImpl<Response> {
 
     private final ResponseRepository responseRepository;
+
     public ResponseServiceImpl(MessageRepository<Response, Integer> messageDao, ResponseRepository responseRepository) {
         super(messageDao);
         this.responseRepository = responseRepository;

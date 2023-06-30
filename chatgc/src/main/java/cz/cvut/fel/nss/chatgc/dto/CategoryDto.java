@@ -31,7 +31,7 @@ public class CategoryDto {
         this.id = id;
     }
 
-    public Category accept(Visitor v){
+    public Category accept(Visitor v) {
         return v.visitCategoryDto(this);
     }
 }

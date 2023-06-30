@@ -22,48 +22,47 @@ public abstract class UserServiceImpl<T extends User> implements UserService {
     private final PasswordEncoder encoder;
 
 
-
     @Transactional
-    public void persist(User user){
+    public void persist(User user) {
         user.encodePassword(encoder);
         userDao.save(user);
     }
 
     @Transactional
-    public void update(User user){
+    public void update(User user) {
         userDao.save(user);
     }
 
     @Transactional
-    public User findById(Integer id){
+    public User findById(Integer id) {
         return userDao.findById(id).orElse(null);
     }
 
     @Transactional
-    public User findByUsername(String name){
+    public User findByUsername(String name) {
         return userDao.findByUsername(name);
     }
 
     @Transactional
-    public User findByEmail(String email){
+    public User findByEmail(String email) {
         return userDao.findByEmail(email);
     }
 
     @Transactional
-    public void changePassword(User user, String password){
+    public void changePassword(User user, String password) {
         user.setPassword(password);
         user.encodePassword(encoder);
         userDao.save(user);
     }
 
     @Transactional
-    public void changeEmail(User user, String email){
-        if(findByEmail(email)!=null){
+    public void changeEmail(User user, String email) {
+        if (findByEmail(email) != null) {
             throw new ExistsException("email already exists");
         }
         String regexPattern = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@"
                 + "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
-        if(!patternMatches(email, regexPattern)){
+        if (!patternMatches(email, regexPattern)) {
             throw new ExistsException("email is not valid");
         }
         user.setEmail(email);

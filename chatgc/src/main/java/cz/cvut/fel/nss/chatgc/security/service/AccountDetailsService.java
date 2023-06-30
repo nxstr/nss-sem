@@ -21,14 +21,12 @@ public class AccountDetailsService implements org.springframework.security.core.
     }
 
 
-
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         if (adminDao.findByUsername(username) != null) {
             return new AccountDetails(adminDao.findByUsername(username));
-        }else {
+        } else {
             return new AccountDetails(userDao.findByUsername(username));
         }
     }

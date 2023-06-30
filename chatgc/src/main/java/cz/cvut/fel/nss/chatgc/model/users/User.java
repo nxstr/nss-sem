@@ -29,6 +29,7 @@ public abstract class User extends AbstractEntity {
 
     /**
      * Encode raw password.
+     *
      * @param passwordEncoder
      */
 

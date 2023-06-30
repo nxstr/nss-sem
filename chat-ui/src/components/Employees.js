@@ -250,7 +250,7 @@ const Employees =({employees, roles, submitEmployee}) => {
             ):
                 <>
                     <Button onClick={openNew}>
-                        Create new role
+                        Create new employee
                     </Button>
                     <ul className="chat-list">
                         {employees.map(cat => renderEmployee(cat))}

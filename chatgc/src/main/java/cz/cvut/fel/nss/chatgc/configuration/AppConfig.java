@@ -69,21 +69,20 @@ public class AppConfig {
     }
 
     @Bean
-    public Config hazelCastConfig(){
+    public Config hazelCastConfig() {
         Config config = new Config()
                 .setInstanceName("hazelcast-instance")
                 .addMapConfig(
                         new MapConfig()
                                 .setName("categories")
                                 .setEvictionConfig(new EvictionConfig()
-                                    .setSize(200)
-                                    .setMaxSizePolicy(MaxSizePolicy.FREE_HEAP_SIZE)
-                                    .setEvictionPolicy(EvictionPolicy.LRU)
-                ));
+                                        .setSize(200)
+                                        .setMaxSizePolicy(MaxSizePolicy.FREE_HEAP_SIZE)
+                                        .setEvictionPolicy(EvictionPolicy.LRU)
+                                ));
         config.getJetConfig().setEnabled(true);
         return config;
     }
-
 
 
 }

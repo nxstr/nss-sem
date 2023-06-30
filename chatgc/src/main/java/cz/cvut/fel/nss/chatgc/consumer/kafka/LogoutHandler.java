@@ -11,11 +11,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class LogoutHandler extends BaseKafkaHandler{
+public class LogoutHandler extends BaseKafkaHandler {
 
     private static final String handlerType = "logout";
     @Autowired
     private final MessageHandler messageHandler;
+
     public LogoutHandler(SimpUserRegistry simpUserRegistry, EmployeeServiceImpl employeeService, MessageHandler messageHandler) {
         super(handlerType, simpUserRegistry, employeeService);
         this.messageHandler = messageHandler;
@@ -24,6 +25,7 @@ public class LogoutHandler extends BaseKafkaHandler{
 
     /**
      * Handles logout event. Clears SecurityContext and authentication.
+     *
      * @param message MessageDto is event data
      */
     @KafkaListener(
@@ -31,7 +33,7 @@ public class LogoutHandler extends BaseKafkaHandler{
             groupId = KafkaConstants.GROUP_ID
     )
     @Override
-    public void handle(MessageDto message){
+    public void handle(MessageDto message) {
         getLOG().info("{} sending via kafka-logout listener..", message.getSender());
         SecurityContext context = SecurityContextHolder.getContext();
         SecurityContextHolder.clearContext();

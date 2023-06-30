@@ -37,18 +37,19 @@ public class EmployeeController {
 
     /**
      * Creates new employee from employeeDto.
+     *
      * @param dto EmployeeDTO that contains employee data
      * @return ResponseEntity<String>
      */
     @PostMapping("/api/employee/new")
     @PreAuthorize("hasAuthority('admin')")
-    public ResponseEntity<String> createEmployee(@RequestBody EmployeeDTO dto){
-        try{
+    public ResponseEntity<String> createEmployee(@RequestBody EmployeeDTO dto) {
+        try {
             Employee e = dto.accept(v);
             employeeService.create(e);
             LOG.info("Employee {} successfully created", dto.getUsername());
             return new ResponseEntity<>(HttpStatus.OK);
-        }catch (RoleException | ExistsException | AccountException e){
+        } catch (RoleException | ExistsException | AccountException e) {
             LOG.info(e.getMessage() + ": {}", dto.getUsername());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -57,14 +58,15 @@ public class EmployeeController {
 
     /**
      * Finds data of employee by id.
+     *
      * @param id Integer id of employee
      * @return EmployeeDTO
      */
     @GetMapping("/api/employee/get/{id}")
     @PreAuthorize("hasAuthority('admin')")
-    public EmployeeDTO getEmployee(@PathVariable Integer id){
+    public EmployeeDTO getEmployee(@PathVariable Integer id) {
         Employee employee = employeeService.findById(id);
-        if(employee==null){
+        if (employee == null) {
             return new EmployeeDTO();
         }
         return employee.accept(v);
@@ -72,14 +74,15 @@ public class EmployeeController {
 
     /**
      * Finds all employees.
+     *
      * @return List<EmployeeDTO>
      */
     @GetMapping("/api/employee/getAll")
     @PreAuthorize("hasAuthority('admin')")
-    public List<EmployeeDTO> getEmployees(){
+    public List<EmployeeDTO> getEmployees() {
         List<Employee> employees = employeeService.findAllEmployees();
         List<EmployeeDTO> emps = new ArrayList<>();
-        for(Employee e: employees){
+        for (Employee e : employees) {
             emps.add(e.accept(v));
         }
         return emps;
@@ -87,13 +90,14 @@ public class EmployeeController {
 
     /**
      * Updates existing employee by id.
+     *
      * @param dto EmployeeDTO contains new data, that have to save
-     * @param id Integer id of employee
+     * @param id  Integer id of employee
      * @return ResponseEntity<String>
      */
     @PutMapping("/api/employee/update/{id}")
     @PreAuthorize("hasAuthority('admin')")
-    public ResponseEntity<String> updateEmployee(@RequestBody EmployeeDTO dto, @PathVariable Integer id){
+    public ResponseEntity<String> updateEmployee(@RequestBody EmployeeDTO dto, @PathVariable Integer id) {
         try {
             Employee e = employeeService.findById(id);
             if (!e.getRole().getId().equals(dto.getRoleId())) {
@@ -102,7 +106,7 @@ public class EmployeeController {
             employeeService.updateEmployeeFromDto(dto, id);
             LOG.info("Employee {} successfully updated", dto.getUsername());
             return new ResponseEntity<>(HttpStatus.OK);
-        }catch (RoleException | ExistsException | AccountException e){
+        } catch (RoleException | ExistsException | AccountException e) {
             LOG.info(e.getMessage() + ": {}", dto.getUsername());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -110,18 +114,19 @@ public class EmployeeController {
 
     /**
      * Deletes employee by id.
+     *
      * @param id Integer id of employee, that will be deleted
      * @return ResponseEntity<String>
      */
     @DeleteMapping("/api/emaployee/delete/{id}")
     @PreAuthorize("hasAuthority('admin')")
-    public ResponseEntity<String> deleteEmployee(@PathVariable Integer id){
+    public ResponseEntity<String> deleteEmployee(@PathVariable Integer id) {
         try {
             Employee e = employeeService.findById(id);
             employeeService.delete(e);
             LOG.info("Employee {} successfully deleted", id);
             return new ResponseEntity<>(HttpStatus.OK);
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
             LOG.info(e.getMessage() + ": {}", id);
             return new ResponseEntity<>("employee does not exist", HttpStatus.BAD_REQUEST);
         }
@@ -129,6 +134,7 @@ public class EmployeeController {
 
     /**
      * Gets current authorized employee's data.
+     *
      * @param principal Principal
      * @return EmployeeDTO
      */
@@ -143,20 +149,21 @@ public class EmployeeController {
 
     /**
      * Edits current authorized employee's data.
+     *
      * @param principal Principal
-     * @param dto EmployeeDTO contains new data, that have to save
+     * @param dto       EmployeeDTO contains new data, that have to save
      * @return ResponseEntity<String>
      */
     @PutMapping(value = "api/employee/current/edit")
     @PreAuthorize("hasAuthority('EMPLOYEE')")
-    public ResponseEntity<String> editCurrent(Principal principal, @RequestBody EmployeeDTO dto){
+    public ResponseEntity<String> editCurrent(Principal principal, @RequestBody EmployeeDTO dto) {
         try {
             final AuthenticationToken auth = (AuthenticationToken) principal;
             Integer id = auth.getPrincipal().getAccount().getId();
             employeeService.updateEmployeeFromDto(dto, id);
             LOG.info("Employee {} successfully updated", dto.getUsername());
             return new ResponseEntity<>(HttpStatus.OK);
-        }catch (RoleException | ExistsException | AccountException e){
+        } catch (RoleException | ExistsException | AccountException e) {
             LOG.info(e.getMessage() + ": {}", dto.getUsername());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -164,13 +171,14 @@ public class EmployeeController {
 
     /**
      * Creates admin account if there are no registered admins in system database.
+     *
      * @param dto EmployeeDTO represents data, that will be saved
      * @return ResponseEntity<String>
      */
     @PostMapping("api/register/emp")
-    public ResponseEntity<String> registerAdminOnSystemInitialization(@RequestBody EmployeeDTO dto){
-        if(employeeService.findAllEmployees().stream().filter(d-> d.getRole().getName().equals("admin")).toList().isEmpty()){
-            if(Objects.isNull(roleService.findByName("admin"))){
+    public ResponseEntity<String> registerAdminOnSystemInitialization(@RequestBody EmployeeDTO dto) {
+        if (employeeService.findAllEmployees().stream().filter(d -> d.getRole().getName().equals("admin")).toList().isEmpty()) {
+            if (Objects.isNull(roleService.findByName("admin"))) {
                 roleService.initializeAdminRole();
             }
             Role role = roleService.findByName("admin");
@@ -178,7 +186,7 @@ public class EmployeeController {
             employeeService.create(employee);
             LOG.info("Employee {} successfully created", dto.getUsername());
             return new ResponseEntity<>(HttpStatus.OK);
-        }else{
+        } else {
             LOG.info("admin account already exist");
             return new ResponseEntity<>("admin account already exist", HttpStatus.BAD_REQUEST);
         }

@@ -11,6 +11,6 @@ import java.util.List;
 import java.util.Set;
 
 @Repository
-public interface EmployeeRepository extends UserRepository<Employee, Integer>{
+public interface EmployeeRepository extends UserRepository<Employee, Integer> {
 
 }

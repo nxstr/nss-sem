@@ -55,6 +55,7 @@ public class ChatController {
 
     /**
      * Finds all chats for user by username.
+     *
      * @param username String name of user
      * @return Set<ChatDTO>
      */
@@ -80,8 +81,9 @@ public class ChatController {
 
     /**
      * Sets correct chatDTO, that depends on username.
-     * @param chat Chat that contains data for dto
-     * @param dto MessageDto has client data for setUp
+     *
+     * @param chat     Chat that contains data for dto
+     * @param dto      MessageDto has client data for setUp
      * @param username String username of user that sends request
      * @return ChatDTO
      */
@@ -124,8 +126,9 @@ public class ChatController {
 
     /**
      * finds all messages for concrete chat by its id.
+     *
      * @param username String name of user, that sends request (it is needed for representing user-written messages as "my" messages on client side)
-     * @param id Integer id of chat
+     * @param id       Integer id of chat
      * @return ArrayList<MessageDto>
      */
     @GetMapping(value = "/api/{username}/chat/{id}")
@@ -169,8 +172,9 @@ public class ChatController {
 
     /**
      * Gets new message from user.
+     *
      * @param message MessageDto has message data
-     * @param chatId Integer id of chat
+     * @param chatId  Integer id of chat
      * @return ResponseEntity<String>
      */
     @PostMapping(value = "/api/send/{chatId}", consumes = "application/json", produces = "application/json")
@@ -186,6 +190,7 @@ public class ChatController {
 
     /**
      * Creates new chat for authorized player.
+     *
      * @param principal Principal
      * @return ResponseEntity<String>
      */
@@ -196,7 +201,7 @@ public class ChatController {
             final AuthenticationToken auth = (AuthenticationToken) principal;
             Integer id = auth.getPrincipal().getAccount().getId();
             Player player = playerService.findById(id);
-            if(player.getChat()!=null){
+            if (player.getChat() != null) {
                 throw new ExistsException("this player already has chat");
             }
             Chat chat = new Chat(true, player, new ArrayList<>(), new HashSet<>(), new HashSet<>(), player.getUsername());
@@ -213,6 +218,7 @@ public class ChatController {
 
     /**
      * Sets chat to close state.
+     *
      * @param id Integer id of chat
      * @return ResponseEntity<String>
      */
@@ -232,7 +238,8 @@ public class ChatController {
 
     /**
      * Sets categories to chat.
-     * @param id Integer id of chat
+     *
+     * @param id         Integer id of chat
      * @param categories List<CategoryDto> represents list of categories, that will be added.
      * @return ResponseEntity<String>
      */
@@ -252,6 +259,7 @@ public class ChatController {
 
     /**
      * Sets chat to open state.
+     *
      * @param id Integer id of chat
      * @return ResponseEntity<String>
      */
@@ -271,6 +279,7 @@ public class ChatController {
 
     /**
      * Finds chat by its id.
+     *
      * @param id Integer id of chat
      * @return ChatDTO
      */

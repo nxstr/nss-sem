@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Set;
+
 /**
  * Representing Chat entity.
  */
@@ -20,7 +21,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "chats")
-public class Chat extends AbstractEntity{
+public class Chat extends AbstractEntity {
     @JsonIgnore
     private boolean isOpen;
 

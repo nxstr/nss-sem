@@ -1,7 +1,7 @@
 package cz.cvut.fel.nss.chatgc.exceptions;
 
 
-public class AppException extends RuntimeException{
+public class AppException extends RuntimeException {
 
     public AppException(String message) {
         super(message);

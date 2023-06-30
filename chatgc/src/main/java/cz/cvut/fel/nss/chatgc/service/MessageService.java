@@ -10,6 +10,7 @@ public interface MessageService {
 
     /**
      * Creates new message.
+     *
      * @param message Message that will be saved
      * @return Message
      */
@@ -17,12 +18,14 @@ public interface MessageService {
 
     /**
      * Updates existing message.
+     *
      * @param message Message that will be updated
      */
     void update(Message message);
 
     /**
      * Finds message by its id.
+     *
      * @param id Integer id of message
      * @return Message
      */
@@ -30,6 +33,7 @@ public interface MessageService {
 
     /**
      * Deletes message.
+     *
      * @param message Message that will be deleted
      */
     void delete(Message message);

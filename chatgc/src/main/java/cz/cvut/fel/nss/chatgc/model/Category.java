@@ -19,10 +19,10 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @Entity
 @Table(name = "categories")
-public class Category extends AbstractEntity{
+public class Category extends AbstractEntity {
     private String name;
 
-    public CategoryDto accept(Visitor v){
+    public CategoryDto accept(Visitor v) {
         return v.visitCategoryEntity(this);
     }
 }

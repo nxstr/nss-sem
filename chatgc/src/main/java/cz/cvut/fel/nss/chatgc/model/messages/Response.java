@@ -20,13 +20,13 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @Entity
 @Table(name = "response")
-@DiscriminatorValue(value="RESPONSE")
-public class Response extends Message{
+@DiscriminatorValue(value = "RESPONSE")
+public class Response extends Message {
 
     @ManyToOne(optional = false)
     private Employee employee;
 
-    private Response(ResponseBuilder builder){
+    private Response(ResponseBuilder builder) {
         super(builder);
         this.employee = builder.employee;
     }
@@ -37,7 +37,7 @@ public class Response extends Message{
         public ResponseBuilder() {
         }
 
-        public ResponseBuilder addEmployee(Employee employee){
+        public ResponseBuilder addEmployee(Employee employee) {
             this.employee = employee;
             return this;
         }

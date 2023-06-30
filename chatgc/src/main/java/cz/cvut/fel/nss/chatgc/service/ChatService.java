@@ -12,18 +12,21 @@ public interface ChatService {
 
     /**
      * Creates new chat.
+     *
      * @param chat Chat that will be saved
      */
     void persist(Chat chat);
 
     /**
      * Finds all chats.
+     *
      * @return List<Chat>
      */
     List<Chat> findAll();
 
     /**
      * Finds all chats that contain category.
+     *
      * @param id Integer id of category
      * @return List<Chat>
      */
@@ -31,6 +34,7 @@ public interface ChatService {
 
     /**
      * Finds chat by its id.
+     *
      * @param id Integer id of chat
      * @return Chat
      */
@@ -38,6 +42,7 @@ public interface ChatService {
 
     /**
      * Finds chat by name of chat owner (player).
+     *
      * @param player String username of player
      * @return Chat
      */
@@ -45,6 +50,7 @@ public interface ChatService {
 
     /**
      * Updates chat.
+     *
      * @param chat Chat that will be updated
      * @return Chat
      */
@@ -52,12 +58,14 @@ public interface ChatService {
 
     /**
      * Makes chat close. Clears all chat categories.
+     *
      * @param chat Chat that will be closed
      */
     void setChatClose(Chat chat);
 
     /**
      * Makes chat open. Method is called when handles new Request message.
+     *
      * @param chat Chat that will be opened
      */
     void setChatOpen(Chat chat);

@@ -29,6 +29,7 @@ public class RoleController {
 
     /**
      * Creates new role.
+     *
      * @param dto RoleDto has data that will be saved
      * @return ResponseEntity<String>
      */
@@ -48,6 +49,7 @@ public class RoleController {
 
     /**
      * Updates role by id.
+     *
      * @param dto RoleDto has data that will be saved
      * @return ResponseEntity<String>
      */
@@ -69,6 +71,7 @@ public class RoleController {
 
     /**
      * Deletes role by id.
+     *
      * @param id Integer id of role
      * @return ResponseEntity<String>
      */
@@ -96,6 +99,7 @@ public class RoleController {
 
     /**
      * Finds all roles.
+     *
      * @return List<RoleDto>
      */
     @GetMapping(value = "/api/roles")
@@ -110,6 +114,7 @@ public class RoleController {
 
     /**
      * Finds role's data by id
+     *
      * @param id Integer id of role
      * @return RoleDto
      */

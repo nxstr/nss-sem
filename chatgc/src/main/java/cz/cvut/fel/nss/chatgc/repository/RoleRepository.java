@@ -9,6 +9,7 @@ public interface RoleRepository extends JpaRepository<Role, Integer> {
 
     /**
      * Searching for role by role name.
+     *
      * @param name means role name
      * @return Role
      */

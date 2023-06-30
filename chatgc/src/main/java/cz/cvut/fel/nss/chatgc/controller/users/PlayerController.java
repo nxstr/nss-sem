@@ -33,16 +33,17 @@ public class PlayerController {
 
     /**
      * Creates new player account.
+     *
      * @param dto HashMap<String, String> represents username, email and raw password.
      * @return ResponseEntity<String>
      */
     @PostMapping("api/register/player")
-    public ResponseEntity<String> registerPlayer(@RequestBody PlayerDto dto){
+    public ResponseEntity<String> registerPlayer(@RequestBody PlayerDto dto) {
         try {
             playerService.create(dto.accept(v));
             LOG.info("Player {} successfully created", dto.getUsername());
             return new ResponseEntity<>(HttpStatus.OK);
-        }catch (ExistsException | AccountException e){
+        } catch (ExistsException | AccountException e) {
             LOG.info(e.getMessage() + ": {}", dto.getUsername());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -50,6 +51,7 @@ public class PlayerController {
 
     /**
      * Gets current authorized player's data.
+     *
      * @param principal Principal
      * @return PlayerDto
      */
@@ -65,20 +67,21 @@ public class PlayerController {
 
     /**
      * Edits current authorized player's data.
+     *
      * @param principal Principal
-     * @param dto PlayerDto contains data, that will be saved
+     * @param dto       PlayerDto contains data, that will be saved
      * @return ResponseEntity<String>
      */
     @PutMapping(value = "api/player/current/edit")
     @PreAuthorize("hasAuthority('PLAYER')")
-    public ResponseEntity<String> editCurrent(Principal principal, @RequestBody PlayerDto dto){
+    public ResponseEntity<String> editCurrent(Principal principal, @RequestBody PlayerDto dto) {
         try {
             final AuthenticationToken auth = (AuthenticationToken) principal;
             Integer id = auth.getPrincipal().getAccount().getId();
             playerService.updatePlayer(dto, id);
             LOG.info("Player {} successfully updated", dto.getUsername());
             return new ResponseEntity<>(HttpStatus.OK);
-        }catch (ExistsException | AccountException e){
+        } catch (ExistsException | AccountException e) {
             LOG.info(e.getMessage() + ": {}", dto.getUsername());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -86,18 +89,19 @@ public class PlayerController {
 
     /**
      * Updates player by id.
-     * @param id Integer id of player.
+     *
+     * @param id  Integer id of player.
      * @param dto PlayerDto contains data, that will be saved
      * @return ResponseEntity<String>
      */
     @PutMapping(value = "api/player/{id}/edit")
     @PreAuthorize("hasAuthority('admin')")
-    public ResponseEntity<String> updatePlayer(@PathVariable Integer id, @RequestBody PlayerDto dto){
+    public ResponseEntity<String> updatePlayer(@PathVariable Integer id, @RequestBody PlayerDto dto) {
         try {
             playerService.updatePlayer(dto, id);
             LOG.info("Player {} successfully updated", dto.getUsername());
             return new ResponseEntity<>(HttpStatus.OK);
-        }catch (ExistsException | AccountException e){
+        } catch (ExistsException | AccountException e) {
             LOG.info(e.getMessage() + ": {}", dto.getUsername());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -105,14 +109,15 @@ public class PlayerController {
 
     /**
      * Finds all players.
+     *
      * @return List<PlayerDto>
      */
     @GetMapping(value = "api/player/all")
     @PreAuthorize("hasAuthority('admin')")
-    public List<PlayerDto> getPlayers(){
+    public List<PlayerDto> getPlayers() {
         List<Player> players = playerService.findAllPlayers();
         List<PlayerDto> dtoList = new ArrayList<>();
-        for(Player p: players){
+        for (Player p : players) {
             dtoList.add(p.accept(v));
         }
         return dtoList;
@@ -120,16 +125,17 @@ public class PlayerController {
 
     /**
      * Finds player;s data by id.
+     *
      * @param id Integer id of player.
      * @return PlayerDto
      */
     @GetMapping(value = "api/player/{id}")
     @PreAuthorize("hasAuthority('admin')")
-    public PlayerDto getPlayer(@PathVariable Integer id){
+    public PlayerDto getPlayer(@PathVariable Integer id) {
         Player player = playerService.findById(id);
-        try{
+        try {
             return player.accept(v);
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
             return new PlayerDto();
         }
     }

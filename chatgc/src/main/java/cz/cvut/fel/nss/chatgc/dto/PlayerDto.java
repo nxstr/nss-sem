@@ -15,7 +15,7 @@ public class PlayerDto {
     String password;
     Integer id;
 
-    public Player accept(Visitor v){
+    public Player accept(Visitor v) {
         return v.visitPlayerDto(this);
     }
 }

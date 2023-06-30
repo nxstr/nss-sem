@@ -16,7 +16,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "roles")
-public class Role extends AbstractEntity{
+public class Role extends AbstractEntity {
 
     @Getter
     @Setter
@@ -37,7 +37,7 @@ public class Role extends AbstractEntity{
     @Setter
     private Set<Role> childrenRoles;
 
-    public RoleDto accept(Visitor v){
+    public RoleDto accept(Visitor v) {
         return v.visitRoleEntity(this);
     }
 

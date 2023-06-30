@@ -19,8 +19,8 @@ import java.util.Objects;
 @NoArgsConstructor
 @Entity
 @Table(name = "players")
-@DiscriminatorValue(value="PLAYER")
-public class Player extends User{
+@DiscriminatorValue(value = "PLAYER")
+public class Player extends User {
 
     @OneToOne
     @JsonIgnore
@@ -38,7 +38,7 @@ public class Player extends User{
         this.role = role;
     }
 
-    public PlayerDto accept(Visitor v){
+    public PlayerDto accept(Visitor v) {
         return v.visitPlayerEntity(this);
     }
 

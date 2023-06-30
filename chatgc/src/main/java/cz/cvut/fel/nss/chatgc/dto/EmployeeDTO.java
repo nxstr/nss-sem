@@ -15,7 +15,7 @@ public class EmployeeDTO {
     String roleName;
     Integer id;
 
-    public Employee accept(Visitor v){
+    public Employee accept(Visitor v) {
         return v.visitEmployeeDto(this);
     }
 }

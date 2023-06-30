@@ -40,6 +40,7 @@ public abstract class Message extends AbstractEntity {
 
     /**
      * Abstract Message Builder.
+     *
      * @param <T> RequestBuilder or ResponseBuilder
      */
 
@@ -51,22 +52,22 @@ public abstract class Message extends AbstractEntity {
 
         abstract Message build();
 
-        public T addDataPath(String dataPath){
+        public T addDataPath(String dataPath) {
             this.dataPath = dataPath;
             return self();
         }
 
-        public T addDate(LocalDateTime date){
+        public T addDate(LocalDateTime date) {
             this.date = date;
             return self();
         }
 
-        public T addChat(Chat chat){
+        public T addChat(Chat chat) {
             this.chat = chat;
             return self();
         }
 
-        public T addType(MessageType type){
+        public T addType(MessageType type) {
             this.type = type;
             return self();
         }
