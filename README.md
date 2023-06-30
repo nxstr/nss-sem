@@ -2,7 +2,7 @@
 
 Semestrální projekt z předmětu NSS
 
-##Požadavky:
+## Požadavky
 * vyber vhodne technologie: 
   * Java Spring Boot a React
 * vyuziti spolecne DB: 
@@ -40,7 +40,7 @@ Semestrální projekt z předmětu NSS
     - Přidat/odstranit kategorie v chatu
 
 
-##Program start
+## Program start
 1) Spusťte Docker, který slouží pro použití Kafky. Ve složce `/chatgc/kafka_conf` spusťte příkaz:
 ```
 docker compose -f docker-compose.yml up
@@ -54,7 +54,7 @@ mvn spring-boot:run
 npm start
 ```
 
-##Nastavení přístupu
+## Nastavení přístupu
 Aplikace má dva typy uživatelů - Employee a Player. Employee s role 'admin' má přístup ke všemu. 
 Pro první inicializaci systému nejsou žádná data předem definována. 
 Pokud v systému není zaregistrován žádný admin, může se zaregistrovat na adrese `http://localhost:8080/api/register/emp`, 
